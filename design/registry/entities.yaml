@@ -1,0 +1,353 @@
+# Game World Entity Registry
+#
+# PURPOSE: Single source of truth for all named game-world facts that appear
+# in more than one document. Skills check this before writing new content to
+# detect cross-doc inconsistencies at authoring time.
+#
+# RULES:
+#   - Only register facts that cross system boundaries. Internal-only facts
+#     (a formula used in one GDD only) do NOT need to be registered.
+#   - Never delete entries — set status: deprecated instead.
+#   - When a value changes: update the value, set revised: to today's date,
+#     and add a comment with the old value and which GDD changed it.
+#   - source: is the authoritative GDD — the one that "owns" this fact.
+#     Other GDDs that reference it list themselves in referenced_by.
+#   - When a new GDD references an existing entry, append its path to
+#     referenced_by. Do not create a duplicate entry.
+#
+# WRITTEN BY: /design-system (Phase 5 — after GDD sections are approved)
+#             /consistency-check (when resolving conflicts)
+# READ BY:    /design-system (Phase 2 — before authoring begins, and after
+#               Section C/D writes to conflict-check new entities/formulas)
+#             /consistency-check (primary input — grep-first, GDD-second)
+#             /review-all-gdds (Phase 1 — baseline for Phase 2 checks)
+#             /architecture-review (data structure and interface validation)
+#
+# SEARCH PATTERNS (for skills using Grep):
+#   All entity names:        Grep pattern="^  - name:" path="design/registry/entities.yaml"
+#   Specific entity:         Grep pattern="  - name: goblin" path="design/registry/entities.yaml"
+#   All items:               Grep pattern="^  - name:" path="design/registry/entities.yaml" (items section)
+#   What combat.md owns:     Grep pattern="source: design/gdd/combat.md"
+#   What inventory.md uses:  Grep pattern="referenced_by.*inventory"
+#   All gold values:          Grep pattern="value_gold:"
+#   Deprecated entries:      Grep pattern="status: deprecated"
+#
+# FORMAT: YAML. Consistent indentation is critical for grep reliability.
+#   Sections: entities | items | formulas | constants
+#   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
+
+version: 1
+last_updated: ""
+
+# ─── ENTITIES ────────────────────────────────────────────────────────────────
+# Named game-world objects: enemies, NPCs, characters, factions, bosses.
+# Register an entity here when it appears in more than one GDD — e.g., an
+# enemy defined in combat.md that also drops items listed in inventory.md.
+#
+# Required fields: name, status, source, referenced_by, added
+# Attribute fields: any key stats that could appear in another GDD
+#   (health, damage, drops, faction, etc.)
+
+entities: []
+
+# Example (remove when first real entry is added):
+#
+# entities:
+#   - name: goblin
+#     status: active              # active | deprecated
+#     source: design/gdd/combat.md
+#     referenced_by:
+#       - design/gdd/combat.md
+#       - design/gdd/inventory.md
+#     health: 40
+#     damage: 8
+#     drops:
+#       - item: goblin_arm        # must match an entry in items section
+#         qty: 1
+#         drop_rate: 0.8          # 0.0–1.0
+#     added: 2026-03-26
+#     revised: ""
+
+
+# ─── ITEMS ───────────────────────────────────────────────────────────────────
+# Named collectables, equipment, consumables, crafting materials, currency.
+# Register an item when its name or value appears in more than one GDD.
+#
+# Required fields: name, status, source, referenced_by, added
+# Attribute fields: value_gold, weight, stackable, category, and any stat
+#   modifiers that another system (e.g., economy, crafting) might reference.
+
+items: []
+
+# Example:
+#
+# items:
+#   - name: goblin_arm
+#     status: active
+#     source: design/gdd/combat.md   # drop defined in combat GDD
+#     referenced_by:
+#       - design/gdd/combat.md
+#       - design/gdd/inventory.md    # inventory GDD lists its weight/stack rules
+#       - design/gdd/economy.md      # economy GDD references its sell price
+#     value_gold: 5
+#     weight: 1
+#     stackable: true
+#     category: crafting_material
+#     added: 2026-03-26
+#     revised: ""
+
+
+# ─── FORMULAS ────────────────────────────────────────────────────────────────
+# Named calculations with defined variables and output ranges.
+# Register a formula when its output feeds into another system's input,
+# or when another GDD references it by name.
+#
+# Required fields: name, status, source, referenced_by, variables[],
+#   output_range[min, max], added
+# Optional: expression (the actual formula), notes
+
+formulas:
+  - name: effective_attribute_value
+    status: active
+    source: design/gdd/balance-system.md
+    referenced_by:
+      - design/gdd/balance-system.md
+    variables:
+      - current_attribute
+      - flat_modifier_sum
+      - percent_modifier_sum
+    output_range: [1, 100]
+    expression: "clamp((current_attribute + flat_modifier_sum) * (1 + percent_modifier_sum), 1, 100)"
+    notes: "共享有效属性结算接口，供培养、比赛、UI 预估等系统引用。"
+    added: 2026-05-15
+    revised: ""
+  - name: attribute_growth
+    status: active
+    source: design/gdd/balance-system.md
+    referenced_by:
+      - design/gdd/balance-system.md
+    variables:
+      - raw_growth_input
+      - current_attribute
+      - potential_cap
+      - decay_factor
+    output_range: [0, raw_growth_input]
+    expression: "raw_growth_input * max(0, 1 - current_attribute / potential_cap) ^ decay_factor"
+    notes: "共享成长递减接口，供训练、比赛经验或特殊奖励系统引用。"
+    added: 2026-05-15
+    revised: ""
+  - name: resource_settlement
+    status: active
+    source: design/gdd/balance-system.md
+    referenced_by:
+      - design/gdd/balance-system.md
+    variables:
+      - current_resource
+      - gained_resource
+      - spent_resource
+      - resource_min
+      - resource_max
+    output_range: [resource_min, resource_max]
+    expression: "clamp(current_resource + gained_resource - spent_resource, resource_min, resource_max)"
+    notes: "共享资源结算接口，供经济、建设、训练和比赛消耗系统引用。"
+    added: 2026-05-15
+    revised: ""
+  - name: positional_overall_rating
+    status: active
+    source: design/gdd/balance-system.md
+    referenced_by:
+      - design/gdd/balance-system.md
+    variables:
+      - effective_attribute_i
+      - position_weight_i
+    output_range: [1, 100]
+    expression: "Σ(effective_attribute_i * position_weight_i), where i ∈ {SPD, PWR, TEC, INT, STA} and Σ(position_weight_i) = 1"
+    notes: "共享位置综合评分接口，供比赛系统和球员展示系统引用。"
+    added: 2026-05-15
+    revised: ""
+  - name: base_win_probability
+    status: active
+    source: design/gdd/balance-system.md
+    referenced_by:
+      - design/gdd/balance-system.md
+      - design/gdd/match-competition-system.md
+      - design/gdd/town-building-system.md
+    variables:
+      - self_team_rating
+      - opponent_team_rating
+      - rating_win_slope
+    output_range: [0.05, 0.95]
+    expression: "clamp(0.50 + (self_team_rating - opponent_team_rating) * rating_win_slope, 0.05, 0.95)"
+    notes: "共享基准胜率锚点，供比赛系统叠加主场、战术、士气等后续修正。输入为比赛系统传入的赛前有效队伍评分；基础属性仍为 1-100，但设施/化学修正后的队伍评分可超过 100，最终由胜率 clamp 兜底。"
+    added: 2026-05-15
+    revised: ""
+  - name: action_time_cost
+    status: active
+    source: design/gdd/time-and-season-progression-system.md
+    referenced_by:
+      - design/gdd/time-and-season-progression-system.md
+    variables:
+      - base_time_cost
+      - time_cost_modifier
+    output_range: [">0", "unbounded"]
+    expression: "base_time_cost * time_cost_modifier"
+    notes: "共享行动时间消耗接口，供训练、建设、管理等系统引用。"
+    added: 2026-05-15
+    revised: ""
+  - name: available_action_windows
+    status: active
+    source: design/gdd/time-and-season-progression-system.md
+    referenced_by:
+      - design/gdd/time-and-season-progression-system.md
+    variables:
+      - current_phase_time_budget
+      - reserved_time
+      - consumed_time
+      - standard_window_size
+    output_range: [0, "unbounded"]
+    expression: "floor((current_phase_time_budget - reserved_time - consumed_time) / standard_window_size)"
+    notes: "共享可用行动窗口接口，供主循环、培养和 UI 系统引用。"
+    added: 2026-05-15
+    revised: ""
+  - name: match_trigger_reached
+    status: active
+    source: design/gdd/time-and-season-progression-system.md
+    referenced_by:
+      - design/gdd/time-and-season-progression-system.md
+    variables:
+      - current_timeline_position
+      - scheduled_match_position
+    output_range: [false, true]
+    expression: "current_timeline_position >= scheduled_match_position"
+    notes: "共享比赛节点触发判定接口，供比赛入口和赛程节点系统引用。"
+    added: 2026-05-15
+    revised: ""
+  - name: stage_settlement_trigger_reached
+    status: active
+    source: design/gdd/time-and-season-progression-system.md
+    referenced_by:
+      - design/gdd/time-and-season-progression-system.md
+    variables:
+      - current_stage_progress
+      - stage_progress_target
+    output_range: [false, true]
+    expression: "current_stage_progress >= stage_progress_target"
+    notes: "共享阶段结算触发判定接口，供阶段奖励、解锁和提示系统引用。"
+    added: 2026-05-15
+    revised: ""
+  - name: season_progress_ratio
+    status: active
+    source: design/gdd/time-and-season-progression-system.md
+    referenced_by:
+      - design/gdd/time-and-season-progression-system.md
+    variables:
+      - completed_season_units
+      - total_season_units
+    output_range: [0, 1]
+    expression: "completed_season_units / max(1, total_season_units)"
+    notes: "共享赛季进度比例接口，供赛事、UI 和结算系统引用。"
+    added: 2026-05-15
+    revised: ""
+  - name: remaining_time_to_next_key_node
+    status: active
+    source: design/gdd/time-and-season-progression-system.md
+    referenced_by:
+      - design/gdd/time-and-season-progression-system.md
+    variables:
+      - next_key_node_position
+      - current_timeline_position
+    output_range: [0, "unbounded"]
+    expression: "max(0, next_key_node_position - current_timeline_position)"
+    notes: "共享距离下一关键节点剩余时间接口，供 UI 和规划提示系统引用。"
+    added: 2026-05-15
+    revised: ""
+  - name: training_actual_gain
+    status: active
+    source: design/gdd/player-development-system.md
+    referenced_by:
+      - design/gdd/player-development-system.md
+      - design/gdd/town-building-system.md
+    variables:
+      - raw_growth_input
+      - current_attribute
+      - potential_cap
+      - decay_factor
+      - fatigue_adjusted_training_efficiency
+      - training_focus_match_multiplier
+      - facility_training_multiplier
+    output_range: [0, "potential_cap - current_attribute"]
+    expression: "min(potential_cap - current_attribute, attribute_growth(raw_growth_input, current_attribute, potential_cap, decay_factor) * fatigue_adjusted_training_efficiency * training_focus_match_multiplier * facility_training_multiplier)"
+    notes: "共享单次训练实际成长接口，供培养结果展示、比赛前能力预估和后续技能/事件成长结算系统引用。2026-05-16 新增 facility_training_multiplier 第 7 变量（来自小镇建设系统）。"
+    added: 2026-05-15
+    revised: 2026-05-16
+  - name: player_tier_potential_band
+    status: active
+    source: design/gdd/player-development-system.md
+    referenced_by:
+      - design/gdd/player-development-system.md
+    variables:
+      - player_tier
+    output_range: [60, 100]
+    expression: "lookup(player_tier)"
+    notes: "共享球员层级到潜力区间映射接口，供招募、培养展示、事件和后续技能资格系统引用。"
+    added: 2026-05-15
+    revised: ""
+
+# Example:
+#
+# formulas:
+#   - name: damage_formula
+#     status: active
+#     source: design/gdd/combat.md
+#     referenced_by:
+#       - design/gdd/combat.md
+#       - design/gdd/progression.md   # progression GDD scales attack variable
+#     variables:
+#       - attack
+#       - defense
+#       - crit_chance
+#       - crit_multiplier
+#     output_range: [0, 999]
+#     expression: "max(0, attack - defense) * (1 + crit_chance * crit_multiplier)"
+#     notes: "Output feeds into health-system damage intake. Min is 0 (armour
+#       can absorb all damage). Max is uncapped in formula but tuning knob
+#       damage_cap in combat.md clamps at 999."
+#     added: 2026-03-26
+#     revised: ""
+
+
+# ─── CONSTANTS ───────────────────────────────────────────────────────────────
+# Named numerical values referenced across multiple systems.
+# Register a constant when it is defined in one GDD but another GDD must
+# agree with it (e.g., gold carry limit defined in economy but checked in
+# inventory, or base inventory slots defined in inventory but displayed in HUD).
+#
+# Required fields: name, status, source, referenced_by, value, unit, added
+
+constants: []
+
+# Example:
+#
+# constants:
+#   - name: gold_carry_limit
+#     status: active
+#     source: design/gdd/economy.md
+#     referenced_by:
+#       - design/gdd/economy.md
+#       - design/gdd/inventory.md   # inventory enforces the carry limit
+#       - design/gdd/ui.md          # HUD displays current gold vs limit
+#     value: 9999
+#     unit: gold
+#     added: 2026-03-26
+#     revised: ""
+#
+#   - name: base_inventory_slots
+#     status: active
+#     source: design/gdd/inventory.md
+#     referenced_by:
+#       - design/gdd/inventory.md
+#       - design/gdd/progression.md  # progression unlocks additional slots
+#     value: 20
+#     unit: slots
+#     added: 2026-03-26
+#     revised: ""

@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://sijtg862vy6v"
+
+[deps]
+
+files=["res://assets/data/training-items.name.translation", "res://assets/data/training-items.primary.translation", "res://assets/data/training-items.secondary.translation", "res://assets/data/training-items.raw.translation", "res://assets/data/training-items.ap.translation", "res://assets/data/training-items.funds.translation", "res://assets/data/training-items.focus.translation", "res://assets/data/training-items.description.translation"]
+
+source_file="res://assets/data/training-items.csv"
+dest_files=["res://assets/data/training-items.name.translation", "res://assets/data/training-items.primary.translation", "res://assets/data/training-items.secondary.translation", "res://assets/data/training-items.raw.translation", "res://assets/data/training-items.ap.translation", "res://assets/data/training-items.funds.translation", "res://assets/data/training-items.focus.translation", "res://assets/data/training-items.description.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

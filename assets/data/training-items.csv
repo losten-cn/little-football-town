@@ -1,0 +1,4 @@
+id,name,primary_attribute,secondary_attribute,raw_growth_input,ap_cost,funds_cost,focus_match_multiplier,description
+basic_fitness,基础体能训练,STA,SPD,2.5,2,20,1.0,提升耐力，少量带动速度。
+technical_drill,技术训练,TEC,INT,2.8,2,25,1.0,提升技术，少量带动意识。
+tactical_session,战术训练,INT,TEC,2.4,3,30,1.1,提升意识，并在匹配训练重点时获得更高收益。

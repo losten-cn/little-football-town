@@ -1,0 +1,1082 @@
+# Technical Requirement ID Registry
+
+version: 2
+last_updated: "2026-05-17"
+
+requirements:
+  # ─── Foundation: game-concept ───
+  - id: TR-gameconcept-001
+    system: game-concept
+    gdd: design/gdd/game-concept.md
+    requirement: "Dual-core loop: 培养→比赛→反馈→再培养"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-gameconcept-002
+    system: game-concept
+    gdd: design/gdd/game-concept.md
+    requirement: "Three resource types: 经费, 运动点数(AP), 研究点数(RP)"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-gameconcept-003
+    system: game-concept
+    gdd: design/gdd/game-concept.md
+    requirement: "8 game states spanning Planning through SeasonStart"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-gameconcept-004
+    system: game-concept
+    gdd: design/gdd/game-concept.md
+    requirement: "Three-layer time cycles: action windows → stages → seasons"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-gameconcept-005
+    system: game-concept
+    gdd: design/gdd/game-concept.md
+    requirement: "core_progress = (player_power_growth_index + competition_achievement_index) / 2"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-gameconcept-006
+    system: game-concept
+    gdd: design/gdd/game-concept.md
+    requirement: "decision_pressure = (1 - remaining_action_windows / max) × urgency_multiplier"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-gameconcept-007
+    system: game-concept
+    gdd: design/gdd/game-concept.md
+    requirement: "retention_drive = next_key_node_visible × (1 - season_completion) × content_promise_strength"
+    created: 2026-05-17
+    status: active
+
+  # ─── Foundation: balance ───
+  - id: TR-balance-001
+    system: balance
+    gdd: design/gdd/balance-system.md
+    requirement: "Five core attributes (SPD/PWR/TEC/INT/STA) with three-layer semantics (current/potential/effective)"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-balance-002
+    system: balance
+    gdd: design/gdd/balance-system.md
+    requirement: "effective_attribute_value = (current + flat_modifiers) × (1 + percent_modifiers), clamped [1, 100]"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-balance-003
+    system: balance
+    gdd: design/gdd/balance-system.md
+    requirement: "attribute_growth = raw × (1 - current/potential)^decay_factor"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-balance-004
+    system: balance
+    gdd: design/gdd/balance-system.md
+    requirement: "positional_overall_rating aggregates position-weighted attributes into 0-100 score"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-balance-005
+    system: balance
+    gdd: design/gdd/balance-system.md
+    requirement: "base_win_probability = 0.5 + rating_win_slope × (home_strength - away_strength), clamped [0.05, 0.95]"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-balance-006
+    system: balance
+    gdd: design/gdd/balance-system.md
+    requirement: "flat_modifier_sum_budget [-10, 15]; percent_modifier_sum_budget [-0.20, 0.30]"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-balance-007
+    system: balance
+    gdd: design/gdd/balance-system.md
+    requirement: "resource_buffer_multiplier ∈ [2.0, 4.0]"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-balance-008
+    system: balance
+    gdd: design/gdd/balance-system.md
+    requirement: "4 player tiers with distinct potential_cap and training_efficiency bands"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-balance-009
+    system: balance
+    gdd: design/gdd/balance-system.md
+    requirement: "4 KPI formulas: AP use rate, overall win rate, even match win rate, resource efficiency"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-balance-010
+    system: balance
+    gdd: design/gdd/balance-system.md
+    requirement: "All shared formula parameters must live in data-driven config, not hardcoded in src/"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-balance-011
+    system: balance
+    gdd: design/gdd/balance-system.md
+    requirement: "Modifier application order: flat first, then percent"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-balance-012
+    system: balance
+    gdd: design/gdd/balance-system.md
+    requirement: "decay_factor ∈ [0.8, 1.8], default 1.2"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-balance-013
+    system: balance
+    gdd: design/gdd/balance-system.md
+    requirement: "potential_cap_span ∈ [10, 20], default 15"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-balance-014
+    system: balance
+    gdd: design/gdd/balance-system.md
+    requirement: "Numeric lifecycle states: Draft→Tuned→Locked→Revised→Deprecated"
+    created: 2026-05-17
+    status: active
+
+  # ─── Foundation: save ───
+  - id: TR-save-001
+    system: save
+    gdd: design/gdd/save-and-load-system.md
+    requirement: "SaveManager is the sole disk writer"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-save-002
+    system: save
+    gdd: design/gdd/save-and-load-system.md
+    requirement: "3 manual save slots + 1 autosave slot"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-save-003
+    system: save
+    gdd: design/gdd/save-and-load-system.md
+    requirement: "Save completeness: all 12 dependency systems captured atomically"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-save-004
+    system: save
+    gdd: design/gdd/save-and-load-system.md
+    requirement: "Cross-system consistency: save_time_state == TimeManager.get_state() instantaneously"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-save-005
+    system: save
+    gdd: design/gdd/save-and-load-system.md
+    requirement: "Stable save nodes: Planning, Match Trigger, Post-Match Settlement, Stage Settlement, Season Settlement, Offseason"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-save-006
+    system: save
+    gdd: design/gdd/save-and-load-system.md
+    requirement: "Match In Progress is NOT a stable save node"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-save-007
+    system: save
+    gdd: design/gdd/save-and-load-system.md
+    requirement: "Version migration: additive-forward only, no field deletion"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-save-008
+    system: save
+    gdd: design/gdd/save-and-load-system.md
+    requirement: "Save integrity verified via hash checksum"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-save-009
+    system: save
+    gdd: design/gdd/save-and-load-system.md
+    requirement: "Load time < 500ms for full save"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-save-010
+    system: save
+    gdd: design/gdd/save-and-load-system.md
+    requirement: "Auto-save triggers: match_completed, time_season_ended, town_facility_completed, WM_CLOSE_REQUEST"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-save-011
+    system: save
+    gdd: design/gdd/save-and-load-system.md
+    requirement: "Registration contract: each Core system registers serialize/deserialize callables with SaveManager"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-save-012
+    system: save
+    gdd: design/gdd/save-and-load-system.md
+    requirement: "Deserialize order: Time→Town→Player→League→Economy→Match"
+    created: 2026-05-17
+    status: active
+
+  # ─── Foundation: time ───
+  - id: TR-time-001
+    system: time
+    gdd: design/gdd/time-and-season-progression-system.md
+    requirement: "7 game states: Planning through SeasonStart"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-time-002
+    system: time
+    gdd: design/gdd/time-and-season-progression-system.md
+    requirement: "action_time_cost defines action window consumption"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-time-003
+    system: time
+    gdd: design/gdd/time-and-season-progression-system.md
+    requirement: "available_action_windows: remaining actions before forced time advance"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-time-004
+    system: time
+    gdd: design/gdd/time-and-season-progression-system.md
+    requirement: "match_trigger_reached = accumulated ≥ match_interval AND no match in progress"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-time-005
+    system: time
+    gdd: design/gdd/time-and-season-progression-system.md
+    requirement: "stage_settlement_trigger_reached = matches_played ≥ matches_per_stage"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-time-006
+    system: time
+    gdd: design/gdd/time-and-season-progression-system.md
+    requirement: "season_progress_ratio = matches_played / total_matches"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-time-007
+    system: time
+    gdd: design/gdd/time-and-season-progression-system.md
+    requirement: "TimeManager is Autoload #5 — loaded after ScreenManager, before Core systems"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-time-008
+    system: time
+    gdd: design/gdd/time-and-season-progression-system.md
+    requirement: "TimeManager exposes get_state() for save snapshots"
+    created: 2026-05-17
+    status: active
+
+  # ─── Core: player-dev ───
+  - id: TR-playerdev-001
+    system: player-dev
+    gdd: design/gdd/player-development-system.md
+    requirement: "Player must have: id, name, age, position, 5 attrs, train_efficiency, condition, morale, history, milestones"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-playerdev-002
+    system: player-dev
+    gdd: design/gdd/player-development-system.md
+    requirement: "fatigue_adjusted_training_efficiency = efficiency × condition × morale, clamped [0.5, 1.8]"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-playerdev-003
+    system: player-dev
+    gdd: design/gdd/player-development-system.md
+    requirement: "training_actual_gain = attribute_growth × fatigue × focus_match × facility_multiplier"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-playerdev-004
+    system: player-dev
+    gdd: design/gdd/player-development-system.md
+    requirement: "facility_training_multiplier ∈ [1.0, 1.75] — consumed from TownBuilding"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-playerdev-005
+    system: player-dev
+    gdd: design/gdd/player-development-system.md
+    requirement: "Training must be atomic: validate→deduct→grow→apply→emit"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-playerdev-006
+    system: player-dev
+    gdd: design/gdd/player-development-system.md
+    requirement: "Training costs via EconomyManager.accredit_training_cost() only"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-playerdev-007
+    system: player-dev
+    gdd: design/gdd/player-development-system.md
+    requirement: "ap_to_funds_weight = 50 (from EconomyManager, not overridden locally)"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-playerdev-008
+    system: player-dev
+    gdd: design/gdd/player-development-system.md
+    requirement: "Training gains survive save/load without loss or double-settlement"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-playerdev-009
+    system: player-dev
+    gdd: design/gdd/player-development-system.md
+    requirement: "Tier potential bands: 普通(60-75), 优秀(72-85), 明星(82-95), 传奇胚子(90-99)"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-playerdev-010
+    system: player-dev
+    gdd: design/gdd/player-development-system.md
+    requirement: "Individual training_efficiency ∈ [0.8, 1.5] per player"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-playerdev-011
+    system: player-dev
+    gdd: design/gdd/player-development-system.md
+    requirement: "Milestone check: attribute reaching 10-multiple triggers player_milestone_reached"
+    created: 2026-05-17
+    status: active
+
+  # ─── Core: match ───
+  - id: TR-match-001
+    system: match
+    gdd: design/gdd/match-competition-system.md
+    requirement: "8-state match flow: Entry→Pre-Match→Confirmation→First Half→Halftime→Second Half→Result Review→Settlement"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-match-002
+    system: match
+    gdd: design/gdd/match-competition-system.md
+    requirement: "team_match_strength = weighted positional ratings × chemistry + facility_bonus"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-match-003
+    system: match
+    gdd: design/gdd/match-competition-system.md
+    requirement: "actual_win_probability = base + home + condition + tactical modifiers, clamped [0.05, 0.95]"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-match-004
+    system: match
+    gdd: design/gdd/match-competition-system.md
+    requirement: "Key event count per match: 3 ≤ count ≤ 15"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-match-005
+    system: match
+    gdd: design/gdd/match-competition-system.md
+    requirement: "6 event categories: offensive_push, shot_on_goal, goal_scored, key_defense, tactical_adaptation, stamina_decline"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-match-006
+    system: match
+    gdd: design/gdd/match-competition-system.md
+    requirement: "Half-time adjustment: change tactics + up to 3 substitutions, second half only"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-match-007
+    system: match
+    gdd: design/gdd/match-competition-system.md
+    requirement: "Match In Progress NOT a stable restore point — save abandons partial state"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-match-008
+    system: match
+    gdd: design/gdd/match-competition-system.md
+    requirement: "Standardized MatchResultPacket consumed by LeagueStructure, EconomyManager, TimeManager, MatchPerfUI"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-match-009
+    system: match
+    gdd: design/gdd/match-competition-system.md
+    requirement: "Seeded RNG per match — same seed + inputs = identical outcome"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-match-010
+    system: match
+    gdd: design/gdd/match-competition-system.md
+    requirement: "5 win_reason categories for post-match analysis"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-match-011
+    system: match
+    gdd: design/gdd/match-competition-system.md
+    requirement: "post_match_growth_tag: 5 discrete labels"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-match-012
+    system: match
+    gdd: design/gdd/match-competition-system.md
+    requirement: "match_id in match_completed event for LeagueStructure correlation"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-match-013
+    system: match
+    gdd: design/gdd/match-competition-system.md
+    requirement: "Full match simulation < 100ms"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-match-014
+    system: match
+    gdd: design/gdd/match-competition-system.md
+    requirement: "Home advantage bonus consumed from TownBuilding.compute_home_advantage_bonus()"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-match-015
+    system: match
+    gdd: design/gdd/match-competition-system.md
+    requirement: "Stadium revenue multiplier consumed from TownBuilding"
+    created: 2026-05-17
+    status: active
+
+  # ─── Core: economy ───
+  - id: TR-economy-001
+    system: economy
+    gdd: design/gdd/economy-management-system.md
+    requirement: "Three resources: funds (可负债), AP (≥1), RP (≥0, MVP隐藏)"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-economy-002
+    system: economy
+    gdd: design/gdd/economy-management-system.md
+    requirement: "execute_transaction() is the SOLE resource mutation path"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-economy-003
+    system: economy
+    gdd: design/gdd/economy-management-system.md
+    requirement: "Pre-validation rejects transactions violating resource floors"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-economy-004
+    system: economy
+    gdd: design/gdd/economy-management-system.md
+    requirement: "Warning thresholds: funds_low, ap_low, debt → emit economy_warning_triggered"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-economy-005
+    system: economy
+    gdd: design/gdd/economy-management-system.md
+    requirement: "Three settlement stages: post-match, stage settlement, season settlement"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-economy-006
+    system: economy
+    gdd: design/gdd/economy-management-system.md
+    requirement: "post_match_funds = base × result_multiplier × stadium × season_bonus"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-economy-007
+    system: economy
+    gdd: design/gdd/economy-management-system.md
+    requirement: "Float-to-int conversion: all uses floor()"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-economy-008
+    system: economy
+    gdd: design/gdd/economy-management-system.md
+    requirement: "Daily AP recovery and rest AP recovery formulas"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-economy-009
+    system: economy
+    gdd: design/gdd/economy-management-system.md
+    requirement: "daily_maintenance_cost deducted from funds, computed by TownBuilding"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-economy-010
+    system: economy
+    gdd: design/gdd/economy-management-system.md
+    requirement: "Transaction log retained (last ~200), serialized in save"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-economy-011
+    system: economy
+    gdd: design/gdd/economy-management-system.md
+    requirement: "Accredited entry points: accredit_match_reward, accredit_facility_cost, accredit_training_cost"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-economy-012
+    system: economy
+    gdd: design/gdd/economy-management-system.md
+    requirement: "Warning cooldown per threshold type to prevent alert spam"
+    created: 2026-05-17
+    status: active
+
+  # ─── Core: town ───
+  - id: TR-town-001
+    system: town
+    gdd: design/gdd/town-building-system.md
+    requirement: "5×5 grid, 4-directional adjacency (Manhattan distance = 1)"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-town-002
+    system: town
+    gdd: design/gdd/town-building-system.md
+    requirement: "4 MVP facility types, 5 levels each"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-town-003
+    system: town
+    gdd: design/gdd/town-building-system.md
+    requirement: "Facility state machine: Empty→Constructing→Active↔Upgrading→Demolishing→Empty"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-town-004
+    system: town
+    gdd: design/gdd/town-building-system.md
+    requirement: "Construction cost: ceil(base × 1.8^(level-1))"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-town-005
+    system: town
+    gdd: design/gdd/town-building-system.md
+    requirement: "Construction time: ceil(base × 1.3^(level-1))"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-town-006
+    system: town
+    gdd: design/gdd/town-building-system.md
+    requirement: "training_efficiency_multiplier = 1.0 + 0.05 × training_ground_level"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-town-007
+    system: town
+    gdd: design/gdd/town-building-system.md
+    requirement: "home_advantage_bonus = 2.0 × stadium_level, max 10.0"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-town-008
+    system: town
+    gdd: design/gdd/town-building-system.md
+    requirement: "stadium_revenue_multiplier = 1.0 + 0.08 × stadium_level, max 1.40"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-town-009
+    system: town
+    gdd: design/gdd/town-building-system.md
+    requirement: "medical_ap_bonus: clamp(floor(level × bonus_per_level), 1, 3) + adjacency, total [0, 3]"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-town-010
+    system: town
+    gdd: design/gdd/town-building-system.md
+    requirement: "injury_recovery_reduction: clamp(floor(level × recovery_per_level), 1, 2)"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-town-011
+    system: town
+    gdd: design/gdd/town-building-system.md
+    requirement: "youth_potential_floor_boost: base + adjacency, clamp [0, 5]"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-town-012
+    system: town
+    gdd: design/gdd/town-building-system.md
+    requirement: "3 adjacency pairs: training_ground↔medical_room, training_ground↔youth_academy, stadium↔training_ground"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-town-013
+    system: town
+    gdd: design/gdd/town-building-system.md
+    requirement: "Maximum adjacency bonus: 15.0 (stadium Lv.5 + training_ground Lv.5 adjacent)"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-town-014
+    system: town
+    gdd: design/gdd/town-building-system.md
+    requirement: "Construction/upgrade costs via EconomyManager.accredit_facility_cost() exclusively"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-town-015
+    system: town
+    gdd: design/gdd/town-building-system.md
+    requirement: "Demolish under-construction facility returns error"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-town-016
+    system: town
+    gdd: design/gdd/town-building-system.md
+    requirement: "Construction timers decrement on time_phase_changed"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-town-017
+    system: town
+    gdd: design/gdd/town-building-system.md
+    requirement: "Adjacency bonuses computed on state change, not polled per-frame"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-town-018
+    system: town
+    gdd: design/gdd/town-building-system.md
+    requirement: "8 public formula methods for downstream consumption"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-town-019
+    system: town
+    gdd: design/gdd/town-building-system.md
+    requirement: "Daily maintenance = Σ active facilities × (base + delta × (level-1))"
+    created: 2026-05-17
+    status: active
+
+  # ─── Feature: league ───
+  - id: TR-league-001
+    system: league
+    gdd: design/gdd/league-competition-structure-system.md
+    requirement: "MVP 2-tier league chain, extensible to N via config"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-league-002
+    system: league
+    gdd: design/gdd/league-competition-structure-system.md
+    requirement: "8-12 teams, double round-robin (home/away)"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-league-003
+    system: league
+    gdd: design/gdd/league-competition-structure-system.md
+    requirement: "Points: win=3, draw=1, loss=0"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-league-004
+    system: league
+    gdd: design/gdd/league-competition-structure-system.md
+    requirement: "4-level tiebreaker: points→GD→goals scored→team_id"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-league-005
+    system: league
+    gdd: design/gdd/league-competition-structure-system.md
+    requirement: "Promotion/relegation: top N up, bottom N down"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-league-006
+    system: league
+    gdd: design/gdd/league-competition-structure-system.md
+    requirement: "matches_per_team = 2×(team_count-1) via circle method"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-league-007
+    system: league
+    gdd: design/gdd/league-competition-structure-system.md
+    requirement: "4 season states: PRE_SEASON→IN_PROGRESS→SETTLEMENT→COMPLETED"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-league-008
+    system: league
+    gdd: design/gdd/league-competition-structure-system.md
+    requirement: "Standings update O(1) per match"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-league-009
+    system: league
+    gdd: design/gdd/league-competition-structure-system.md
+    requirement: "Season history capped at configurable retention"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-league-010
+    system: league
+    gdd: design/gdd/league-competition-structure-system.md
+    requirement: "match_id correlation between schedule and match_completed event"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-league-011
+    system: league
+    gdd: design/gdd/league-competition-structure-system.md
+    requirement: "Season settlement on time_season_ended: finalize, promote/relegate, emit completed"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-league-012
+    system: league
+    gdd: design/gdd/league-competition-structure-system.md
+    requirement: "Circle method requires even team_count; odd must be rejected"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-league-013
+    system: league
+    gdd: design/gdd/league-competition-structure-system.md
+    requirement: "season_win_rate = wins / played"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-league-014
+    system: league
+    gdd: design/gdd/league-competition-structure-system.md
+    requirement: "Duplicate match_id submission rejected (is_completed flag)"
+    created: 2026-05-17
+    status: active
+
+  # ─── Presentation: main-ui ───
+  - id: TR-mainui-001
+    system: main-ui
+    gdd: design/gdd/main-loop-ui-framework.md
+    requirement: "max_navigation_depth_from_home ≤ 3"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-mainui-002
+    system: main-ui
+    gdd: design/gdd/main-loop-ui-framework.md
+    requirement: "5 MVP screens within single-click from Home"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-mainui-003
+    system: main-ui
+    gdd: design/gdd/main-loop-ui-framework.md
+    requirement: "ui_event_priority_order: 比赛>阶段结算>里程碑>一般变化"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-mainui-004
+    system: main-ui
+    gdd: design/gdd/main-loop-ui-framework.md
+    requirement: "ui_refresh_trigger = time_advanced OR system_state_changed OR player_action_completed"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-mainui-005
+    system: main-ui
+    gdd: design/gdd/main-loop-ui-framework.md
+    requirement: "Visual containers: top bar, main content, bottom tabs — consistent across screens"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-mainui-006
+    system: main-ui
+    gdd: design/gdd/main-loop-ui-framework.md
+    requirement: "entry_available = system_state_allows AND navigation_context_allows"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-mainui-007
+    system: main-ui
+    gdd: design/gdd/main-loop-ui-framework.md
+    requirement: "screen_transition_duration_ms ∈ [150, 400]"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-mainui-008
+    system: main-ui
+    gdd: design/gdd/main-loop-ui-framework.md
+    requirement: "home_info_density ≤ 8 key fields"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-mainui-009
+    system: main-ui
+    gdd: design/gdd/main-loop-ui-framework.md
+    requirement: "Match Live: player cannot leave without explicit warning"
+    created: 2026-05-17
+    status: active
+
+  # ─── Presentation: player-ui ───
+  - id: TR-playerui-001
+    system: player-ui
+    gdd: design/gdd/player-management-ui.md
+    requirement: "Roster row: name, position, rating, tier, status, growth — max 7 fields"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-playerui-002
+    system: player-ui
+    gdd: design/gdd/player-management-ui.md
+    requirement: "Default sort by rating desc; re-sort by name/position resets to page 1"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-playerui-003
+    system: player-ui
+    gdd: design/gdd/player-management-ui.md
+    requirement: "Detail sections: identity→attributes→growth→status→actions (fixed order)"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-playerui-004
+    system: player-ui
+    gdd: design/gdd/player-management-ui.md
+    requirement: "attribute_visual: unified 1-100 fill bar, capped marked distinctly"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-playerui-005
+    system: player-ui
+    gdd: design/gdd/player-management-ui.md
+    requirement: "growth_visible = recent_growth AND amount ≥ threshold (0.1)"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-playerui-006
+    system: player-ui
+    gdd: design/gdd/player-management-ui.md
+    requirement: "Pagination with page_size ∈ [10, 25]; virtual scroll for 50+ players"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-playerui-007
+    system: player-ui
+    gdd: design/gdd/player-management-ui.md
+    requirement: "Empty filter result shows '无匹配球员'"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-playerui-008
+    system: player-ui
+    gdd: design/gdd/player-management-ui.md
+    requirement: "Training button disabled with reason when AP unavailable"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-playerui-009
+    system: player-ui
+    gdd: design/gdd/player-management-ui.md
+    requirement: "All interactive elements have stable IDs for onboarding anchoring"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-playerui-010
+    system: player-ui
+    gdd: design/gdd/player-management-ui.md
+    requirement: "Empty roster shows guide text; training/match entries naturally disabled"
+    created: 2026-05-17
+    status: active
+
+  # ─── Presentation: match-ui ───
+  - id: TR-matchui-001
+    system: match-ui
+    gdd: design/gdd/match-performance-ui.md
+    requirement: "3 UI containers: Match Pre, Match Live, Match Result"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-matchui-002
+    system: match-ui
+    gdd: design/gdd/match-performance-ui.md
+    requirement: "Pre-match: opponent, home/away, round, rankings, lineup, tactics, confirm"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-matchui-003
+    system: match-ui
+    gdd: design/gdd/match-performance-ui.md
+    requirement: "Opponent strength labels: ≥+10优势, ±10相当, ≤-10略强"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-matchui-004
+    system: match-ui
+    gdd: design/gdd/match-performance-ui.md
+    requirement: "Live match: real-time score, half indicator, event timeline, clock"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-matchui-005
+    system: match-ui
+    gdd: design/gdd/match-performance-ui.md
+    requirement: "Event weights: goal=HIGH, shot=MEDIUM, push/defense/stamina=LOW"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-matchui-006
+    system: match-ui
+    gdd: design/gdd/match-performance-ui.md
+    requirement: "event_interval = max(500ms, base_interval / intensity_factor)"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-matchui-007
+    system: match-ui
+    gdd: design/gdd/match-performance-ui.md
+    requirement: "Post-match order: score→reasons→timeline→performances→league→confirm"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-matchui-008
+    system: match-ui
+    gdd: design/gdd/match-performance-ui.md
+    requirement: "Score change animations queue; no events lost"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-matchui-009
+    system: match-ui
+    gdd: design/gdd/match-performance-ui.md
+    requirement: "Halftime transition with clear separator"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-matchui-010
+    system: match-ui
+    gdd: design/gdd/match-performance-ui.md
+    requirement: "Match exit warning during live match"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-matchui-011
+    system: match-ui
+    gdd: design/gdd/match-performance-ui.md
+    requirement: "0-0 halftime: show summary, adjustment still available"
+    created: 2026-05-17
+    status: active
+
+  # ─── Polish: onboard ───
+  - id: TR-onboard-001
+    system: onboard
+    gdd: design/gdd/onboarding-system.md
+    requirement: "10-step flow (MVP 7 steps): Home→Roster→Training→Match Pre/Live/Halftime/Result→Loop"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-onboard-002
+    system: onboard
+    gdd: design/gdd/onboarding-system.md
+    requirement: "tip_core_text ≤ 25 chars; tip_optional_detail ≤ 80 chars"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-onboard-003
+    system: onboard
+    gdd: design/gdd/onboarding-system.md
+    requirement: "No modal dialogs — highlights with text annotations only"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-onboard-004
+    system: onboard
+    gdd: design/gdd/onboarding-system.md
+    requirement: "highlight_visible = screen_matches AND NOT interacting_with_other_ui"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-onboard-005
+    system: onboard
+    gdd: design/gdd/onboarding-system.md
+    requirement: "step_advance = action_matches_target OR skipped — context-following"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-onboard-006
+    system: onboard
+    gdd: design/gdd/onboarding-system.md
+    requirement: "onboarding_done flag persisted in save"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-onboard-007
+    system: onboard
+    gdd: design/gdd/onboarding-system.md
+    requirement: "Onboarding state persists across save/load — resume from last completed + 1"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-onboard-008
+    system: onboard
+    gdd: design/gdd/onboarding-system.md
+    requirement: "Skip all at any step, no confirmation dialog"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-onboard-009
+    system: onboard
+    gdd: design/gdd/onboarding-system.md
+    requirement: "Missing UI anchor → degrade to text-only hint"
+    created: 2026-05-17
+    status: active
+
+  - id: TR-onboard-010
+    system: onboard
+    gdd: design/gdd/onboarding-system.md
+    requirement: "All anchor references use stable IDs from UI systems"
+    created: 2026-05-17
+    status: active

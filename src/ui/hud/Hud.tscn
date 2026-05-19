@@ -1,0 +1,281 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://src/ui/hud/hud.gd" id="1_hud"]
+[ext_resource type="Script" path="res://src/ui/hud/zone_a.gd" id="2_zone_a"]
+[ext_resource type="Script" path="res://src/ui/hud/zone_b.gd" id="3_zone_b"]
+[ext_resource type="Script" path="res://src/ui/hud/zone_c1.gd" id="4_zone_c1"]
+[ext_resource type="Script" path="res://src/ui/hud/zone_c2.gd" id="5_zone_c2"]
+[ext_resource type="Script" path="res://src/ui/overlays/pause_menu.gd" id="6_pause_menu"]
+[ext_resource type="Script" path="res://src/ui/overlays/toast_manager.gd" id="7_toast_manager"]
+[ext_resource type="Script" path="res://src/ui/overlays/tooltip.gd" id="8_tooltip"]
+[ext_resource type="Script" path="res://src/ui/overlays/confirmation_dialog.gd" id="9_confirmation_dialog"]
+[ext_resource type="Script" path="res://src/ui/components/progress_bar_pixel.gd" id="10_progress_bar_pixel"]
+
+[node name="Hud" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_hud")
+
+[node name="ZoneA" type="PanelContainer" parent="."]
+script = ExtResource("2_zone_a")
+
+[node name="DateButton" type="Button" parent="ZoneA"]
+unique_name_in_owner = true
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 132.0
+offset_bottom = 40.0
+text = ""
+
+[node name="DateValue" type="Label" parent="ZoneA/DateButton"]
+unique_name_in_owner = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 6.0
+offset_right = -8.0
+offset_bottom = -6.0
+text = "时间加载中"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="FundsGroup" type="HBoxContainer" parent="ZoneA"]
+offset_left = 140.0
+offset_top = 8.0
+offset_right = 260.0
+offset_bottom = 40.0
+alignment = 1
+
+[node name="FundsValue" type="Label" parent="ZoneA/FundsGroup"]
+unique_name_in_owner = true
+text = "经费加载中"
+vertical_alignment = 1
+
+[node name="FundsDelta" type="Label" parent="ZoneA/FundsGroup"]
+unique_name_in_owner = true
+text = ""
+visible = false
+vertical_alignment = 1
+
+[node name="ActionPointsGroup" type="HBoxContainer" parent="ZoneA"]
+offset_left = 268.0
+offset_top = 8.0
+offset_right = 500.0
+offset_bottom = 40.0
+alignment = 1
+
+[node name="ActionPointsProgress" type="Control" parent="ZoneA/ActionPointsGroup"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 12)
+offset_right = 120.0
+offset_bottom = 12.0
+script = ExtResource("10_progress_bar_pixel")
+
+[node name="Track" type="ColorRect" parent="ZoneA/ActionPointsGroup/ActionPointsProgress"]
+offset_right = 120.0
+offset_bottom = 12.0
+color = Color(0.0705882, 0.0705882, 0.164706, 1)
+
+[node name="Fill" type="ColorRect" parent="ZoneA/ActionPointsGroup/ActionPointsProgress"]
+offset_bottom = 12.0
+color = Color(1, 0.596078, 0, 1)
+
+[node name="ValueLabel" type="Label" parent="ZoneA/ActionPointsGroup/ActionPointsProgress"]
+visible = false
+offset_left = 126.0
+offset_right = 186.0
+offset_bottom = 12.0
+text = ""
+
+[node name="ActionPointsValue" type="Label" parent="ZoneA/ActionPointsGroup"]
+unique_name_in_owner = true
+text = "点数加载中"
+vertical_alignment = 1
+
+[node name="ActionWindowsValue" type="Label" parent="ZoneA"]
+unique_name_in_owner = true
+offset_left = 508.0
+offset_top = 8.0
+offset_right = 596.0
+offset_bottom = 40.0
+text = "窗口加载中"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NextMatchButton" type="Button" parent="ZoneA"]
+unique_name_in_owner = true
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -312.0
+offset_top = 8.0
+offset_right = -88.0
+offset_bottom = 40.0
+text = ""
+
+[node name="NextMatchValue" type="Label" parent="ZoneA/NextMatchButton"]
+unique_name_in_owner = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 6.0
+offset_right = -8.0
+offset_bottom = -6.0
+text = "赛程加载中"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MenuButton" type="Button" parent="ZoneA"]
+unique_name_in_owner = true
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -80.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 40.0
+text = "菜单"
+
+[node name="ZoneB" type="PanelContainer" parent="."]
+visible = false
+script = ExtResource("3_zone_b")
+
+[node name="ZoneC1" type="PanelContainer" parent="."]
+script = ExtResource("4_zone_c1")
+
+[node name="RosterButton" type="Button" parent="ZoneC1"]
+unique_name_in_owner = true
+offset_left = 16.0
+offset_top = 8.0
+offset_right = 208.0
+offset_bottom = 48.0
+toggle_mode = true
+text = "球员"
+
+[node name="MatchButton" type="Button" parent="ZoneC1"]
+unique_name_in_owner = true
+offset_left = 220.0
+offset_top = 8.0
+offset_right = 412.0
+offset_bottom = 48.0
+toggle_mode = true
+text = "比赛"
+
+[node name="ZoneC2" type="PanelContainer" parent="."]
+visible = false
+script = ExtResource("5_zone_c2")
+
+[node name="OverlayLayer" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="PauseMenu" type="Control" parent="OverlayLayer"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("6_pause_menu")
+
+[node name="BgDim" type="ColorRect" parent="OverlayLayer/PauseMenu"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.5)
+
+[node name="MenuPanel" type="PanelContainer" parent="OverlayLayer/PauseMenu"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -144.0
+offset_right = 160.0
+offset_bottom = 144.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="OverlayLayer/PauseMenu/MenuPanel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+theme_override_constants/separation = 8
+
+[node name="ResumeBtn" type="Button" parent="OverlayLayer/PauseMenu/MenuPanel/VBoxContainer"]
+text = "继续游戏"
+
+[node name="SaveBtn" type="Button" parent="OverlayLayer/PauseMenu/MenuPanel/VBoxContainer"]
+text = "存档"
+
+[node name="LoadBtn" type="Button" parent="OverlayLayer/PauseMenu/MenuPanel/VBoxContainer"]
+text = "读档"
+
+[node name="SettingsBtn" type="Button" parent="OverlayLayer/PauseMenu/MenuPanel/VBoxContainer"]
+text = "设置"
+
+[node name="MainMenuBtn" type="Button" parent="OverlayLayer/PauseMenu/MenuPanel/VBoxContainer"]
+text = "返回主菜单"
+
+[node name="QuitBtn" type="Button" parent="OverlayLayer/PauseMenu/MenuPanel/VBoxContainer"]
+text = "退出"
+
+[node name="ToastContainer" type="Control" parent="OverlayLayer"]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -316.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 200.0
+script = ExtResource("7_toast_manager")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="OverlayLayer/ToastContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/separation = 8
+
+[node name="TooltipNode" type="PanelContainer" parent="OverlayLayer"]
+visible = false
+offset_right = 200.0
+offset_bottom = 40.0
+script = ExtResource("8_tooltip")
+
+[node name="TooltipLabel" type="Label" parent="OverlayLayer/TooltipNode"]
+unique_name_in_owner = true
+offset_left = 6.0
+offset_top = 4.0
+offset_right = 194.0
+offset_bottom = 36.0
+text = "提示"
+autowrap_mode = 3
+
+[node name="ConfirmationDialog" type="PanelContainer" parent="OverlayLayer"]
+visible = false
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -72.0
+offset_right = 160.0
+offset_bottom = 72.0
+script = ExtResource("9_confirmation_dialog")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="OverlayLayer/ConfirmationDialog"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+theme_override_constants/separation = 12
+
+[node name="MessageLabel" type="Label" parent="OverlayLayer/ConfirmationDialog/VBoxContainer"]
+unique_name_in_owner = true
+text = "确认操作"
+autowrap_mode = 3
+
+[node name="ButtonsRow" type="HBoxContainer" parent="OverlayLayer/ConfirmationDialog/VBoxContainer"]
+alignment = 2
+theme_override_constants/separation = 8
+
+[node name="CancelBtn" type="Button" parent="OverlayLayer/ConfirmationDialog/VBoxContainer/ButtonsRow"]
+unique_name_in_owner = true
+text = "取消"
+
+[node name="ConfirmBtn" type="Button" parent="OverlayLayer/ConfirmationDialog/VBoxContainer/ButtonsRow"]
+unique_name_in_owner = true
+text = "确认"
