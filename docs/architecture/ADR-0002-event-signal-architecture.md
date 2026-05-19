@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Date
 
@@ -112,6 +112,8 @@ Priority order (higher = dispatched first):
 extends Node
 
 signal event_fired(event_name: String, payload: Dictionary)
+
+`event_fired` is an observability signal for debugging, logging, tracing, and tooling. Gameplay and UI business logic must not consume `event_fired` directly; production consumers subscribe through `subscribe(event_name, callable)` only.
 
 var _subscribers: Dictionary = {}  # {event_name: Array[Callable]}
 var _event_queue: Array[Dictionary] = []
@@ -238,7 +240,7 @@ func deserialize(data: Dictionary) -> void: ...
 
 **Producers** (Core systems, TimeManager, SaveManager): call `EventBus.emit(event_name, payload)`. Never know who consumes their events.
 
-**Consumers** (UI modules, downstream Core systems): call `EventBus.subscribe(event_name, callable)` in `_ready()` and `EventBus.unsubscribe()` in `_exit_tree()`.
+**Consumers** (UI modules, downstream Core systems): call `EventBus.subscribe(event_name, callable)` in `_ready()` and `EventBus.unsubscribe()` in `_exit_tree()`. Business logic consumers must not implement runtime behavior off the generic `event_fired` signal.
 
 **Screen-based consumers** (UI): subscribe in `on_enter()`, unsubscribe in `on_leave()`. This prevents hidden screens from processing events.
 

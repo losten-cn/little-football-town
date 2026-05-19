@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Date
 
@@ -40,7 +40,7 @@ The league-competition-structure GDD defines a 2+ tier league chain, double roun
 - MVP: 2 league tiers (extensible to N via LeagueConfig)
 - Double round-robin (home/away) per season
 - Points: win=3, draw=1, loss=0
-- Tiebreakers: points → goal difference → goals scored → head-to-head → allow ties
+- Tiebreakers: points → goal difference → goals scored → head-to-head; if MVP implementation does not materialize a full head-to-head matrix, internal ordering falls back to a stable deterministic key while presentation may still display tied placement semantics
 - Opponents are abstract team entities (no full player rosters in MVP)
 - Season schedule generated at season start, fixed for entire season
 - Season history capped at configurable retention count
@@ -50,7 +50,7 @@ The league-competition-structure GDD defines a 2+ tier league chain, double roun
 - `match_completed` event drives standings updates — one result per scheduled match
 - Season settlement triggered by `time_season_ended` → finalizes standings → determines promotion/relegation
 - Next season starts at the correct tier based on prior season outcome
-- Standings sort deterministically using 4-level tiebreaker
+- Standings sort deterministically using the documented tiebreak chain; when MVP stops short of full head-to-head resolution, internal ordering uses a stable fallback key
 - Full serialization of season state and capped history
 
 ## Decision
@@ -173,7 +173,10 @@ func _compare_standings(a: StandingsEntry, b: StandingsEntry) -> bool:
     if a.goal_difference != b.goal_difference: return a.goal_difference > b.goal_difference
     if a.goals_for != b.goals_for: return a.goals_for > b.goals_for
     # Head-to-head comparison for tied teams:
-    # In MVP, skip full H2H matrix; fall through to deterministic tiebreak via team_id
+    # MVP does not maintain a full H2H matrix yet. Internal ordering therefore
+    # falls back to team_id for deterministic storage and UI refresh stability.
+    # If presentation needs true "tied placement" semantics, the display layer
+    # must derive that explicitly instead of relying on array order alone.
     return a.team_id < b.team_id
 
 func get_player_rank() -> int:
@@ -232,7 +235,7 @@ func _round_robin_pairings(teams: Array[int], round: int, n: int) -> Array[Dicti
     return pairings
 ```
 
-### Part D: LeagueStructure Autoload
+### Part D: LeagueStructure Core System Node
 
 ```gdscript
 # src/core/league_structure.gd
@@ -481,7 +484,7 @@ func _deserialize(data: Dictionary) -> void:
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│                   LeagueStructure (Core Autoload)                 │
+│                 LeagueStructure (Core System Node)                │
 │  ┌────────────────────────────────────────────────────────────┐  │
 │  │ current_season: LeagueSeason                                │  │
 │  │   ├── standings: Array[StandingsEntry]  (N teams)           │  │

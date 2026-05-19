@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Date
 
@@ -94,9 +94,9 @@ static func from_dict(data: Dictionary) -> Facility:
     return f
 ```
 
-### Part B: TownBuilding Autoload
+### Part B: TownBuilding Core System Node
 
-TownBuilding is a Core Autoload node. It owns the grid, the facility registry, and all formula computation. It registers with SaveManager and subscribes to EventBus for time ticks.
+TownBuilding is a Core system node instantiated within the game scene. It owns the grid, the facility registry, and all formula computation. It registers with SaveManager and subscribes to EventBus for time ticks after the gameplay scene creates it.
 
 ```gdscript
 # src/core/town_building.gd
@@ -451,7 +451,7 @@ func _deserialize(data: Dictionary) -> void:
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│                    TownBuilding (Core Autoload)                   │
+│                  TownBuilding (Core System Node)                  │
 │  ┌────────────────────────────────────────────────────────────┐  │
 │  │ Grid: flat Array[Facility] of size W×H                     │  │
 │  │ _facility_by_id: Dictionary[int, Facility] — id lookup      │  │
@@ -536,7 +536,7 @@ func _deserialize(data: Dictionary) -> void:
 
 | Risk | Probability | Impact | Mitigation |
 |------|------------|--------|-----------|
-| Autoload load order: TownBuilding._ready() runs before SaveManager/EventBus loaded | Low | High — crash on startup | ADR-0001 defines autoload order. Add `assert(SaveManager != null and EventBus != null)` in `_ready()` as defense-in-depth |
+| Scene initialization order: TownBuilding._ready() runs before required Foundation Autoloads are accessible | Low | High — crash on startup | ADR-0001 defines the Foundation Autoload order. Instantiate TownBuilding only after the gameplay scene can access SaveManager and EventBus; keep `assert(SaveManager != null and EventBus != null)` in `_ready()` as defense-in-depth |
 | Dictionary mutation during `_on_time_phase_changed` iteration | Low | Medium — undefined iteration behavior | Snapshot facility IDs before iterating (implemented in draft) |
 | Construction timer drift: `time_phase_changed` fires at wrong granularity for "days" | Medium | Medium — construction takes too long or too fast | Construction time units are abstract ("time units"), not calendar days. Tuning in TownConfig maps GDD day-values to phase tick counts. Adjustable without code change |
 | Multiple `town_facility_completed` events in one frame from cascading completions | Low | Low — UI may render multiple popups | Order is deterministic (by facility_id). UI debounces via EventBus priority queue ordering |

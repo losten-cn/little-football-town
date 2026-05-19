@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Date
 
@@ -90,7 +90,7 @@ extends Resource
 @export var league_state: Dictionary = {}
 
 # Metadata — displayed in save/load UI
-@export var metadata: Dictionary = {}  # {town_name, season, league_tier, team_rating, ...}
+@export var metadata: Dictionary = {}  # {town_name, season, league_tier, team_rating, integrity_hash, ...}
 ```
 
 **Rationale**: `.tres` provides type-safe serialization (`@export var`), editor visibility for debugging, and native nested Resource handling. JSON was rejected because it requires manual type coercion for every field and gains no benefit for a single-player local save.
@@ -108,7 +108,7 @@ File structure:
     autosave.tres     # Auto-save (overwritten on key nodes)
 ```
 
-**Save slot metadata**: SaveManager reads the `metadata` Dictionary from each slot file (without fully deserializing the Resource) to populate the save/load UI with: town name, season number, league tier, team rating, playtime, timestamp.
+**Save slot metadata**: SaveManager reads the `metadata` Dictionary from each slot file through the snapshot resource path to populate the save/load UI with: town name, season number, league tier, team rating, playtime, timestamp. Whether this is later optimized into a lighter index-read path is an implementation detail, not a contract requirement of this ADR.
 
 **Auto-save triggers** (no player interaction required):
 - After `match_completed` (post-match settlement done)
@@ -207,7 +207,7 @@ func _migrate(snapshot: SaveSnapshot, from_version: int) -> SaveSnapshot:
 
 ### Part E: Save Integrity
 
-SaveSnapshot carries a `metadata` hash computed from the full state. On load, SaveManager recomputes and compares. Mismatch → save is corrupted → report to player with the slot number and offer to delete.
+SaveSnapshot carries an `integrity_hash` in `metadata`, computed from the serialized gameplay state. On load, SaveManager recomputes and compares it as a best-effort corruption detection step. A mismatch is treated as probable save corruption: report the slot to the player and offer recovery or deletion rather than silently loading.
 
 ```gdscript
 func _verify_integrity(snapshot: SaveSnapshot) -> bool:
@@ -300,7 +300,7 @@ func _slot_path(slot: int) -> String:
 
 - `.tres` files are binary in practice — not human-readable for player troubleshooting
 - Registration is opt-in — a Core system that forgets to call `register_system()` will silently not be saved
-- Hash-based integrity check is probabilistic (hash collision possible, though extremely unlikely with `hash()` over multiple dictionaries)
+- Hash-based integrity checking is best-effort rather than cryptographic; collisions are possible, so this mechanism is for practical corruption detection, not tamper-proof guarantees
 - No incremental/partial save — the entire snapshot is written each time
 
 ### Risks

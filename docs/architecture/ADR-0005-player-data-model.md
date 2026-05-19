@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Date
 
@@ -261,9 +261,9 @@ func _find_index(id: int) -> int:
     return -1
 ```
 
-### Part C: PlayerDevelopment Autoload
+### Part C: PlayerDevelopment Core System Node
 
-`PlayerDevelopment` is the Core Autoload that owns the `PlayerRoster` and implements training operations. It is NOT an Autoload in the Foundation sense — it's a Core system node instantiated by the game scene. It registers with SaveManager and EventBus.
+`PlayerDevelopment` is a Core system node instantiated by the game scene. It owns the `PlayerRoster` and implements training operations. It is not a Foundation Autoload; it registers with SaveManager and EventBus after the gameplay scene creates it.
 
 ```gdscript
 # src/core/player_development.gd
@@ -420,7 +420,7 @@ Player IDs are monotonically increasing integers assigned by `PlayerRoster` at c
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│                 PlayerDevelopment (Core Autoload)         │
+│               PlayerDevelopment (Core System Node)        │
 │  ┌────────────────────────────────────────────────────┐  │
 │  │ train(player_id, training_item_id) → Dictionary     │  │
 │  │ get_player(id) → Player                            │  │
