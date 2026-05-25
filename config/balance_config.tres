@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="BalanceConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/config/balance_config.gd" id="1_balance_config"]
+
+[resource]
+script = ExtResource("1_balance_config")
+flat_modifier_sum_budget_min = -10
+flat_modifier_sum_budget_max = 15
+percent_modifier_sum_budget_min = -0.2
+percent_modifier_sum_budget_max = 0.3
+resource_buffer_multiplier = 3.0
+decay_factor = 1.2
+potential_cap_span = 15
+rating_win_slope = 0.0045
+win_probability_floor = 0.05
+win_probability_ceiling = 0.95
+player_tier_potential_caps = {
+"excellent": Vector2i(72, 85),
+"legend_prospect": Vector2i(90, 99),
+"normal": Vector2i(60, 75),
+"star": Vector2i(82, 95)
+}
+player_tier_training_efficiency = {
+"excellent": Vector2(0.95, 1.2),
+"legend_prospect": Vector2(1.25, 1.5),
+"normal": Vector2(0.8, 1.0),
+"star": Vector2(1.1, 1.35)
+}
+action_point_use_rate_target_min = 0.7
+action_point_use_rate_target_max = 0.9
+overall_win_rate_target_min = 0.55
+overall_win_rate_target_max = 0.65
+even_match_win_rate_target_min = 0.45
+even_match_win_rate_target_max = 0.55
+resource_efficiency_target_min = 0.8
+resource_efficiency_target_max = 1.2

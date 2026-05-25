@@ -14,17 +14,24 @@
 
 | ID | Task | Agent/Owner | Est. Days | Dependencies | Acceptance Criteria |
 |----|------|-------------|-----------|--------------|---------------------|
-| S1-1 | 完成 HUD Framework 实现收尾 | ui-programmer / godot-specialist | 1.5 | `design/ux/hud.md`, `design/art/hud-visual-design.md`, active HUD implementation | HUD scene/scripts/components/overlays are complete enough for review; no obvious script parse errors; HUD follows layer/layout decisions from session state. |
-| S1-2 | HUD 手动 walkthrough + 截图证据 | qa-tester / ui-programmer | 1 | S1-1 | Evidence captures Home HUD zones, overlay behavior, focus/navigation, resource/date/action displays, and any known visual issues. |
-| S1-3 | 修复 HUD Review/QA 发现的问题 | ui-programmer / godot-gdscript-specialist | 1 | S1-2 | Blocking HUD walkthrough findings resolved or explicitly deferred with rationale; no S1/S2 issues remain in HUD Framework. |
-| S1-4 | 创建 QA plan for Sprint 1 | qa-lead | 1 | Sprint plan written | `production/qa/qa-plan-sprint-1.md` exists and defines required checks for HUD, Player Management UI readiness, and Match Performance UI readiness. |
+| S1-1 | 完成 HUD Framework 实现收尾 | ui-programmer / godot-specialist | 1.5 | `production/epics/time-and-season-progression-system/story-009-time-status-regression.md`, `production/epics/economy-management-system/story-004-budget-preview-affordability-query.md` | HUD scene/scripts/components/overlays are complete enough for review; no obvious script parse errors; HUD follows layer/layout decisions from session state. |
+| S1-2 | HUD 手动 walkthrough + 截图证据 | qa-tester / ui-programmer | 1 | `production/epics/time-and-season-progression-system/story-009-time-status-regression.md`, `production/epics/economy-management-system/story-004-budget-preview-affordability-query.md` | Evidence captures Home HUD zones, overlay behavior, focus/navigation, resource/date/action displays, and any known visual issues. |
+| S1-3 | 修复 HUD Review/QA 发现的问题 | ui-programmer / godot-gdscript-specialist | 1 | `production/epics/time-and-season-progression-system/story-009-time-status-regression.md`, `production/epics/economy-management-system/story-004-budget-preview-affordability-query.md` | Blocking HUD walkthrough findings resolved or explicitly deferred with rationale; no S1/S2 issues remain in HUD Framework. |
+| S1-4 | 创建 QA plan for Sprint 1 | qa-lead | 1 | `production/epics/time-and-season-progression-system/story-009-time-status-regression.md`, `production/epics/player-development-system/story-009-player-development-regression.md`, `production/epics/match-competition-system/story-009-match-loop-regression.md` | `production/qa/qa-plan-sprint-1.md` exists and defines required checks for HUD, Player Management UI readiness, and Match Performance UI readiness. |
 
 ### Should Have
 
 | ID | Task | Agent/Owner | Est. Days | Dependencies | Acceptance Criteria |
 |----|------|-------------|-----------|--------------|---------------------|
-| S1-5 | 准备 Player Management UI story/readiness | producer / ui-programmer | 1 | HUD Framework stable; `design/gdd/player-management-ui.md` | Story/readiness notes identify scope, dependencies, acceptance criteria, UI anchors, and required QA checks for Player Management UI implementation. |
-| S1-6 | 准备 Match Performance UI story/readiness | producer / ui-programmer | 1 | HUD Framework stable; `design/gdd/match-performance-ui.md` | Story/readiness notes identify scope, dependencies, acceptance criteria, UI anchors, and required QA checks for Match Performance UI implementation. |
+| S1-5 | 准备 Player Management UI story/readiness | producer / ui-programmer | 1 | `production/epics/time-and-season-progression-system/story-009-time-status-regression.md`, `production/epics/player-development-system/story-008-player-state-boundary.md`, `production/epics/player-development-system/story-009-player-development-regression.md` | Story/readiness notes identify scope, dependencies, acceptance criteria, UI anchors, and required QA checks for Player Management UI implementation. |
+| S1-6 | 准备 Match Performance UI story/readiness | producer / ui-programmer | 1 | `production/epics/time-and-season-progression-system/story-009-time-status-regression.md`, `production/epics/match-competition-system/story-006-match-result-packet.md`, `production/epics/match-competition-system/story-009-match-loop-regression.md` | Story/readiness notes identify scope, dependencies, acceptance criteria, UI anchors, and required QA checks for Match Performance UI implementation. |
+
+## Story Mapping Notes
+
+- Dedicated Presentation UI story files for HUD Framework, Player Management UI, and Match Performance UI are not present under `production/epics/`.
+- HUD Framework references are mapped to `production/epics/time-and-season-progression-system/story-009-time-status-regression.md` and `production/epics/economy-management-system/story-004-budget-preview-affordability-query.md` because those stories provide the UI-facing time/status and resource query surfaces used by the HUD.
+- Player Management UI readiness is mapped to `production/epics/player-development-system/story-008-player-state-boundary.md` and `production/epics/player-development-system/story-009-player-development-regression.md` because those stories define player state consumption boundaries and explicitly identify Player Management UI as downstream work.
+- Match Performance UI readiness is mapped to `production/epics/match-competition-system/story-006-match-result-packet.md` and `production/epics/match-competition-system/story-009-match-loop-regression.md` because those stories define the MatchResultPacket consumed by Match Performance UI and explicitly identify Match Performance UI as downstream work.
 
 ### Nice to Have
 
@@ -36,7 +43,7 @@
 
 | Task | Reason | New Estimate |
 |------|--------|--------------|
-| HUD Framework implementation | Active session state shows Phase 3 implementation in progress from prior work. | 1.5 days |
+| `production/epics/time-and-season-progression-system/story-009-time-status-regression.md`, `production/epics/economy-management-system/story-004-budget-preview-affordability-query.md` | Active session state shows HUD Framework Phase 3 implementation in progress from prior work. | 1.5 days |
 
 ## Risks
 

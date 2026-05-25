@@ -1,7 +1,7 @@
 # Technical Requirement ID Registry
 
 version: 2
-last_updated: "2026-05-17"
+last_updated: "2026-05-25"
 
 requirements:
   # ─── Foundation: game-concept ───
@@ -562,6 +562,13 @@ requirements:
     gdd: design/gdd/economy-management-system.md
     requirement: "Warning cooldown per threshold type to prevent alert spam"
     created: 2026-05-17
+    status: active
+
+  - id: TR-economy-013
+    system: economy
+    gdd: design/gdd/economy-management-system.md
+    requirement: "Budget preview and affordability queries are read-only and return projected balances plus reason codes without mutating authoritative resources"
+    created: 2026-05-25
     status: active
 
   # ─── Core: town ───
