@@ -1,12 +1,12 @@
 # Story 002: 实现 execute_transaction 原子执行与资源底线校验
 
 > **Epic**: 经济管理系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -38,10 +38,10 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 ## Acceptance Criteria
 
-*From GDD `design/gdd/economy-management-system.md`, scoped to this story:*
+*From GDD `design/gdd/economy-management-system.md`, scoped to this story and resolved by ADR-0007 / `TR-economy-001`:*
 
 - [ ] `execute_transaction()` validates before applying; failed validation returns failure and leaves all three resources unchanged.
-- [ ] Resource floors follow the current ADR/EPIC baseline: `funds` may enter debt, `action_points` must not drop below its floor, and `research_points` must not drop below 0.
+- [ ] Resource floor policy is explicit and enforced: `funds` may enter debt, `action_points` must not drop below their configured floor, and `research_points` must not drop below `0`.
 - [ ] Successful transactions receive unique increasing `tx_id` values and apply all deltas as one atomic commit.
 
 ---
@@ -50,7 +50,15 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *Derived from ADR-0007 Implementation Guidelines:*
 
-Centralize floor checks in `_validate_transaction()` and call it before applying any delta. Treat a transaction as all-or-nothing. The GDD contains one wording that says every resource has lower bound 0, but EPIC/TR/ADR define funds as debt-capable; implement the ADR/EPIC baseline and flag the wording mismatch during readiness review.
+Centralize floor checks in `_validate_transaction()` and call it before applying any delta. Treat a transaction as all-or-nothing.
+
+### Readiness Resolution
+
+For this story's implementation and tests, `funds` follow the Accepted ADR / TR baseline and are debt-capable. `action_points` must not drop below their configured floor, and `research_points` must not drop below `0`.
+
+The conflicting GDD wording that states all resources share a lower bound of `0` is treated as stale for this story and does not override ADR-0007 or `TR-economy-001`.
+
+All acceptance tests for this story must use the debt-capable `funds` policy.
 
 ---
 
@@ -94,7 +102,16 @@ Centralize floor checks in `_validate_transaction()` and call it before applying
 **Required evidence**:
 - Logic: `tests/unit/economy/execute_transaction_atomic_validation_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `tests/unit/economy/execute_transaction_atomic_validation_test.gd`
+
+---
+
+## Completion Notes
+**Completed**: 2026-05-26
+**Criteria**: 3/3 passing
+**Deviations**: Test entry was adapted to a `SceneTree` runner so Godot headless `--script` can execute it directly; `EconomyManager` now exposes `set_economy_config_for_testing()` and `get_transaction_log()` as minimal test/audit seams; local Godot runs still emit resource cleanup warnings at exit.
+**Test Evidence**: Logic: `tests/unit/economy/execute_transaction_atomic_validation_test.gd` present and locally verified with `D:/Program Files/godot/Godot_v4.6.2-stable_win64_console.exe` (PASS).
+**Code Review**: Complete — implementation gaps around auditability were closed and local Godot verification passed.
 
 ---
 

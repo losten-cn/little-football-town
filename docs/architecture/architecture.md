@@ -394,17 +394,17 @@ func get_anchor_id() -> String: return ""
 
 | ADR | Status | Assessment |
 |-----|--------|------------|
-| ADR-0001: Scene Management & Autoload Architecture | Proposed | 5 Autoloads (ConfigLoader, EventBus, TimeManager, SaveManager, ScreenManager). Screen Stack pattern adopted. |
-| ADR-0002: Event/Signal Architecture + TimeManager | Proposed | EventBus with 16 signals + TimeManager. All cross-system communication routed through EventBus. |
-| ADR-0003: Save/Load Persistence | Proposed | .tres save format, 3+1 slots, version migration, all Core systems register serialize/deserialize. |
-| ADR-0004: Data-Driven Configuration | Proposed | 9 .tres Custom Resource files loaded by ConfigLoader at startup. Read-only, all tuning values external. |
-| ADR-0005: Player Data Model | Proposed | Player (RefCounted), PlayerRoster, 5-attribute triplets (current/potential/effective), training system. Fixed: uses `accredit_training_cost()` per ADR-0007. |
-| ADR-0006: Match Simulation Architecture | Proposed | 8-state machine, seeded RNG, 6 event categories, result packet structure, lineup/tactics data. |
-| ADR-0007: Economy Transaction Framework | Proposed | `execute_transaction()` sole mutation path, Transaction class, settlement formulas, warning thresholds. |
-| ADR-0008: Town Grid & Facility System | Proposed | 5×5 grid, 4 facility types × 5 levels, adjacency bonus (capped 15.0), 8 formula methods. |
-| ADR-0009: League Competition Structure | Proposed | Circle method round-robin, 3/1/0 points, 4-level tiebreaker, promotion/relegation, season schedule. |
+| ADR-0001: Scene Management & Autoload Architecture | Accepted | 5 Autoloads (ConfigLoader, EventBus, TimeManager, SaveManager, ScreenManager). Screen Stack pattern adopted. |
+| ADR-0002: Event/Signal Architecture + TimeManager | Accepted | EventBus with 16 signals + TimeManager. All cross-system communication routed through EventBus. |
+| ADR-0003: Save/Load Persistence | Accepted | .tres save format, 3+1 slots, version migration, all Core systems register serialize/deserialize. |
+| ADR-0004: Data-Driven Configuration | Accepted | 9 .tres Custom Resource files loaded by ConfigLoader at startup. Read-only, all tuning values external. |
+| ADR-0005: Player Data Model | Accepted | Player (RefCounted), PlayerRoster, 5-attribute triplets (current/potential/effective), training system. Fixed: uses `accredit_training_cost()` per ADR-0007. |
+| ADR-0006: Match Simulation Architecture | Accepted | 8-state machine, seeded RNG, 6 event categories, result packet structure, lineup/tactics data. |
+| ADR-0007: Economy Transaction Framework | Accepted | `execute_transaction()` sole mutation path, Transaction class, settlement formulas, warning thresholds. |
+| ADR-0008: Town Grid & Facility System | Accepted | 5×5 grid, 4 facility types × 5 levels, adjacency bonus (capped 15.0), 8 formula methods. |
+| ADR-0009: League Competition Structure | Accepted | Circle method round-robin, 3/1/0 points, 4-level tiebreaker, promotion/relegation, season schedule. |
 
-All 9 ADRs currently Proposed — batch acceptance recommended before implementation begins. No dependency cycles.
+All 9 ADRs currently Accepted. No dependency cycles.
 
 ### GDD Technical Requirement → ADR Coverage
 

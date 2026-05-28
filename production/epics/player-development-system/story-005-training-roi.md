@@ -1,12 +1,12 @@
 # Story 005: 实现训练项目匹配、副属性成长与 ROI 计算样本
 
 > **Epic**: 运动员培养系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -39,10 +39,10 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *From GDD `design/gdd/player-development-system.md`, scoped to this story:*
 
-- [ ] Matched training projects have `training_focus_match_multiplier >= 1.0`; mismatched projects have `<= 1.0`.
-- [ ] Primary attribute gain is at least secondary attribute total gain, and secondary gain total stays within 10%–35% of primary gain.
-- [ ] `player_development_roi` uses `ap_to_funds_weight` from EconomyManager, not a local override.
-- [ ] Short-term and mid-term ROI samples verify ordinary vs star-player tradeoffs or mark tuning failure.
+- [x] Matched training projects have `training_focus_match_multiplier >= 1.0`; mismatched projects have `<= 1.0`.
+- [x] Primary attribute gain is at least secondary attribute total gain, and secondary gain total stays within 10%–35% of primary gain.
+- [x] `player_development_roi` uses `ap_to_funds_weight` from EconomyManager, not a local override.
+- [x] Short-term and mid-term ROI samples verify ordinary vs star-player tradeoffs or mark tuning failure.
 
 ---
 
@@ -93,7 +93,9 @@ Use training item config to define target attributes, secondary attributes, raw 
 **Required evidence**:
 - Logic: `tests/unit/player-dev/training_roi_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Test file created at `tests/unit/player-dev/training_roi_test.gd`; runtime verification passed locally via `tests/unit/player-dev/training_roi_runner.gd` with Godot 4.6.2 headless result `TRAINING_ROI_TEST_PASS` (non-blocking exit warnings remain)
+
+**Review Note (2026-05-28)**: Runtime evidence is green. AC-3 coverage was strengthened to route `ap_to_funds_weight` through the EconomyManager authority seam and to assert ordinary-vs-star ROI sample tradeoffs directly from automated test samples, in addition to the existing ROI helper and tuning-failure coverage.
 
 ---
 

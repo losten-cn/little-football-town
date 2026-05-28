@@ -1,12 +1,12 @@
 # Story 008: 建立数值生命周期元数据与跨系统一致性扫描
 
 > **Epic**: 数值系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-27
 
 ## Context
 
@@ -94,7 +94,7 @@ Use `BalanceConfig` and metadata as the authoritative source. The scan should di
 **Required evidence**:
 - Integration: `tests/integration/balance/balance_consistency_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `tests/integration/balance/balance_consistency_test.gd`
 
 ---
 
@@ -104,3 +104,12 @@ Use `BalanceConfig` and metadata as the authoritative source. The scan should di
   - `production/epics/balance-system/story-001-balance-config-validation.md` — must be DONE
 - Unlocks:
   - Downstream work: Downstream Core story readiness checks
+
+---
+
+## Completion Notes
+**Completed**: 2026-05-27
+**Criteria**: 5/5 passing
+**Deviations**: Partial scope only covered the confirmed downstream duplicate growth formula; no duplicate shared resource settlement implementation was found in `src/` at completion time.
+**Test Evidence**: Integration test passed at `tests/integration/balance/balance_consistency_test.gd`
+**Code Review**: Complete

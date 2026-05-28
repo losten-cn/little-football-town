@@ -1,12 +1,12 @@
 # Story 008: 实现赛后状态消费与下游写保护边界
 
 > **Epic**: 运动员培养系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-28
 
 ## Context
 
@@ -39,9 +39,9 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *From GDD `design/gdd/player-development-system.md`, scoped to this story:*
 
-- [ ] Match-provided condition and morale changes affect the next training settlement.
-- [ ] Downstream systems cannot bypass formal interfaces to directly modify long-term attributes, `potential_cap`, or `training_efficiency`.
-- [ ] Conflicting state updates are rejected or marked for review instead of silently overwriting authoritative player state.
+- [x] Match-provided condition and morale changes affect the next training settlement.
+- [x] Downstream systems cannot bypass formal interfaces to directly modify long-term attributes, `potential_cap`, or `training_efficiency`.
+- [x] Conflicting state updates are rejected or marked for review instead of silently overwriting authoritative player state.
 
 ---
 
@@ -92,7 +92,7 @@ Keep PlayerDevelopment as the owner of player long-term state and expose control
 **Required evidence**:
 - Integration: `tests/integration/player-dev/player_state_boundary_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `tests/integration/player-dev/player_state_boundary_test.gd` + `tests/integration/player-dev/player_state_boundary_test.tscn`; Godot 4.6.2 headless result: `PLAYER_STATE_BOUNDARY_TEST_PASS` (non-blocking exit warnings remain)
 
 ---
 

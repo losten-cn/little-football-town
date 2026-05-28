@@ -1,12 +1,12 @@
 # Story 004: 实现阶段结算与赛后连续触发
 
 > **Epic**: 时间与赛季推进系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Logic
 > **Estimate**: S
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -93,7 +93,7 @@ This story owns trigger timing, not settlement rewards. Downstream systems subsc
 **Required evidence**:
 - Logic: `tests/unit/time/stage_settlement_trigger_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Automated unit evidence recorded — `tests/unit/time/stage_settlement_trigger_test.gd` passed (`STAGE_SETTLEMENT_TRIGGER_TEST_PASS`)
 
 ---
 

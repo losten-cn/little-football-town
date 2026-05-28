@@ -1,12 +1,12 @@
 # Story 007: 实现球场与三组邻接加成公式
 
 > **Epic**: 小镇建设系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-27
 
 ## Context
 
@@ -97,7 +97,7 @@ Do not build a generic adjacency matrix beyond the GDD-defined MVP pairs. Only A
 **Required evidence**:
 - Logic: `tests/unit/town/stadium_adjacency_formula_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — `tests/unit/town/stadium_adjacency_formula_test.gd`
 
 ---
 
@@ -110,3 +110,12 @@ Do not build a generic adjacency matrix beyond the GDD-defined MVP pairs. Only A
 - Unlocks:
   - `production/epics/town-building-system/story-008-downstream-query-maintenance.md`
   - `production/epics/town-building-system/story-009-serialization-restore-regression.md`
+
+---
+
+## Completion Notes
+**Completed**: 2026-05-27
+**Criteria**: 3/3 passing
+**Deviations**: None
+**Test Evidence**: Logic: `tests/unit/town/stadium_adjacency_formula_test.gd`
+**Code Review**: Complete — approved after formula cap and state-boundary regression coverage updates

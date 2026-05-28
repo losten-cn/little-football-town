@@ -1,12 +1,12 @@
 # Story 002: 实现属性模型与有效属性公式
 
 > **Epic**: 数值系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-25
 
 ## Context
 
@@ -96,7 +96,7 @@ Keep formula code independent from downstream systems and feed it typed config v
 **Required evidence**:
 - Logic: `tests/unit/balance/attribute_formula_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — tests/unit/balance/attribute_formula_test.gd
 
 ---
 
@@ -106,3 +106,10 @@ Keep formula code independent from downstream systems and feed it typed config v
   - `production/epics/balance-system/story-001-balance-config-validation.md` — must be DONE
 - Unlocks:
   - `production/epics/balance-system/story-005-positional-rating.md`
+
+## Completion Notes
+**Completed**: 2026-05-25
+**Criteria**: 5/5 passing
+**Deviations**: None
+**Test Evidence**: Logic: `tests/unit/balance/attribute_formula_test.gd`
+**Code Review**: Skipped in lean mode

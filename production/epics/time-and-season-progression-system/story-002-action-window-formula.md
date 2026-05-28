@@ -1,12 +1,12 @@
 # Story 002: 实现行动时间消耗与可用窗口公式
 
 > **Epic**: 时间与赛季推进系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -100,7 +100,7 @@ Keep time cost and window calculations under TimeManager authority. Downstream s
 **Required evidence**:
 - Logic: `tests/unit/time/action_window_formula_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Automated unit evidence recorded — `tests/unit/time/action_window_formula_test.gd` passed (`ACTION_WINDOW_FORMULA_TEST_PASS`)
 
 ---
 

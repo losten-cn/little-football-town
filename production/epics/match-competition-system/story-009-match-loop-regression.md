@@ -1,12 +1,12 @@
 # Story 009: 实现完整比赛闭环回归样本与性能验证
 
 > **Epic**: 比赛竞技系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-27
 
 ## Context
 
@@ -92,7 +92,18 @@ This story creates integration regression evidence for the complete match loop. 
 **Required evidence**:
 - Integration: `tests/integration/match/match_loop_regression_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — tests/integration/match/match_loop_regression_test.gd
+
+---
+
+## Completion Notes
+
+**Completed**: 2026-05-27  
+**Criteria**: 3/3 passing  
+**Deviations**: None  
+**Test Evidence**: Integration: `tests/integration/match/match_loop_regression_test.gd`  
+**Code Review**: Approved with suggestions  
+**Review Notes**: Full-loop closure, downstream handoff fields, and <100ms draw/performance coverage all passed review. Remaining feedback is advisory only around tightening repeated-run performance evidence and making the event-contract assertion more explicit if needed later.
 
 ---
 

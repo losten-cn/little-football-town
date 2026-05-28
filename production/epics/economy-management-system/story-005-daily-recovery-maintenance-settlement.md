@@ -1,12 +1,12 @@
 # Story 005: 实现每日 AP 恢复、休息恢复与维护费结算
 
 > **Epic**: 经济管理系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -93,11 +93,23 @@ Handle daily settlement as an economy transaction or fixed sequence of transacti
 **Required evidence**:
 - Integration: `tests/integration/economy/daily_recovery_maintenance_settlement_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and verified — `DAILY_RECOVERY_MAINTENANCE_SETTLEMENT_TEST_PASS`
 
 ---
 
 ## Dependencies
+
+- Depends on:
+  - `production/epics/economy-management-system/story-002-execute-transaction-atomic-validation.md` — must be DONE
+- Unlocks:
+  - `production/epics/economy-management-system/story-009-settlement-order-concurrency-regression.md`
+
+## Completion Notes
+**Completed**: 2026-05-26
+**Criteria**: 3/3 passing
+**Deviations**: Advisory only — TownBuilding query surface and TownConfig data were expanded to support daily settlement without hardcoded values; remaining QA edge cases are coverage improvements, not blockers.
+**Test Evidence**: Integration test at `tests/integration/economy/daily_recovery_maintenance_settlement_test.gd` — PASS (`DAILY_RECOVERY_MAINTENANCE_SETTLEMENT_TEST_PASS`)
+**Code Review**: Complete — APPROVED WITH SUGGESTIONS
 
 - Depends on:
   - `production/epics/economy-management-system/story-002-execute-transaction-atomic-validation.md` — must be DONE

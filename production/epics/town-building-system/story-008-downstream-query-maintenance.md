@@ -1,12 +1,12 @@
 # Story 008: 实现下游只读查询面与维护费汇总
 
 > **Epic**: 小镇建设系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-27
 
 ## Context
 
@@ -93,7 +93,7 @@ This story closes the downstream query surface. Maintenance is a value EconomyMa
 **Required evidence**:
 - Integration: `tests/integration/town/downstream_query_maintenance_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — `tests/integration/town/downstream_query_maintenance_test.gd`
 
 ---
 
@@ -104,3 +104,12 @@ This story closes the downstream query surface. Maintenance is a value EconomyMa
   - `production/epics/town-building-system/story-007-stadium-adjacency-formulas.md` — must be DONE
 - Unlocks:
   - `production/epics/town-building-system/story-009-serialization-restore-regression.md`
+
+---
+
+## Completion Notes
+**Completed**: 2026-05-27
+**Criteria**: 3/3 passing
+**Deviations**: None
+**Test Evidence**: Integration: `tests/integration/town/downstream_query_maintenance_test.gd`
+**Code Review**: Complete — approved with advisory-only notes around edge-case coverage and wording clarity for upgrading semantics

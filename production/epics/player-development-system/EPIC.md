@@ -3,7 +3,7 @@
 > **Layer**: Core
 > **GDD**: design/gdd/player-development-system.md
 > **Architecture Module**: PlayerDevelopment
-> **Status**: Ready
+> **Status**: Complete
 > **Stories**: 9 stories
 
 ## Overview
@@ -36,15 +36,15 @@
 
 | # | Story | Type | Status | ADR |
 |---|-------|------|--------|-----|
-| 001 | [实现 Player / PlayerRoster 权威数据模型与序列化边界](story-001-player-data-serialization-boundary.md) | Integration | Ready | ADR-0005 |
-| 002 | [实现训练效率与状态修正公式](story-002-training-efficiency-formula.md) | Logic | Ready | ADR-0005 |
-| 003 | [实现训练成长结算与潜力上限裁剪](story-003-training-gain-cap.md) | Logic | Ready | ADR-0005 |
-| 004 | [实现球员层级、潜力区间与训练效率差异](story-004-player-tier-band.md) | Logic | Ready | ADR-0005 |
-| 005 | [实现训练项目匹配、副属性成长与 ROI 计算样本](story-005-training-roi.md) | Logic | Ready | ADR-0005 |
-| 006 | [实现训练原子性与 Economy/Time 集成](story-006-training-atomic-integration.md) | Integration | Ready | ADR-0005 |
-| 007 | [实现成长里程碑、训练历史与赛季年龄推进](story-007-player-milestone-history.md) | Integration | Ready | ADR-0005 |
-| 008 | [实现赛后状态消费与下游写保护边界](story-008-player-state-boundary.md) | Integration | Ready | ADR-0005 |
-| 009 | [实现培养闭环回归样本与持久化一致性验证](story-009-player-development-regression.md) | Integration | Ready | ADR-0005 |
+| 001 | [实现 Player / PlayerRoster 权威数据模型与序列化边界](story-001-player-data-serialization-boundary.md) | Integration | Complete | ADR-0005 |
+| 002 | [实现训练效率与状态修正公式](story-002-training-efficiency-formula.md) | Logic | Complete | ADR-0005 |
+| 003 | [实现训练成长结算与潜力上限裁剪](story-003-training-gain-cap.md) | Logic | Complete | ADR-0005 |
+| 004 | [实现球员层级、潜力区间与训练效率差异](story-004-player-tier-band.md) | Logic | Complete | ADR-0005 |
+| 005 | [实现训练项目匹配、副属性成长与 ROI 计算样本](story-005-training-roi.md) | Logic | Complete | ADR-0005 |
+| 006 | [实现训练原子性与 Economy/Time 集成](story-006-training-atomic-integration.md) | Integration | Complete | ADR-0005 |
+| 007 | [实现成长里程碑、训练历史与赛季年龄推进](story-007-player-milestone-history.md) | Integration | Complete | ADR-0005 |
+| 008 | [实现赛后状态消费与下游写保护边界](story-008-player-state-boundary.md) | Integration | Complete | ADR-0005 |
+| 009 | [实现培养闭环回归样本与持久化一致性验证](story-009-player-development-regression.md) | Integration | Complete | ADR-0005 |
 
 ## Definition of Done
 

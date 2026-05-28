@@ -1,12 +1,12 @@
 # Story 001: 实现 Player / PlayerRoster 权威数据模型与序列化边界
 
 > **Epic**: 运动员培养系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-28
 
 ## Context
 
@@ -39,9 +39,9 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *From GDD `design/gdd/player-development-system.md`, scoped to this story:*
 
-- [ ] Player authoritative state includes id, name, age, position, five attributes, training efficiency, condition, morale, history, and milestones.
-- [ ] Derived values such as `effective` attributes and positional ratings are not persisted as authoritative state.
-- [ ] Training gains survive save/load without loss, player mismatch, or double settlement.
+- [x] Player authoritative state includes id, name, age, position, five attributes, training efficiency, condition, morale, history, and milestones.
+- [x] Derived values such as `effective` attributes and positional ratings are not persisted as authoritative state.
+- [x] Training gains survive save/load without loss, player mismatch, or double settlement.
 
 ---
 
@@ -92,7 +92,7 @@ Represent `Player` as a `RefCounted` runtime data object and `PlayerRoster` as a
 **Required evidence**:
 - Integration: `tests/integration/player-dev/player_data_serialization_boundary_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `tests/integration/player-dev/player_data_serialization_boundary_test.gd` + `tests/integration/player-dev/player_data_serialization_boundary_test.tscn`; Godot 4.6.2 headless result: `PLAYER_DATA_SERIALIZATION_BOUNDARY_TEST_PASS` (non-blocking exit warnings remain). Coverage includes authoritative exact-key boundary checks, empty history/milestones persistence, multi-player restore by id under reordered snapshots, and legacy derived-field ignore semantics.
 
 ---
 

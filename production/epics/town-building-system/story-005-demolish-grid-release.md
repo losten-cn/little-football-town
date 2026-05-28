@@ -1,12 +1,12 @@
 # Story 005: 实现拆除限制、空地释放与邻接重算触发
 
 > **Epic**: 小镇建设系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -23,6 +23,7 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 **ADR Governing Implementation**: ADR-0008: Town Grid & Facility System
 **ADR Decision Summary**: Demolition is a controlled town-state transition that releases grid occupancy and triggers adjacency recomputation without per-frame polling.
+**Architecture Clarification**: For MVP, demolition follows ADR-0008 Accepted behavior: it is an instantaneous controlled transition from `Active` to `Empty` and does not create a persistent `Demolishing` runtime state.
 
 **Engine**: Godot 4.6 | **Risk**: LOW
 **Engine Notes**: Pure GDScript state transition and EventBus notification; no post-cutoff APIs required.
@@ -40,7 +41,7 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *From GDD `design/gdd/town-building-system.md`, scoped to this story:*
 
-- [ ] Active facilities can be demolished immediately; the grid cell becomes Empty, the facility is removed from registry, and no resources are refunded.
+- [ ] Active facilities can be demolished immediately without entering a persistent `Demolishing` runtime state; the grid cell becomes `Empty`, the facility is removed from registry, and no resources are refunded.
 - [ ] `Constructing` and `Upgrading` facilities reject demolition requests and preserve their previous state.
 - [ ] After demolition, affected neighboring adjacency bonuses are invalidated within the same settlement boundary without per-frame polling.
 
@@ -50,7 +51,7 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *Derived from ADR-0008 Implementation Guidelines:*
 
-The GDD/EPIC state path names `Demolishing`, while ADR-0008 treats MVP demolition as immediate rather than a persistent `DEMOLISHING` state. Implement it as an instantaneous controlled transition and keep this mismatch visible during readiness review.
+For MVP, demolition follows ADR-0008 Accepted behavior rather than a persistent `Demolishing` runtime state. A valid demolition request transitions an `Active` facility directly to `Empty` within the same settlement boundary, releases grid occupancy immediately, and triggers adjacency recomputation without per-frame polling.
 
 ---
 
@@ -94,7 +95,7 @@ The GDD/EPIC state path names `Demolishing`, while ADR-0008 treats MVP demolitio
 **Required evidence**:
 - Integration: `tests/integration/town/demolish_grid_release_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `tests/integration/town/demolish_grid_release_test.gd` (passes via Godot headless on 2026-05-26)
 
 ---
 
@@ -108,3 +109,10 @@ The GDD/EPIC state path names `Demolishing`, while ADR-0008 treats MVP demolitio
   - `production/epics/town-building-system/story-007-stadium-adjacency-formulas.md`
   - `production/epics/town-building-system/story-008-downstream-query-maintenance.md`
   - `production/epics/town-building-system/story-009-serialization-restore-regression.md`
+
+## Completion Notes
+**Completed**: 2026-05-26
+**Criteria**: 3/3 passing
+**Deviations**: Code review found no blocking issues; remaining notes were non-blocking coverage and event-contract suggestions.
+**Test Evidence**: Integration: test file at `tests/integration/town/demolish_grid_release_test.gd`
+**Code Review**: Complete — APPROVED WITH SUGGESTIONS

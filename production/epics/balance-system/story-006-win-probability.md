@@ -1,12 +1,12 @@
 # Story 006: 实现基准胜率公式与边界
 
 > **Epic**: 数值系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Logic
 > **Estimate**: S
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -93,7 +93,7 @@ Implement the shared base win probability anchor only. MatchCompetition owns hom
 **Required evidence**:
 - Logic: `tests/unit/balance/win_probability_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — tests/unit/balance/win_probability_test.gd
 
 ---
 
@@ -103,3 +103,10 @@ Implement the shared base win probability anchor only. MatchCompetition owns hom
   - `production/epics/balance-system/story-005-positional-rating.md` — must be DONE
 - Unlocks:
   - `production/epics/balance-system/story-009-balance-statistical-validation.md`
+
+## Completion Notes
+**Completed**: 2026-05-26
+**Criteria**: 5/5 passing
+**Deviations**: `tests/unit/balance/win_probability_test.gd` validates script defaults and formula outputs without loading `res://config/balance_config.tres`; exact-boundary `0.05`/`0.95` retention is not asserted in the story evidence file; the repository still lacks the standard Godot test runner wiring declared in project docs.
+**Test Evidence**: Logic: `tests/unit/balance/win_probability_test.gd`
+**Code Review**: Complete — approved with suggestions

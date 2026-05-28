@@ -1,12 +1,12 @@
 # Story 006: 实现赛后/阶段/赛季结算公式与 floor 舍入
 
 > **Epic**: 经济管理系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-27
 
 ## Context
 
@@ -38,11 +38,11 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 ## Acceptance Criteria
 
-*From GDD `design/gdd/economy-management-system.md`, scoped to this story:*
+*From GDD `design/gdd/economy-management-system.md`, scoped to this story and resolved against the current GDD formula set:*
 
-- [ ] Post-match settlement computes funds and RP from GDD formulas and applies `floor()` to all float-to-int resource results.
-- [ ] Stage and season settlement handlers run independently and consume current season context rather than next-season state.
-- [ ] Abnormal inputs follow GDD edge-case behavior, including clamping `tactical_rating_ratio` to `[0.3, 1.0]` and identifying discarded overflow at resource caps.
+- [x] Post-match settlement computes `post_match_funds = base_match_funds × league_tier_multiplier × match_result_multiplier × stadium_revenue_multiplier` and applies `floor()` to all float-to-int resource results.
+- [x] Stage settlement runs independently, applies `floor()` / cap rules to upstream-provided rewards, and preserves current-stage context at the settlement boundary; season settlement computes rewards from current season context rather than next-season state.
+- [x] Abnormal inputs follow GDD edge-case behavior, including clamping `tactical_rating_ratio` to `[0.3, 1.0]` and identifying discarded overflow at resource caps.
 
 ---
 
@@ -50,7 +50,19 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *Derived from ADR-0007 Implementation Guidelines:*
 
-Implement settlement handlers as EventBus-driven economy operations that create transactions instead of writing balances directly. `TR-economy-006` mentions `season_bonus`, while the GDD formula uses `league_tier_multiplier × match_result_multiplier × stadium_revenue_multiplier`; keep this mismatch visible for readiness review and implement the GDD-scoped formula unless the registry is updated.
+Implement settlement handlers as EventBus-driven economy operations that create transactions instead of writing balances directly.
+
+### Readiness Resolution
+
+For this story's implementation and tests, post-match funds use the GDD-scoped formula:
+
+`post_match_funds = base_match_funds × league_tier_multiplier × match_result_multiplier × stadium_revenue_multiplier`
+
+`season_bonus` does not apply to post-match settlement in this story. Season bonus remains part of season settlement only.
+
+Until `TR-economy-006` is updated, this story treats the GDD formula above as the authoritative implementation target, and all acceptance tests must validate against that formula with `floor()` rounding.
+
+The current GDD defines explicit formulas for post-match and season settlement, but not for stage settlement rewards. For MVP, stage settlement therefore remains a transactionized boundary that applies `floor()` / cap rules to upstream-provided reward values while preserving current-stage context in audit metadata.
 
 ---
 
@@ -94,7 +106,19 @@ Implement settlement handlers as EventBus-driven economy operations that create 
 **Required evidence**:
 - Integration: `tests/integration/economy/staged_settlement_formulas_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `tests/integration/economy/staged_settlement_formulas_test.gd`
+
+---
+
+## Completion Notes
+
+**Completed**: 2026-05-27  
+**Criteria**: 3/3 passing  
+**Deviations**: None  
+**Test Evidence**: Integration: `tests/integration/economy/staged_settlement_formulas_test.gd`  
+**Code Review**: Approved with suggestions  
+**Review Notes**: Re-review closed the two prior blockers: transaction history snapshots are now immutable, and season settlement now computes from current season context. Remaining feedback is non-blocking only (input validation and extra branch/event coverage).  
+**Story Done Verdict**: Complete with notes — automated integration evidence passed, review blockers are closed, and the remaining notes are advisory only.
 
 ---
 

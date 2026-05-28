@@ -1,12 +1,12 @@
 # Story 006: 实现训练/医疗/青训基础公式接口
 
 > **Epic**: 小镇建设系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-27
 
 ## Context
 
@@ -94,9 +94,13 @@ Implement only the base training, medical, and youth formula query methods here.
 
 **Story Type**: Logic
 **Required evidence**:
-- Logic: `tests/unit/town/training_medical_youth_formula_test.gd` — must exist and pass
+- Logic: `tests/unit/town/training_medical_youth_formula_test.gd` — passed
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
+
+**Verification**:
+- Headless runtime: `TRAINING_MEDICAL_YOUTH_FORMULA_TEST_PASS`
+- Engine: Godot 4.6.2
 
 ---
 

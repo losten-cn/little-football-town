@@ -1,12 +1,12 @@
 # Story 001: 建立 Facility 数据模型与网格索引契约
 
 > **Epic**: 小镇建设系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-25
 
 ## Context
 
@@ -94,7 +94,14 @@ Create `Facility` as a `RefCounted` runtime object and keep the flat typed array
 **Required evidence**:
 - Integration: `tests/integration/town/town_grid_contract_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `tests/integration/town/town_grid_contract_test.gd` (passes via Godot headless on 2026-05-25)
+
+## Completion Notes
+**Completed**: 2026-05-25
+**Criteria**: 3/3 passing
+**Deviations**: None
+**Test Evidence**: Integration test at `tests/integration/town/town_grid_contract_test.gd`
+**Code Review**: Complete — `/code-review` passed in lean mode
 
 ---
 

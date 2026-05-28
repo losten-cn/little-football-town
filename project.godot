@@ -13,6 +13,7 @@ config_version=5
 config/name="Football Town"
 config/description="像素足球小镇经营模拟 — 轻度足球经营 + 像素小镇养成 + 低压力长期成长"
 config/version="0.1.0"
+run/main_scene="res://src/ui/hud/Hud.tscn"
 config/features=PackedStringArray("4.6")
 config/run/main_scene=""
 

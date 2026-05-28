@@ -1,12 +1,12 @@
 # Story 004: 实现球员层级、潜力区间与训练效率差异
 
 > **Epic**: 运动员培养系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -39,9 +39,9 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *From GDD `design/gdd/player-development-system.md`, scoped to this story:*
 
-- [ ] Four player tiers have verifiable potential band mapping and training efficiency differences.
-- [ ] Each player's `potential_cap` falls inside its tier's default band, unless marked as a special individual with an explicit source.
-- [ ] With identical conditions, the player with higher `training_efficiency` gains more from the same training unless potential cap clipping applies.
+- [x] Four player tiers have verifiable potential band mapping and training efficiency differences.
+- [x] Each player's `potential_cap` falls inside its tier's default band, unless marked as a special individual with an explicit source.
+- [x] With identical conditions, the player with higher `training_efficiency` gains more from the same training unless potential cap clipping applies.
 
 ---
 
@@ -92,7 +92,9 @@ Store `Player.tier` and `Player.training_efficiency` as typed authoritative fiel
 **Required evidence**:
 - Logic: `tests/unit/player-dev/player_tier_band_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Test file created at `tests/unit/player-dev/player_tier_band_test.gd`; runtime verification passed locally via `tests/unit/player-dev/player_tier_band_runner.gd` with Godot 4.6.2 headless result `PLAYER_TIER_BAND_TEST_PASS` (non-blocking exit warnings remain)
+
+**Review Note (2026-05-28)**: Runtime evidence is green. AC-1 coverage was strengthened to assert four-way default training-efficiency differentiation directly from the typed balance configuration, in addition to the existing tier-band mapping and higher-efficiency-vs-lower-efficiency gain comparison.
 
 ---
 

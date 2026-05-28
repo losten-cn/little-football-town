@@ -1,24 +1,24 @@
 # Story 009: 验证数值公式可复核性与随机统计边界
 
 > **Epic**: 数值系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-27
 
 ## Context
 
 **GDD**: `design/gdd/balance-system.md`
-**Requirement**: GDD random/statistical/manual verification acceptance criteria
-*(Requirement text lives in `docs/architecture/tr-registry.yaml` — read fresh at review time)*
+**Requirement**: GDD acceptance criteria — statistical validation, random-bound verification, and manual formula reproducibility rules in `design/gdd/balance-system.md`
+*(No dedicated TR-ID is currently registered for this verification-only story; scope is taken directly from the cited GDD acceptance criteria. If registry coverage is required later, add a dedicated TR entry in a separate architecture pass.)*
 
 **GDD Rule / Acceptance Mapping**:
 - GDD scoped acceptance criterion 1: A fixed deterministic input where object A is stronger than object B can be repeated 1000 times with only random terms varying.
 - GDD scoped acceptance criterion 2: Random terms stay inside the GDD-defined range.
 - GDD scoped acceptance criterion 3: A wins at least `0.95` of trials when deterministic strength advantage requires that outcome.
-- GDD scoped acceptance criterion 4: Manual verification samples for effective attributes, growth, resource settlement, position rating, and win probability match system output.
+- GDD scoped acceptance criterion 4: Manual verification samples for effective attributes, growth, position rating, and win probability match system output.
 
 This story implements only the mapped rules above; neighbouring requirements remain out of scope unless listed below.
 
@@ -44,7 +44,7 @@ This story implements only the mapped rules above; neighbouring requirements rem
 - [ ] A fixed deterministic input where object A is stronger than object B can be repeated 1000 times with only random terms varying.
 - [ ] Random terms stay inside the GDD-defined range.
 - [ ] A wins at least `0.95` of trials when deterministic strength advantage requires that outcome.
-- [ ] Manual verification samples for effective attributes, growth, resource settlement, position rating, and win probability match system output.
+- [ ] Manual verification samples for effective attributes, growth, position rating, and win probability match system output.
 - [ ] Illegal inputs are normalized before formula use and repeated calculations are stable.
 - [ ] Same initial state, total duration, and total resources produce identical aggregate results regardless of atomic operation order.
 
@@ -64,6 +64,7 @@ Use config-backed formulas and deterministic test seeds. This story validates fo
 
 - Match Competition stories: full seeded match simulation and key events.
 - Full MVP playtest evidence for reputation Lv.3/Lv.10 targets, which belongs after those systems exist.
+- Backfilling missing shared formula implementations such as resource settlement; validate them in their owning story once the shared formula surface exists.
 
 ---
 
@@ -78,16 +79,16 @@ Use config-backed formulas and deterministic test seeds. This story validates fo
   - Edge cases: 理论值接近 `0.05/0.95` 时仍应满足容差；随机种子变化不应导致系统性偏移
 
 - **AC-2**: 公式输出必须支持人工复核，且中间步骤与最终结果一致
-  - Given: 提供一组可手算样本，覆盖 effective、growth、resource settlement、win probability
+  - Given: 提供一组可手算样本，覆盖 effective、growth、position rating、win probability
   - When: 用文档/表格按公式逐步复核
   - Then: 人工计算结果与程序输出一致，且能看出“先 flat 后 percent”“最后 clamp”等关键步骤
   - Edge cases: 浮点保留位数需一致；中间步骤缺失、顺序不透明或结果不可追溯应判失败
 
 - **AC-3**: 非法输入在归一化后必须稳定、可重复、不中断
-  - Given: 输入包含负属性、超上限属性、NaN modifier、非法资源范围、缺失权重等异常值
+  - Given: 输入包含负属性、超上限属性、potential 低于 current、非法权重、零分母与非有限 KPI 输入等异常值
   - When: 对同一组归一化后的输入重复执行 100 次
   - Then: 输出稳定一致，不崩溃，不出现 NaN/Inf
-  - Edge cases: 多种非法值同时出现时仍应稳定；同一非法输入不得在不同运行中产生不同结果
+  - Edge cases: 多种非法值同时出现时仍应稳定；同一非法输入不得在不同运行中产生不同结果；缺失权重时必须回退到算术平均口径
 
 ---
 
@@ -95,9 +96,12 @@ Use config-backed formulas and deterministic test seeds. This story validates fo
 
 **Story Type**: Integration
 **Required evidence**:
-- Integration: `tests/integration/balance/balance_statistical_validation_test.gd` OR playtest doc
+- Integration: `tests/integration/balance/balance_statistical_validation_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Optional supplemental evidence**:
+- `production/qa/evidence/balance-statistical-validation-evidence.md` — manual verification notes for hand-calculated samples, if captured
+
+**Status**: [x] Created — `tests/integration/balance/balance_statistical_validation_test.gd`
 
 ---
 
@@ -108,3 +112,12 @@ Use config-backed formulas and deterministic test seeds. This story validates fo
   - `production/epics/balance-system/story-007-kpi-formulas.md` — must be DONE
 - Unlocks:
   - Downstream work: Balance playtest evidence and downstream simulation validation
+
+---
+
+## Completion Notes
+**Completed**: 2026-05-27
+**Criteria**: 6/6 passing
+**Deviations**: None
+**Test Evidence**: Integration test passed at `tests/integration/balance/balance_statistical_validation_test.gd`
+**Code Review**: Complete

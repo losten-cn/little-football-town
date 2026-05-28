@@ -1,12 +1,12 @@
 # Story 005: 实现赛季进度、赛季结算与休赛期流转
 
 > **Epic**: 时间与赛季推进系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -100,7 +100,7 @@ TimeManager defines when a season ends and starts; LeagueStructure later defines
 **Required evidence**:
 - Logic: `tests/unit/time/season_progress_flow_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Automated unit evidence recorded — `tests/unit/time/season_progress_flow_test.gd` passed (`SEASON_PROGRESS_FLOW_TEST_PASS`)
 
 ---
 

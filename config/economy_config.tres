@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="EconomyConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/config/economy_config.gd" id="1_economy_config"]
+
+[resource]
+script = ExtResource("1_economy_config")
+action_points_floor = 1.0
+research_points_floor = 0.0
+funds_low_threshold = 100.0
+action_points_low_threshold = 2.0
+debt_warning_threshold = 0.0
+warning_cooldown_seconds = 60.0
+base_ap_recovery = 5.0
+base_rest_ap_recovery = 3.0
+action_points_max = 100.0
+base_maintenance_cost = 25.0
+ap_to_funds_weight = 50.0

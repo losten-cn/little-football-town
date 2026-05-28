@@ -114,7 +114,7 @@ requirements:
   - id: TR-balance-009
     system: balance
     gdd: design/gdd/balance-system.md
-    requirement: "4 KPI formulas: AP use rate, overall win rate, even match win rate, resource efficiency"
+    requirement: "4 diagnostic formulas: AP use rate, overall win rate, even match win rate, milestone completion time"
     created: 2026-05-17
     status: active
 

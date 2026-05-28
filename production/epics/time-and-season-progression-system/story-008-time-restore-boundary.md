@@ -1,12 +1,12 @@
 # Story 008: 实现读档恢复节点与下游推进边界
 
 > **Epic**: 时间与赛季推进系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-28
 
 ## Context
 
@@ -103,7 +103,7 @@ Expose controlled TimeManager APIs for save/restore and time progression. Downst
 **Required evidence**:
 - Integration: `tests/integration/time/time_restore_boundary_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Automated integration evidence recorded — `tests/integration/time/time_restore_boundary_test.gd` passed (`TIME_RESTORE_BOUNDARY_TEST_PASS`)
 
 ---
 

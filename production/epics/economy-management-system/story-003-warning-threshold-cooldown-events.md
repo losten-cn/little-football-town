@@ -1,12 +1,12 @@
 # Story 003: 实现资源预警阈值、debt 预警与冷却机制
 
 > **Epic**: 经济管理系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -93,7 +93,16 @@ Run warning checks after resource mutations have been committed. Emit through Ev
 **Required evidence**:
 - Integration: `tests/integration/economy/warning_threshold_cooldown_events_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and locally verified (`WARNING_THRESHOLD_COOLDOWN_EVENTS_TEST_PASS`)
+
+---
+
+## Completion Notes
+**Completed**: 2026-05-26
+**Criteria**: 3/3 passing
+**Deviations**: `EconomyManager` exposes `set_event_bus_for_testing()` and `set_warning_cooldown_for_testing()` as minimal deterministic test seams; code review noted a low-risk runtime edge where cooldown is recorded before confirming EventBus availability, but this does not block the implemented Story 003 path.
+**Test Evidence**: Integration: `tests/integration/economy/warning_threshold_cooldown_events_test.gd` present and locally verified with `D:/Program Files/godot/Godot_v4.6.2-stable_win64_console.exe` (PASS).
+**Code Review**: Complete — Story 003 implementation approved with one non-blocking low-risk note.
 
 ---
 

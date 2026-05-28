@@ -1,12 +1,12 @@
 # Story 009: 实现存档摘要、性能预算与回归样本
 
 > **Epic**: 存档与读档系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-28
 
 ## Context
 
@@ -42,11 +42,11 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *From GDD `design/gdd/save-and-load-system.md`, scoped to this story:*
 
-- [ ] Save summary fields include save name or town name, last save time, playtime, season/phase, key resources, and recent stable node type.
-- [ ] `save_summary_progress_ratio = completed_progress_units / max(1, total_progress_units)` is correct for displayed progress.
-- [ ] Empty, corrupted, and incomplete slots are clearly distinguishable from valid slots.
-- [ ] Full save load completes in <500ms for a representative full-save regression sample.
-- [ ] MVP local recovery baseline verifies last valid manual save plus recent valid autosave behavior.
+- [x] Save summary fields include save name or town name, last save time, playtime, season/phase, key resources, and recent stable node type.
+- [x] `save_summary_progress_ratio = completed_progress_units / max(1, total_progress_units)` is correct for displayed progress.
+- [x] Empty, corrupted, and incomplete slots are clearly distinguishable from valid slots.
+- [x] Full save load completes in <500ms for a representative full-save regression sample.
+- [x] MVP local recovery baseline verifies last valid manual save plus recent valid autosave behavior.
 
 ---
 
@@ -103,7 +103,7 @@ This story implements only the mapped rules above; neighbouring requirements rem
 **Required evidence**:
 - Integration: `tests/integration/save/save_summary_performance_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and verified — SAVE_SUMMARY_PERFORMANCE_TEST_PASS
 
 ---
 
@@ -115,3 +115,10 @@ This story implements only the mapped rules above; neighbouring requirements rem
   - `production/epics/save-and-load-system/story-007-load-restore-order.md` — must be DONE
 - Unlocks:
   - Downstream work: Save/Load UI story readiness
+
+## Completion Notes
+**Completed**: 2026-05-28
+**Criteria**: 5/5 passing
+**Deviations**: Advisory only — headless verification uses `tests/integration/save/save_summary_performance_runner.gd` to host the Node-based integration test, while the evidence file remains `tests/integration/save/save_summary_performance_test.gd`.
+**Test Evidence**: Integration test at `tests/integration/save/save_summary_performance_test.gd` — PASS via `tests/integration/save/save_summary_performance_runner.gd` (`SAVE_SUMMARY_PERFORMANCE_TEST_PASS`)
+**Code Review**: Complete — no blocking issues

@@ -1,12 +1,12 @@
 # Story 008: 实现存档恢复失败与玩家风险操作语义
 
 > **Epic**: 存档与读档系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-28
 
 ## Context
 
@@ -39,11 +39,11 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *From GDD `design/gdd/save-and-load-system.md`, scoped to this story:*
 
-- [ ] Missing fields, hash mismatch, unsupported version, or failed migration routes to Recovery instead of State Restore.
-- [ ] Load failure leaves the current valid runtime state unchanged.
-- [ ] Covering, deleting, or loading over unsaved long-term progress exposes explicit structured risk semantics.
-- [ ] Cancelled risk operations do not modify disk state or runtime state.
-- [ ] Recovery uses only valid snapshots; corrupted saves are not silently repaired into authority state.
+- [x] Missing fields, hash mismatch, unsupported version, or failed migration routes to Recovery instead of State Restore.
+- [x] Load failure leaves the current valid runtime state unchanged.
+- [x] Covering, deleting, or loading over unsaved long-term progress exposes explicit structured risk semantics.
+- [x] Cancelled risk operations do not modify disk state or runtime state.
+- [x] Recovery uses only valid snapshots; corrupted saves are not silently repaired into authority state.
 
 ---
 
@@ -100,7 +100,7 @@ Implement structured failure results such as missing, corrupted, unsupported, mi
 **Required evidence**:
 - Integration: `tests/integration/save/save_recovery_flow_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and verified — SAVE_RECOVERY_FLOW_TEST_PASS
 
 ---
 
@@ -112,3 +112,10 @@ Implement structured failure results such as missing, corrupted, unsupported, mi
   - `production/epics/save-and-load-system/story-007-load-restore-order.md` — must be DONE
 - Unlocks:
   - Downstream work: Save/Load UI confirmation and recovery stories
+
+## Completion Notes
+**Completed**: 2026-05-28
+**Criteria**: 5/5 passing
+**Deviations**: Advisory only — headless verification uses `tests/integration/save/save_recovery_flow_runner.gd` to host the Node-based integration test, while the evidence file remains `tests/integration/save/save_recovery_flow_test.gd`.
+**Test Evidence**: Integration test at `tests/integration/save/save_recovery_flow_test.gd` — PASS via `tests/integration/save/save_recovery_flow_runner.gd` (`SAVE_RECOVERY_FLOW_TEST_PASS`)
+**Code Review**: Complete — no blocking issues

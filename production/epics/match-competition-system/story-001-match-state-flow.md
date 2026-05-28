@@ -1,12 +1,12 @@
 # Story 001: 实现比赛状态机与正式比赛入口边界
 
 > **Epic**: 比赛竞技系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-25
 
 ## Context
 
@@ -40,7 +40,7 @@ This story implements only the mapped rules above; neighbouring requirements rem
 *From GDD `design/gdd/match-competition-system.md`, scoped to this story:*
 
 - [ ] Match flow follows Entry → Pre-Match → Confirmation → First Half → Halftime → Second Half → Result Review → Settlement.
-- [ ] A formal match can only enter through a legal match node where `match_trigger_reached = true`.
+- [ ] A formal match can only enter through a legal match node where `match_trigger_reached = true` and `match_center_available = true`.
 - [ ] `Match In Progress` is not a stable restore point; interruption during a half does not restore into a half-complete state.
 
 ---
@@ -72,10 +72,10 @@ Implement MatchSimulation as the authoritative state machine for a single match.
   - Then: 记录到的状态迁移顺序严格等于 8-state flow；不得跳态、回退、重复进入同一正式状态。
   - Edge cases: 玩家在 Confirmation 返回 Pre-Match 后再次确认；Result Review 停留后再进入 Settlement；平局也必须走完整 8 个状态。
 
-- **AC-2**: 只有 `match_trigger_reached=true` 的正式比赛节点才能进入正式比赛入口
-  - Given: 分别准备一个 `match_trigger_reached=true` 与一个 `match_trigger_reached=false` 的比赛节点。
-  - When: 玩家尝试从两个节点进入正式比赛。
-  - Then: 仅 `true` 节点可进入 Entry/Pre-Match；`false` 节点必须被拒绝且不会创建进行中的正式比赛上下文。
+- **AC-2**: 只有 `match_trigger_reached=true` 且 `match_center_available=true` 的正式比赛节点才能进入正式比赛入口
+  - Given: 分别准备一个 `match_trigger_reached=true, match_center_available=true` 的比赛节点，以及一个 `match_trigger_reached=true, match_center_available=false` 与一个 `match_trigger_reached=false` 的比赛节点。
+  - When: 玩家尝试从这些节点进入正式比赛。
+  - Then: 仅同时满足两个条件的节点可进入 Entry/Pre-Match；其余节点必须被拒绝且不会创建进行中的正式比赛上下文。
   - Edge cases: 非正式节点已存在推荐阵容；从 UI/快捷入口重复触发；时间推进前后再次尝试。
 
 - **AC-3**: Match In Progress 不是稳定恢复点，中途中断后不得恢复到半场中间态
@@ -92,7 +92,7 @@ Implement MatchSimulation as the authoritative state machine for a single match.
 **Required evidence**:
 - Integration: `tests/integration/match/match_state_flow_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — tests/integration/match/match_state_flow_test.gd
 
 ---
 
@@ -105,3 +105,10 @@ Implement MatchSimulation as the authoritative state machine for a single match.
 - Unlocks:
   - `production/epics/match-competition-system/story-005-halftime-adjustment.md`
   - `production/epics/match-competition-system/story-008-match-restore-dedup.md`
+
+## Completion Notes
+**Completed**: 2026-05-25
+**Criteria**: 3/3 passing
+**Deviations**: None
+**Test Evidence**: Integration: `tests/integration/match/match_state_flow_test.gd`
+**Code Review**: Approved

@@ -1,12 +1,12 @@
 # Story 007: 实现时间事件发布与 EventBus 优先级集成
 
 > **Epic**: 时间与赛季推进系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-28
 
 ## Context
 
@@ -42,9 +42,10 @@ This story implements only the mapped rules above; neighbouring requirements rem
 *From GDD `design/gdd/time-and-season-progression-system.md`, scoped to this story:*
 
 - [ ] TimeManager emits `time_match_triggered` with match context when a match node is reached.
-- [ ] TimeManager emits stage and season events when their corresponding nodes settle.
-- [ ] Time event payloads are serializable Dictionaries and contain the fields defined in ADR-0002.
+- [ ] TimeManager emits `time_stage_settled` and `time_season_ended` when their corresponding nodes settle.
+- [ ] Time event payloads are serializable Dictionaries and include the minimum required fields listed in this story's Event Payload Contract.
 - [ ] EventBus dispatches `time_*` events before downstream `match_completed`, `league_*`, `economy_*`, `player_*`, `town_*`, and `save_*` events.
+- [ ] If multiple `time_*` events are emitted from the same time-position resolution, their internal order follows Story 006 key-node priority before downstream domain events are processed.
 - [ ] Subscribers processing `time_*` events read stable TimeManager state from `get_state()`.
 
 ---
@@ -54,6 +55,24 @@ This story implements only the mapped rules above; neighbouring requirements rem
 *Derived from ADR-0002 Implementation Guidelines:*
 
 Business logic consumers subscribe via `EventBus.subscribe(event_name, callable)` and unsubscribe explicitly. `event_fired` is observability-only.
+
+### Event Payload Contract
+
+Time-domain payloads in this story must be serializable `Dictionary` values containing only primitives or `Array[Dictionary]` data.
+
+Minimum required payload fields for this story:
+- `time_match_triggered`
+  - `home_team_id: int`
+  - `away_team_id: int`
+  - `match_context: Dictionary`
+- `time_stage_settled`
+  - `stage_number: int`
+  - `stage_result: Dictionary`
+- `time_season_ended`
+  - `season_number: int`
+  - `final_standings: Array[Dictionary]`
+
+No payload in this story may contain runtime object references such as Nodes, Resources, or other non-serializable objects.
 
 ---
 
@@ -96,7 +115,7 @@ Business logic consumers subscribe via `EventBus.subscribe(event_name, callable)
 **Required evidence**:
 - Integration: `tests/integration/time/time_eventbus_integration_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Automated integration evidence recorded — `tests/integration/time/time_eventbus_integration_test.gd` passed (`TIME_EVENTBUS_INTEGRATION_TEST_PASS`)
 
 ---
 

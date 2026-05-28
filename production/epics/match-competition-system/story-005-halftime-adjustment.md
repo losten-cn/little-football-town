@@ -1,12 +1,12 @@
 # Story 005: 实现中场调整与下半场独立生效
 
 > **Epic**: 比赛竞技系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -91,7 +91,7 @@ Expose a halftime adjustment operation that is valid only while the state machin
 **Required evidence**:
 - Integration: `tests/integration/match/halftime_adjustment_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — tests/integration/match/halftime_adjustment_test.gd
 
 ---
 
@@ -103,3 +103,13 @@ Expose a halftime adjustment operation that is valid only while the state machin
 - Unlocks:
   - `production/epics/match-competition-system/story-006-match-result-packet.md`
   - `production/epics/match-competition-system/story-007-match-rng-determinism.md`
+
+---
+
+## Completion Notes
+
+**Completed**: 2026-05-26  
+**Criteria**: 3/3 passing  
+**Deviations**: None  
+**Test Evidence**: Integration: `tests/integration/match/halftime_adjustment_test.gd`  
+**Code Review**: Approved

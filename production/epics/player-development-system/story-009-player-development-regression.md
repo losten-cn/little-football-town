@@ -1,12 +1,12 @@
 # Story 009: 实现培养闭环回归样本与持久化一致性验证
 
 > **Epic**: 运动员培养系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-28
 
 ## Context
 
@@ -38,9 +38,9 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *From GDD `design/gdd/player-development-system.md`, scoped to this story:*
 
-- [ ] A representative MVP session completes: view player differences → choose training → consume resources and time → receive growth feedback → save/load with consistent player state.
-- [ ] Regression samples for focused training, ordinary-player priority, and star-player priority show opportunity cost and long-term ceiling differences or are marked as tuning failures.
-- [ ] With `facility_training_multiplier = 1.0`, training result matches the hand-calculated formula result.
+- [x] A representative MVP session completes: view player differences → choose training → consume resources and time → receive growth feedback → save/load with consistent player state.
+- [x] Regression samples for focused training, ordinary-player priority, and star-player priority show opportunity cost and long-term ceiling differences or are marked as tuning failures.
+- [x] With `facility_training_multiplier = 1.0`, training result matches the hand-calculated formula result.
 
 ---
 
@@ -91,7 +91,7 @@ This story creates regression evidence for the complete player-development loop.
 **Required evidence**:
 - Integration: `tests/integration/player-dev/player_development_regression_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `tests/integration/player-dev/player_development_regression_test.gd` + `tests/integration/player-dev/player_development_regression_test.tscn`; Godot 4.6.2 headless result: `PLAYER_DEVELOPMENT_REGRESSION_TEST_PASS` (non-blocking exit warnings remain)
 
 ---
 

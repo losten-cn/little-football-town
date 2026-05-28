@@ -1,12 +1,12 @@
 # Story 002: 实现系统注册契约与快照组装
 
 > **Epic**: 存档与读档系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -100,7 +100,7 @@ Implement `register_system(system_id, serialize_fn, deserialize_fn)` in `SaveMan
 **Required evidence**:
 - Integration: `tests/integration/save/save_registration_snapshot_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `tests/integration/save/save_registration_snapshot_test.gd` (runtime verified with `SAVE_REGISTRATION_SNAPSHOT_TEST_PASS`)
 
 ---
 
@@ -111,3 +111,10 @@ Implement `register_system(system_id, serialize_fn, deserialize_fn)` in `SaveMan
 - Unlocks:
   - `production/epics/save-and-load-system/story-005-save-integrity-atomic-commit.md`
   - `production/epics/save-and-load-system/story-007-load-restore-order.md`
+
+## Completion Notes
+**Completed**: 2026-05-26
+**Criteria**: 5/5 passing
+**Deviations**: None
+**Test Evidence**: Integration test at `tests/integration/save/save_registration_snapshot_test.gd` via `tests/integration/save/save_registration_snapshot_runner.gd` (runtime verified with `SAVE_REGISTRATION_SNAPSHOT_TEST_PASS`)
+**Code Review**: Complete

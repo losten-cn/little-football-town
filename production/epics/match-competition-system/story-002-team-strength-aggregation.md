@@ -1,12 +1,12 @@
 # Story 002: 实现阵容合法性、位置适配与队伍强度聚合
 
 > **Epic**: 比赛竞技系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-28
 
 ## Context
 
@@ -91,7 +91,16 @@ Build a TeamProfile from 11 LineupSlot entries, selected tactics, chemistry fact
 **Required evidence**:
 - Logic: `tests/unit/match/team_strength_aggregation_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — tests/unit/match/team_strength_aggregation_test.gd
+
+---
+
+## Completion Notes
+**Completed**: 2026-05-28
+**Criteria**: 3/3 passing
+**Deviations**: Scoped preferred-position handling to the current single `Player.position` field; full multi-position preference and richer availability modeling remain out of scope for this story closeout.
+**Test Evidence**: Logic: `tests/unit/match/team_strength_aggregation_test.gd`
+**Code Review**: Not run
 
 ---
 

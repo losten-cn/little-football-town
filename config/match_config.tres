@@ -1,0 +1,50 @@
+[gd_resource type="Resource" script_class="MatchConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/config/match_config.gd" id="1_match_config"]
+
+[resource]
+script = ExtResource("1_match_config")
+min_key_events = 3
+max_key_events = 15
+low_density_event_count = 3
+event_minute_start = 5
+event_minute_step = 7
+home_win_home_score = 2
+home_win_away_score = 1
+away_win_home_score = 1
+away_win_away_score = 2
+draw_home_score = 1
+draw_away_score = 1
+strength_gap_reason_threshold = 10.0
+morale_win_delta = 0.12
+morale_loss_delta = -0.1
+morale_draw_delta = 0.02
+condition_minutes_divisor = 180.0
+condition_floor = 0.45
+growth_tag_breakthrough_minutes = 75
+growth_tag_breakthrough_score = 8.5
+growth_tag_breakthrough_opponent_strength = 75.0
+growth_tag_significant_minutes = 60
+growth_tag_significant_score = 7.8
+growth_tag_regular_minutes = 30
+growth_tag_regular_score = 6.8
+growth_tag_light_minutes = 10
+growth_tag_none_minutes = 5
+default_chemistry_factor = 1.0
+chemistry_factor_min = 0.85
+chemistry_factor_max = 1.15
+out_of_position_penalty_multiplier = 0.85
+goalkeeper_lineup_weight = 0.9
+defender_lineup_weight = 0.95
+midfielder_lineup_weight = 1.0
+forward_lineup_weight = 1.0
+recommended_goalkeeper_count = 1
+recommended_defender_count = 4
+recommended_midfielder_count = 3
+recommended_forward_count = 3
+goalkeeper_attribute_weights = Array[float]([0.05, 0.15, 0.1, 0.35, 0.35])
+defender_attribute_weights = Array[float]([0.15, 0.25, 0.1, 0.2, 0.3])
+midfielder_attribute_weights = Array[float]([0.2, 0.15, 0.25, 0.25, 0.15])
+forward_attribute_weights = Array[float]([0.25, 0.2, 0.3, 0.1, 0.15])
+recommended_tactic_label = "balanced"
+recommended_tactical_match_mod = 0.0

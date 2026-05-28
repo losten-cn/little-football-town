@@ -1,12 +1,12 @@
 # Story 007: 实现 seeded RNG 决定性与重复运行一致性
 
 > **Epic**: 比赛竞技系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -91,7 +91,17 @@ Use a per-match RandomNumberGenerator seeded from stored MatchData seed. Re-seed
 **Required evidence**:
 - Logic: `tests/unit/match/match_rng_determinism_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — tests/unit/match/match_rng_determinism_test.gd
+
+---
+
+## Completion Notes
+
+**Completed**: 2026-05-26  
+**Criteria**: 3/3 passing  
+**Deviations**: None  
+**Test Evidence**: Logic: `tests/unit/match/match_rng_determinism_test.gd`  
+**Code Review**: Approved
 
 ---
 

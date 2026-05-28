@@ -3,7 +3,7 @@
 > **Layer**: Core
 > **GDD**: design/gdd/match-competition-system.md
 > **Architecture Module**: MatchCompetition
-> **Status**: Ready
+> **Status**: Complete
 > **Stories**: 9 stories
 
 ## Overview
@@ -40,15 +40,15 @@
 
 | # | Story | Type | Status | ADR |
 |---|-------|------|--------|-----|
-| 001 | [实现比赛状态机与正式比赛入口边界](story-001-match-state-flow.md) | Integration | Ready | ADR-0006 |
-| 002 | [实现阵容合法性、位置适配与队伍强度聚合](story-002-team-strength-aggregation.md) | Logic | Ready | ADR-0006 |
-| 003 | [实现实际胜率修正与战术/状态影响](story-003-actual-win-probability.md) | Logic | Ready | ADR-0006 |
-| 004 | [实现关键事件产量与事件分类生成](story-004-key-event-generation.md) | Logic | Ready | ADR-0006 |
-| 005 | [实现中场调整与下半场独立生效](story-005-halftime-adjustment.md) | Integration | Ready | ADR-0006 |
-| 006 | [实现 MatchResultPacket、胜负原因与赛后标签](story-006-match-result-packet.md) | Integration | Ready | ADR-0006 |
-| 007 | [实现 seeded RNG 决定性与重复运行一致性](story-007-match-rng-determinism.md) | Logic | Ready | ADR-0006 |
-| 008 | [实现存档降级恢复与重复触发防重赛](story-008-match-restore-dedup.md) | Integration | Ready | ADR-0006 |
-| 009 | [实现完整比赛闭环回归样本与性能验证](story-009-match-loop-regression.md) | Integration | Ready | ADR-0006 |
+| 001 | [实现比赛状态机与正式比赛入口边界](story-001-match-state-flow.md) | Integration | Complete | ADR-0006 |
+| 002 | [实现阵容合法性、位置适配与队伍强度聚合](story-002-team-strength-aggregation.md) | Logic | Complete | ADR-0006 |
+| 003 | [实现实际胜率修正与战术/状态影响](story-003-actual-win-probability.md) | Logic | Complete | ADR-0006 |
+| 004 | [实现关键事件产量与事件分类生成](story-004-key-event-generation.md) | Logic | Complete | ADR-0006 |
+| 005 | [实现中场调整与下半场独立生效](story-005-halftime-adjustment.md) | Integration | Complete | ADR-0006 |
+| 006 | [实现 MatchResultPacket、胜负原因与赛后标签](story-006-match-result-packet.md) | Integration | Complete | ADR-0006 |
+| 007 | [实现 seeded RNG 决定性与重复运行一致性](story-007-match-rng-determinism.md) | Logic | Complete | ADR-0006 |
+| 008 | [实现存档降级恢复与重复触发防重赛](story-008-match-restore-dedup.md) | Integration | Complete | ADR-0006 |
+| 009 | [实现完整比赛闭环回归样本与性能验证](story-009-match-loop-regression.md) | Integration | Complete | ADR-0006 |
 
 ## Definition of Done
 
@@ -60,4 +60,4 @@ This epic is complete when:
 
 ## Next Step
 
-Run `/create-stories match-competition-system` to break this epic into implementable stories.
+Epic complete. Recommended downstream work: economy post-match settlement consumers, league standings integration, and match performance UI implementation.

@@ -1,12 +1,12 @@
 # Story 001: 实现 TimeManager 状态模型与 Autoload 契约
 
 > **Epic**: 时间与赛季推进系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-25
 
 ## Context
 
@@ -15,9 +15,17 @@
 *(Requirement text lives in `docs/architecture/tr-registry.yaml` — read fresh at review time)*
 
 **GDD Rule / Acceptance Mapping**:
-- `TR-time-001`: 7 game states: Planning through SeasonStart
-- `TR-time-007`: TimeManager is Autoload #5 — loaded after ScreenManager, before Core systems
-- `TR-time-008`: TimeManager exposes get_state() for save snapshots
+- `TR-time-001`: TimeManager owns the GDD-defined time state model and must support these 9 states:
+  `Planning`, `Action Resolution`, `Match Trigger`, `Match In Progress`,
+  `Post-Match Settlement`, `Stage Settlement`, `Season Settlement`,
+  `Offseason`, `SeasonStart`
+- `TR-time-007`: TimeManager Autoload order is validated against the accepted control-manifest / ADR order:
+  `ConfigLoader → EventBus → TimeManager → SaveManager → ScreenManager`
+- `TR-time-008`: TimeManager exposes `get_state()` for save snapshots
+
+**State-model note**:
+- The active GDD defines 9 states at `design/gdd/time-and-season-progression-system.md`.
+- If any TR wording or older notes imply a 7-state model, implementation and verification for this story follow the GDD's 9-state model and the accepted manifest/ADR ordering.
 
 This story implements only the mapped rules above; neighbouring requirements remain out of scope unless listed below.
 
@@ -53,6 +61,8 @@ This story implements only the mapped rules above; neighbouring requirements rem
 *Derived from ADR-0002 Implementation Guidelines:*
 
 Implement TimeManager as the timeline authority, with pull state for save/load and UI, and push events through EventBus. Do not rely on downstream systems to infer or mutate time state.
+
+Autoload validation for this story uses the accepted manifest/ADR runtime order, not the textual "Autoload #5" label by itself. A numbering mismatch is treated as documentation drift, not as implementation permission to change the load order.
 
 ---
 
@@ -100,9 +110,9 @@ Implement TimeManager as the timeline authority, with pull state for save/load a
 
 **Story Type**: Integration
 **Required evidence**:
-- Integration: `tests/integration/time/time_manager_state_contract_test.gd` OR playtest doc
+- Integration: `tests/integration/time/time_manager_state_contract_test.gd` via `tests/integration/time/time_manager_state_contract_runner.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Automated integration evidence recorded — `tests/integration/time/time_manager_state_contract_test.gd` passed via `tests/integration/time/time_manager_state_contract_runner.gd`
 
 ---
 

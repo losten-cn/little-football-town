@@ -1,12 +1,12 @@
 # Story 003: 实现属性成长公式与潜力边界
 
 > **Epic**: 数值系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-27
 
 ## Context
 
@@ -102,7 +102,7 @@ Keep growth formula parameters in `BalanceConfig`; do not duplicate default valu
 **Required evidence**:
 - Logic: `tests/unit/balance/attribute_growth_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `tests/unit/balance/attribute_growth_test.gd`
 
 ---
 
@@ -112,3 +112,12 @@ Keep growth formula parameters in `BalanceConfig`; do not duplicate default valu
   - `production/epics/balance-system/story-001-balance-config-validation.md` — must be DONE
 - Unlocks:
   - Downstream work: Player Development growth stories
+
+---
+
+## Completion Notes
+**Completed**: 2026-05-27
+**Criteria**: 6/6 passing
+**Deviations**: None
+**Test Evidence**: Logic test passed at `tests/unit/balance/attribute_growth_test.gd`
+**Code Review**: Complete

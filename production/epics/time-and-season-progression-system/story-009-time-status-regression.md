@@ -1,12 +1,12 @@
 # Story 009: 实现时间状态展示字段与节奏回归样本
 
 > **Epic**: 时间与赛季推进系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-28
 
 ## Context
 
@@ -20,6 +20,13 @@
 - `TR-time-008`: TimeManager exposes get_state() for save snapshots
 
 This story implements only the mapped rules above; neighbouring requirements remain out of scope unless listed below.
+
+**State-display note**:
+- All display-facing state coverage in this story follows the 9-state GDD model at
+  `design/gdd/time-and-season-progression-system.md`:
+  `Planning`, `Action Resolution`, `Match Trigger`, `Match In Progress`,
+  `Post-Match Settlement`, `Stage Settlement`, `Season Settlement`,
+  `Offseason`, `SeasonStart`.
 
 **ADR Governing Implementation**: ADR-0002: Event/Signal Architecture + TimeManager
 **ADR Decision Summary**: TimeManager provides pull state for UI and save/load, and pushes updates via EventBus so display surfaces remain consistent without polling independent time state.
@@ -42,9 +49,14 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 - [ ] Time state exposes current date/phase, next key node, remaining windows, and season position for UI consumption.
 - [ ] `remaining_time_to_next_key_node = max(0, next_key_node_position - current_timeline_position)`.
-- [ ] A standard MVP session can complete the minimum loop: arrange action → match node → post-match settlement → stage or season node.
+- [ ] A predefined MVP regression sample can complete this minimum loop:
+      one scheduled regular action → match node → post-match settlement → stage or season node.
 - [ ] Time status fields are consistent across display consumers and internal TimeManager state.
-- [ ] Season progression samples, match frequency, and stage settlement frequency fall inside GDD tuning target bands or are marked as tuning failures.
+- [ ] Regression samples validate against these GDD tuning target bands, or explicitly mark a tuning failure when outside them:
+      - `match_interval_target = 2–5` actionable windows
+      - `stage_settlement_frequency_target = every 3–7` actionable windows
+      - `remaining_time_to_next_key_node_target = 1–4` actionable windows in normal UI-facing play
+      - `session_season_progress_target = 5%–15%` season progress per representative session
 
 ---
 
@@ -75,8 +87,9 @@ Expose structured read-only state for UI. This story creates state regression ev
   - Then: 至少应正确提供 `current_state`、`available_action_windows`、`season_progress_ratio`、`remaining_time_to_next_key_node`
   - Edge cases: `remaining_time_to_next_key_node` 必须满足 `max(0, next_key_node_position - current_timeline_position)`，不得为负数
 
-- **AC-2**: 节奏回归样本在关键检查点保持稳定
-  - Given: 预设一条代表性时间推进样本，覆盖 `Planning → Action Resolution → Match Trigger → Match In Progress → Post-Match Settlement → Stage Settlement → Season Settlement / Offseason / SeasonStart`
+- **AC-2**: 预定义节奏回归样本在关键检查点保持稳定
+  - Given: 一条固定回归样本，按以下顺序推进：
+    `Planning → Action Resolution → Match Trigger → Match In Progress → Post-Match Settlement → Stage Settlement / Season Settlement → Offseason / SeasonStart`
   - When: 按样本逐步推进并在每个检查点记录状态字段
   - Then: 各检查点的状态、窗口数、赛季比值、到下个关键节点剩余时间必须与基线一致
   - Edge cases: 同位置连续触发、赛后连续结算、赛季结束边界都应纳入样本
@@ -84,7 +97,7 @@ Expose structured read-only state for UI. This story creates state regression ev
 - **AC-3**: 展示层按 GDD 的 9 状态枚举，不按过期 7 状态假设渲染
   - Given: 展示层/调试面板读取 TimeManager 的状态字段
   - When: 遍历并展示全部可达状态
-  - Then: 必须能正确展示 9 个 GDD 状态，不得遗漏 `Post-Match Settlement`、`Offseason`、`SeasonStart` 等状态
+  - Then: 必须能正确展示 GDD 定义的 9 个状态，不得遗漏 `Post-Match Settlement`、`Offseason`、`SeasonStart` 等状态
   - Edge cases: 若上层仍按 7 状态做映射，应测试失败并标明为文档/实现未同步
 
 - **AC-4**: 展示字段在边界值下仍稳定可读
@@ -101,7 +114,7 @@ Expose structured read-only state for UI. This story creates state regression ev
 **Required evidence**:
 - Integration: `tests/integration/time/time_status_regression_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Automated integration evidence recorded — `tests/integration/time/time_status_regression_test.gd` passed (`TIME_STATUS_REGRESSION_TEST_PASS`)
 
 ---
 

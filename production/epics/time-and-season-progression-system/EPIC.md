@@ -3,7 +3,7 @@
 > **Layer**: Foundation
 > **GDD**: design/gdd/time-and-season-progression-system.md
 > **Architecture Module**: TimeManager
-> **Status**: Ready
+> **Status**: Complete
 > **Stories**: 9 stories
 
 ## Overview
@@ -33,15 +33,15 @@
 
 | # | Story | Type | Status | ADR |
 |---|-------|------|--------|-----|
-| 001 | [实现 TimeManager 状态模型与 Autoload 契约](story-001-time-manager-state-contract.md) | Integration | Ready | ADR-0002 |
-| 002 | [实现行动时间消耗与可用窗口公式](story-002-action-window-formula.md) | Logic | Ready | ADR-0002 |
-| 003 | [实现比赛节点触发与 Match Trigger 状态转换](story-003-match-trigger.md) | Logic | Ready | ADR-0002 |
-| 004 | [实现阶段结算与赛后连续触发](story-004-stage-settlement-trigger.md) | Logic | Ready | ADR-0002 |
-| 005 | [实现赛季进度、赛季结算与休赛期流转](story-005-season-progress-flow.md) | Logic | Ready | ADR-0002 |
-| 006 | [实现关键节点优先级与同位置确定性结算](story-006-key-node-priority.md) | Integration | Ready | ADR-0002 |
-| 007 | [实现时间事件发布与 EventBus 优先级集成](story-007-time-eventbus-integration.md) | Integration | Ready | ADR-0002 |
-| 008 | [实现读档恢复节点与下游推进边界](story-008-time-restore-boundary.md) | Integration | Ready | ADR-0002 |
-| 009 | [实现时间状态展示字段与节奏回归样本](story-009-time-status-regression.md) | Integration | Ready | ADR-0002 |
+| 001 | [实现 TimeManager 状态模型与 Autoload 契约](story-001-time-manager-state-contract.md) | Integration | Complete | ADR-0002 |
+| 002 | [实现行动时间消耗与可用窗口公式](story-002-action-window-formula.md) | Logic | Complete | ADR-0002 |
+| 003 | [实现比赛节点触发与 Match Trigger 状态转换](story-003-match-trigger.md) | Logic | Complete | ADR-0002 |
+| 004 | [实现阶段结算与赛后连续触发](story-004-stage-settlement-trigger.md) | Logic | Complete | ADR-0002 |
+| 005 | [实现赛季进度、赛季结算与休赛期流转](story-005-season-progress-flow.md) | Logic | Complete | ADR-0002 |
+| 006 | [实现关键节点优先级与同位置确定性结算](story-006-key-node-priority.md) | Integration | Complete | ADR-0002 |
+| 007 | [实现时间事件发布与 EventBus 优先级集成](story-007-time-eventbus-integration.md) | Integration | Complete | ADR-0002 |
+| 008 | [实现读档恢复节点与下游推进边界](story-008-time-restore-boundary.md) | Integration | Complete | ADR-0002 |
+| 009 | [实现时间状态展示字段与节奏回归样本](story-009-time-status-regression.md) | Integration | Complete | ADR-0002 |
 
 ## Definition of Done
 

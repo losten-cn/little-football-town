@@ -5,7 +5,7 @@
 > **Last Updated**: 2026-05-19
 > **Reference**: 开罗游戏系列 (Kairosoft)
 > **Pillars**: 轻度足球经营 / 像素小镇养成 / 低压力长期成长
-> **Art Director Sign-Off (AD-ART-BIBLE)**: Pending
+> **Art Director Sign-Off (AD-ART-BIBLE)**: Approved
 
 ---
 

@@ -1,12 +1,12 @@
 # Story 002: 实现设施建造/升级成本与工期公式
 
 > **Epic**: 小镇建设系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -93,7 +93,7 @@ Keep this story to pure formula interfaces and validation. All base costs, base 
 **Required evidence**:
 - Logic: `tests/unit/town/facility_cost_time_formula_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `tests/unit/town/facility_cost_time_formula_test.gd` (passes via Godot headless on 2026-05-26)
 
 ---
 
@@ -104,3 +104,12 @@ Keep this story to pure formula interfaces and validation. All base costs, base 
 - Unlocks:
   - `production/epics/town-building-system/story-003-build-request-validation.md`
   - `production/epics/town-building-system/story-004-upgrade-completion-flow.md`
+
+---
+
+## Completion Notes
+**Completed**: 2026-05-26
+**Criteria**: 3/3 passing
+**Deviations**: QA review suggested follow-up coverage for `unsupported_facility_type` and direct production-path config resolution; no blocking issues remain for Story 002 completion.
+**Test Evidence**: Logic: test file at `tests/unit/town/facility_cost_time_formula_test.gd`
+**Code Review**: Complete — `/code-review` approved with suggestions in lean mode

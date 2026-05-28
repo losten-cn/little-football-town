@@ -1,12 +1,12 @@
 # Story 008: 实现交易流水上限与存档序列化契约
 
 > **Epic**: 经济管理系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-27
 
 ## Context
 
@@ -92,7 +92,7 @@ Keep committed transaction history bounded and serializable. Do not persist runt
 **Required evidence**:
 - Integration: `tests/integration/economy/transaction_log_save_contract_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and verified — `TRANSACTION_LOG_SAVE_CONTRACT_TEST_PASS`
 
 ---
 
@@ -102,3 +102,10 @@ Keep committed transaction history bounded and serializable. Do not persist runt
   - `production/epics/economy-management-system/story-001-economy-authority-transaction-model.md` — must be DONE
 - Unlocks:
   - `production/epics/economy-management-system/story-009-settlement-order-concurrency-regression.md`
+
+## Completion Notes
+**Completed**: 2026-05-27
+**Criteria**: 3/3 passing
+**Deviations**: Advisory only — code review suggested stronger restore-stage observability and over-cap old-save restore coverage in follow-up regression work; no acceptance criteria were left unverified.
+**Test Evidence**: Integration: `tests/integration/economy/transaction_log_save_contract_test.gd` — PASS (`TRANSACTION_LOG_SAVE_CONTRACT_TEST_PASS`)
+**Code Review**: Complete — passed after tightening the test-only authorization seam and re-running targeted economy regressions

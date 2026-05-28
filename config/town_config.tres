@@ -1,0 +1,41 @@
+[gd_resource type="Resource" script_class="TownConfig" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/core/facility.gd" id="1_facility"]
+[ext_resource type="Script" path="res://src/config/town_config.gd" id="2_town_config"]
+
+[resource]
+script = ExtResource("2_town_config")
+base_funds_cost = {
+0: 200,
+1: 150,
+2: 300,
+3: 500
+}
+base_construction_time = {
+0: 4,
+1: 3,
+2: 6,
+3: 8
+}
+base_upgrade_time = {
+0: 3,
+1: 2,
+2: 4,
+3: 5
+}
+cost_multiplier = 1.8
+time_multiplier = 1.3
+medical_ap_bonus_per_level = 0.7
+adj_med_tr_coeff = 0.6
+facility_maintenance_base = {
+0: 2,
+1: 2,
+2: 3,
+3: 4
+}
+facility_maintenance_delta = {
+0: 1,
+1: 1,
+2: 1,
+3: 2
+}

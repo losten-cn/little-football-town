@@ -1,12 +1,12 @@
 # Story 003: 实现比赛节点触发与 Match Trigger 状态转换
 
 > **Epic**: 时间与赛季推进系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -99,7 +99,7 @@ TimeManager produces the scheduling event; MatchCompetition consumes it later th
 **Required evidence**:
 - Logic: `tests/unit/time/match_trigger_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Automated unit evidence recorded — `tests/unit/time/match_trigger_test.gd` passed (`MATCH_TRIGGER_TEST_PASS`)
 
 ---
 

@@ -1,12 +1,12 @@
 # Story 004: 实现关键事件产量与事件分类生成
 
 > **Epic**: 比赛竞技系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-25
 
 ## Context
 
@@ -92,7 +92,7 @@ Generate match events as typed serializable Dictionaries or typed event objects 
 **Required evidence**:
 - Logic: `tests/unit/match/key_event_generation_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — tests/unit/match/key_event_generation_test.gd
 
 ---
 
@@ -104,3 +104,10 @@ Generate match events as typed serializable Dictionaries or typed event objects 
   - `production/epics/match-competition-system/story-005-halftime-adjustment.md`
   - `production/epics/match-competition-system/story-006-match-result-packet.md`
   - `production/epics/match-competition-system/story-007-match-rng-determinism.md`
+
+## Completion Notes
+**Completed**: 2026-05-26
+**Criteria**: 3/3 passing
+**Deviations**: None
+**Test Evidence**: Logic: `tests/unit/match/key_event_generation_test.gd`
+**Code Review**: Approved

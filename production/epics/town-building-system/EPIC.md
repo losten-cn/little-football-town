@@ -3,7 +3,7 @@
 > **Layer**: Core
 > **GDD**: design/gdd/town-building-system.md
 > **Architecture Module**: TownBuilding
-> **Status**: Ready
+> **Status**: Complete
 > **Stories**: 9 stories
 
 ## Overview
@@ -44,15 +44,15 @@
 
 | # | Story | Type | Status | ADR |
 |---|-------|------|--------|-----|
-| 001 | [建立 Facility 数据模型与网格索引契约](story-001-town-grid-facility-contract.md) | Integration | Ready | ADR-0008 |
-| 002 | [实现设施建造/升级成本与工期公式](story-002-facility-cost-time-formulas.md) | Logic | Ready | ADR-0008 |
-| 003 | [实现建造发起校验与 accredited 扣费入口](story-003-build-request-validation.md) | Integration | Ready | ADR-0008 |
-| 004 | [实现升级流转与 time_phase_changed 完工结算](story-004-upgrade-completion-flow.md) | Integration | Ready | ADR-0008 |
-| 005 | [实现拆除限制、空地释放与邻接重算触发](story-005-demolish-grid-release.md) | Integration | Ready | ADR-0008 |
-| 006 | [实现训练/医疗/青训基础公式接口](story-006-training-medical-youth-formulas.md) | Logic | Ready | ADR-0008 |
-| 007 | [实现球场与三组邻接加成公式](story-007-stadium-adjacency-formulas.md) | Logic | Ready | ADR-0008 |
-| 008 | [实现下游只读查询面与维护费汇总](story-008-downstream-query-maintenance.md) | Integration | Ready | ADR-0008 |
-| 009 | [实现建设状态序列化与读档恢复回归](story-009-serialization-restore-regression.md) | Integration | Ready | ADR-0008 |
+| 001 | [建立 Facility 数据模型与网格索引契约](story-001-town-grid-facility-contract.md) | Integration | Complete | ADR-0008 |
+| 002 | [实现设施建造/升级成本与工期公式](story-002-facility-cost-time-formulas.md) | Logic | Complete | ADR-0008 |
+| 003 | [实现建造发起校验与 accredited 扣费入口](story-003-build-request-validation.md) | Integration | Complete | ADR-0008 |
+| 004 | [实现升级流转与 time_phase_changed 完工结算](story-004-upgrade-completion-flow.md) | Integration | Complete | ADR-0008 |
+| 005 | [实现拆除限制、空地释放与邻接重算触发](story-005-demolish-grid-release.md) | Integration | Complete | ADR-0008 |
+| 006 | [实现训练/医疗/青训基础公式接口](story-006-training-medical-youth-formulas.md) | Logic | Complete | ADR-0008 |
+| 007 | [实现球场与三组邻接加成公式](story-007-stadium-adjacency-formulas.md) | Logic | Complete | ADR-0008 |
+| 008 | [实现下游只读查询面与维护费汇总](story-008-downstream-query-maintenance.md) | Integration | Complete | ADR-0008 |
+| 009 | [实现建设状态序列化与读档恢复回归](story-009-serialization-restore-regression.md) | Integration | Complete | ADR-0008 |
 
 ## Definition of Done
 

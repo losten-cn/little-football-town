@@ -1,12 +1,12 @@
 # Story 009: 实现结算顺序、并发请求拒绝与经济回归验证
 
 > **Epic**: 经济管理系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-27
 
 ## Context
 
@@ -41,9 +41,9 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *From GDD `design/gdd/economy-management-system.md`, scoped to this story:*
 
-- [ ] If post-match and daily/stage/season settlement signals arrive adjacent or in the same frame, EconomyManager processes them in a fixed serial priority without interleaving balance writes.
-- [ ] Multiple same-frame training/building cost requests validate in submission order against latest balances; later insufficient requests fail without dirty state.
-- [ ] A representative season regression satisfies ledger integrity: `ending_balance = starting_balance + total_income - total_spending`, adjusted only by legal clamp/debt rules.
+- [x] If post-match and daily/stage/season settlement signals arrive adjacent or in the same frame, EconomyManager processes them in a fixed serial priority without interleaving balance writes.
+- [x] Multiple same-frame training/building cost requests validate in submission order against latest balances; later insufficient requests fail without dirty state.
+- [x] A representative season regression satisfies ledger integrity: `ending_balance = starting_balance + total_income - total_spending`, adjusted only by legal clamp/debt rules.
 
 ---
 
@@ -95,7 +95,19 @@ This is the economy epic regression story. Reuse transaction, warning, settlemen
 **Required evidence**:
 - Integration: `tests/integration/economy/settlement_order_concurrency_regression_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `tests/integration/economy/settlement_order_concurrency_regression_test.gd`
+
+---
+
+## Completion Notes
+
+**Completed**: 2026-05-27  
+**Criteria**: 3/3 passing  
+**Deviations**: None  
+**Test Evidence**: Integration: `tests/integration/economy/settlement_order_concurrency_regression_test.gd`  
+**Code Review**: Approved with suggestions  
+**Review Notes**: Fixed ordering, same-frame rejection behavior, representative ledger reconciliation, bounded transaction history, and settlement-side atomicity all passed review. Remaining feedback is advisory only around future queue-level same-frame signal coverage and explicit batch cooldown assertions if the event scheduler grows more complex.  
+**Story Done Verdict**: Complete — automated integration evidence passed for fixed settlement ordering, same-frame cost rejection, and representative season ledger reconciliation.
 
 ---
 

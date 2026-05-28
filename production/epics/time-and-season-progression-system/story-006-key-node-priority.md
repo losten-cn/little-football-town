@@ -1,12 +1,12 @@
 # Story 006: 实现关键节点优先级与同位置确定性结算
 
 > **Epic**: 时间与赛季推进系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-28
 
 ## Context
 
@@ -40,11 +40,12 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *From GDD `design/gdd/time-and-season-progression-system.md`, scoped to this story:*
 
-- [ ] Multiple key nodes at the same timeline position resolve in a fixed, documented order.
-- [ ] A qualifying chain handles match node → post-match settlement → stage settlement → season settlement without skipping nodes.
+- [ ] Multiple key nodes at the same timeline position resolve in this fixed order:
+      `Match Trigger → Post-Match Settlement → Stage Settlement → Season Settlement`.
+- [ ] A qualifying chain handles `Match Trigger → Post-Match Settlement → Stage Settlement → Season Settlement` without skipping eligible nodes.
 - [ ] Repeating the same input produces the same state sequence, event sequence, and final state.
 - [ ] Each eligible key node is processed exactly once.
-- [ ] Order remains deterministic when a processed node changes the next node's eligibility.
+- [ ] If processing one node changes the next node's eligibility, the next node is re-evaluated from the newly committed stable state, but no already-processed node may be replayed.
 
 ---
 
@@ -53,6 +54,8 @@ This story implements only the mapped rules above; neighbouring requirements rem
 *Derived from ADR-0002 Implementation Guidelines:*
 
 Use TimeManager-owned key-node scheduling and EventBus priority rules. This story validates deterministic ordering, not downstream reward details.
+
+This story defines key-node order inside the time domain. EventBus domain priority still applies after node resolution: `time_*` events dispatch before downstream `match_completed`, `league_*`, `economy_*`, `player_*`, `town_*`, and `save_*` events.
 
 ---
 
@@ -95,7 +98,7 @@ Use TimeManager-owned key-node scheduling and EventBus priority rules. This stor
 **Required evidence**:
 - Integration: `tests/integration/time/key_node_priority_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Automated integration evidence recorded — `tests/integration/time/key_node_priority_test.gd` passed (`KEY_NODE_PRIORITY_TEST_PASS`)
 
 ---
 

@@ -1,12 +1,12 @@
 # Story 009: 实现建设状态序列化与读档恢复回归
 
 > **Epic**: 小镇建设系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-27
 
 ## Context
 
@@ -93,7 +93,7 @@ Register TownBuilding with SaveManager and serialize authoritative gameplay stat
 **Required evidence**:
 - Integration: `tests/integration/town/serialization_restore_regression_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — `tests/integration/town/serialization_restore_regression_test.gd`
 
 ---
 
@@ -110,3 +110,12 @@ Register TownBuilding with SaveManager and serialize authoritative gameplay stat
   - `production/epics/town-building-system/story-008-downstream-query-maintenance.md` — must be DONE
 - Unlocks:
   - Downstream work: Town epic completion gate
+
+---
+
+## Completion Notes
+**Completed**: 2026-05-27
+**Criteria**: 3/3 passing
+**Deviations**: None
+**Test Evidence**: Integration: `tests/integration/town/serialization_restore_regression_test.gd`
+**Code Review**: Complete — approved after adding SaveManager restore-path coverage plus D=1 and multi-project restore regression assertions

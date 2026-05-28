@@ -1,12 +1,12 @@
 # Story 002: 实现训练效率与状态修正公式
 
 > **Epic**: 运动员培养系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -39,9 +39,9 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *From GDD `design/gdd/player-development-system.md`, scoped to this story:*
 
-- [ ] `fatigue_adjusted_training_efficiency = clamp(training_efficiency × condition_multiplier × morale_multiplier, 0.5, 1.8)`.
-- [ ] Individual `training_efficiency` is constrained to `[0.8, 1.5]` per player.
-- [ ] High fatigue, low morale, or recovery-state inputs reduce effective training efficiency without dropping below the formula lower bound.
+- [x] `fatigue_adjusted_training_efficiency = clamp(training_efficiency × condition_multiplier × morale_multiplier, 0.5, 1.8)`.
+- [x] Individual `training_efficiency` is constrained to `[0.8, 1.5]` per player.
+- [x] High fatigue, low morale, or recovery-state inputs reduce effective training efficiency without dropping below the formula lower bound.
 
 ---
 
@@ -92,7 +92,7 @@ Compute fatigue-adjusted efficiency from `Player.training_efficiency`, `conditio
 **Required evidence**:
 - Logic: `tests/unit/player-dev/training_efficiency_formula_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Test file created at `tests/unit/player-dev/training_efficiency_formula_test.gd`; runtime verification passed locally via `tests/unit/player-dev/training_efficiency_formula_runner.gd` with Godot 4.6.2 headless result `TRAINING_EFFICIENCY_FORMULA_TEST_PASS` (non-blocking exit warnings remain)
 
 ---
 

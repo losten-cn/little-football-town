@@ -1,12 +1,12 @@
 # Story 006: 实现训练原子性与 Economy/Time 集成
 
 > **Epic**: 运动员培养系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-28
 
 ## Context
 
@@ -39,9 +39,9 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *From GDD `design/gdd/player-development-system.md`, scoped to this story:*
 
-- [ ] Training flow executes in order: validate → deduct → grow → apply → emit.
-- [ ] Training costs are deducted only through `EconomyManager.accredit_training_cost()`.
-- [ ] Funds, AP, and time-window costs are committed before training settlement; failures do not partially apply growth, history, events, or resource changes.
+- [x] Training flow executes in order: validate → deduct → grow → apply → emit.
+- [x] Training costs are deducted only through `EconomyManager.accredit_training_cost()`.
+- [x] Funds, AP, and time-window costs are committed before training settlement; failures do not partially apply growth, history, events, or resource changes.
 
 ---
 
@@ -92,7 +92,7 @@ Implement `PlayerDevelopment.train(player_id, training_item_id)` as the single t
 **Required evidence**:
 - Integration: `tests/integration/player-dev/training_atomic_integration_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `tests/integration/player-dev/training_atomic_integration_test.gd` + `tests/integration/player-dev/training_atomic_integration_test.tscn`; Godot 4.6.2 headless result: `TRAINING_ATOMIC_INTEGRATION_TEST_PASS` (non-blocking exit warnings remain)
 
 ---
 

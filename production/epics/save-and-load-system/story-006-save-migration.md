@@ -1,12 +1,12 @@
 # Story 006: 实现版本兼容判定与 additive-forward 迁移
 
 > **Epic**: 存档与读档系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-28
 
 ## Context
 
@@ -38,11 +38,11 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *From GDD `design/gdd/save-and-load-system.md`, scoped to this story:*
 
-- [ ] Same-version saves load without migration.
-- [ ] Older supported saves migrate forward by adding fields and safe defaults only.
-- [ ] Migrated saves pass field completeness and consistency validation before restore.
-- [ ] Future or unsupported version gaps are rejected with clear failure semantics.
-- [ ] Migration never deletes or renames existing persisted fields.
+- [x] Same-version saves load without migration.
+- [x] Older supported saves migrate forward by adding fields and safe defaults only.
+- [x] Migrated saves pass field completeness and consistency validation before restore.
+- [x] Future or unsupported version gaps are rejected with clear failure semantics.
+- [x] Migration never deletes or renames existing persisted fields.
 
 ---
 
@@ -99,7 +99,7 @@ Use `ConfigLoader.get_save_version()` as the current save schema version. Implem
 **Required evidence**:
 - Integration: `tests/integration/save/save_migration_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and verified — SAVE_MIGRATION_TEST_PASS
 
 ---
 
@@ -110,3 +110,10 @@ Use `ConfigLoader.get_save_version()` as the current save schema version. Implem
 - Unlocks:
   - `production/epics/save-and-load-system/story-007-load-restore-order.md`
   - `production/epics/save-and-load-system/story-008-save-recovery-flow.md`
+
+## Completion Notes
+**Completed**: 2026-05-28
+**Criteria**: 5/5 passing
+**Deviations**: Advisory only — headless verification uses `tests/integration/save/save_migration_runner.gd` to host the Node-based integration test, while the evidence file remains `tests/integration/save/save_migration_test.gd`.
+**Test Evidence**: Integration test at `tests/integration/save/save_migration_test.gd` — PASS via `tests/integration/save/save_migration_runner.gd` (`SAVE_MIGRATION_TEST_PASS`)
+**Code Review**: Complete — no blocking issues

@@ -26,6 +26,8 @@ player_tier_training_efficiency = {
 "normal": Vector2(0.8, 1.0),
 "star": Vector2(1.1, 1.35)
 }
+player_training_session_milestones = Array[int]([10, 25, 50])
+recent_growth_summary_limit = 5
 action_point_use_rate_target_min = 0.7
 action_point_use_rate_target_max = 0.9
 overall_win_rate_target_min = 0.55

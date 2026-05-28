@@ -1,12 +1,12 @@
 # Story 007: 实现认证入口与 caller 约束
 
 > **Epic**: 经济管理系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-28
 
 ## Context
 
@@ -39,9 +39,9 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *From GDD `design/gdd/economy-management-system.md`, scoped to this story:*
 
-- [ ] `accredit_match_reward()`, `accredit_facility_cost()`, and `accredit_training_cost()` exist and delegate to `execute_transaction()`.
-- [ ] Each accredited entry writes correct `source_system`, `reason`, and `metadata` for transaction audit.
-- [ ] Downstream systems cannot successfully modify balances through unaccredited resource write paths.
+- [x] `accredit_match_reward()`, `accredit_facility_cost()`, and `accredit_training_cost()` exist and delegate to `execute_transaction()`.
+- [x] Each accredited entry writes correct `source_system`, `reason`, and `metadata` for transaction audit.
+- [x] Downstream systems cannot successfully modify balances through unaccredited resource write paths.
 
 ---
 
@@ -93,7 +93,7 @@ Accredited methods are the public cross-system contract for MatchCompetition, To
 **Required evidence**:
 - Integration: `tests/integration/economy/accredited_entry_points_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and verified — `ACCREDITED_ENTRY_POINTS_TEST_PASS`
 
 ---
 
@@ -104,3 +104,10 @@ Accredited methods are the public cross-system contract for MatchCompetition, To
   - `production/epics/economy-management-system/story-002-execute-transaction-atomic-validation.md` — must be DONE
 - Unlocks:
   - Downstream work: PlayerDevelopment, TownBuilding, and MatchCompetition economy integration
+
+## Completion Notes
+**Completed**: 2026-05-28
+**Criteria**: 3/3 passing
+**Deviations**: Advisory only — internal authorization token was introduced to preserve the sole `execute_transaction()` mutation boundary while preventing spoofed business `source_system` writes; Town construction now uses a dedicated `accredit_facility_construction_cost()` accredited entry so build requests can enforce stricter insufficient-funds rejection without changing the debt-capable facility-upgrade path.
+**Test Evidence**: Integration test at `tests/integration/economy/accredited_entry_points_test.gd` — PASS (`ACCREDITED_ENTRY_POINTS_TEST_PASS`); supporting regressions passed in `tests/integration/economy/budget_preview_affordability_query_test.gd`, `tests/integration/town/build_request_validation_test.gd`, and `tests/integration/town/upgrade_completion_flow_test.gd`
+**Code Review**: Complete — APPROVED WITH SUGGESTIONS

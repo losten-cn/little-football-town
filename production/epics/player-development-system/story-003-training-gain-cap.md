@@ -1,12 +1,12 @@
 # Story 003: 实现训练成长结算与潜力上限裁剪
 
 > **Epic**: 运动员培养系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -39,9 +39,9 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *From GDD `design/gdd/player-development-system.md`, scoped to this story:*
 
-- [ ] `training_actual_gain = min(potential_cap - current_attribute, attribute_growth(...) × fatigue_adjusted_training_efficiency × training_focus_match_multiplier × facility_training_multiplier)`.
-- [ ] `facility_training_multiplier` is consumed from TownBuilding and constrained to `[1.0, 1.75]`.
-- [ ] If `current_attribute = potential_cap`, growth is `0`; if `potential_cap < current_attribute`, normalize potential to current and mark the player for review.
+- [x] `training_actual_gain = min(potential_cap - current_attribute, attribute_growth(...) × fatigue_adjusted_training_efficiency × training_focus_match_multiplier × facility_training_multiplier)`.
+- [x] `facility_training_multiplier` is consumed from TownBuilding and constrained to `[1.0, 1.75]`.
+- [x] If `current_attribute = potential_cap`, growth is `0`; if `potential_cap < current_attribute`, normalize potential to current and mark the player for review.
 
 ---
 
@@ -92,7 +92,7 @@ Use the shared `attribute_growth` formula as the base growth term and multiply b
 **Required evidence**:
 - Logic: `tests/unit/player-dev/training_gain_cap_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Test file created at `tests/unit/player-dev/training_gain_cap_test.gd`; runtime verification passed locally via `tests/unit/player-dev/training_gain_cap_runner.gd` with Godot 4.6.2 headless result `TRAINING_GAIN_CAP_TEST_PASS` (non-blocking exit warnings remain)
 
 ---
 

@@ -3,7 +3,7 @@
 > **Layer**: Foundation
 > **GDD**: design/gdd/balance-system.md
 > **Architecture Module**: ConfigLoader
-> **Status**: Ready
+> **Status**: Complete
 > **Stories**: 9 stories
 
 ## Overview
@@ -39,15 +39,15 @@
 
 | # | Story | Type | Status | ADR |
 |---|-------|------|--------|-----|
-| 001 | [定义 BalanceConfig 数据资源与启动校验](story-001-balance-config-validation.md) | Config/Data | Ready | ADR-0004 |
-| 002 | [实现属性模型与有效属性公式](story-002-attribute-formula.md) | Logic | Ready | ADR-0004 |
-| 003 | [实现属性成长公式与潜力边界](story-003-attribute-growth.md) | Logic | Ready | ADR-0004 |
-| 004 | [实现资源结算共享公式](story-004-resource-settlement.md) | Logic | Ready | ADR-0004 |
-| 005 | [实现位置综合评分公式](story-005-positional-rating.md) | Logic | Ready | ADR-0004 |
-| 006 | [实现基准胜率公式与边界](story-006-win-probability.md) | Logic | Ready | ADR-0004 |
-| 007 | [实现 KPI 与诊断公式](story-007-kpi-formulas.md) | Logic | Ready | ADR-0004 |
-| 008 | [建立数值生命周期元数据与跨系统一致性扫描](story-008-balance-consistency-scan.md) | Integration | Ready | ADR-0004 |
-| 009 | [验证数值公式可复核性与随机统计边界](story-009-balance-statistical-validation.md) | Integration | Ready | ADR-0004 |
+| 001 | [定义 BalanceConfig 数据资源与启动校验](story-001-balance-config-validation.md) | Config/Data | Complete | ADR-0004 |
+| 002 | [实现属性模型与有效属性公式](story-002-attribute-formula.md) | Logic | Complete | ADR-0004 |
+| 003 | [实现属性成长公式与潜力边界](story-003-attribute-growth.md) | Logic | Complete | ADR-0004 |
+| 004 | [实现资源结算共享公式](story-004-resource-settlement.md) | Logic | Complete | ADR-0004 |
+| 005 | [实现位置综合评分公式](story-005-positional-rating.md) | Logic | Complete | ADR-0004 |
+| 006 | [实现基准胜率公式与边界](story-006-win-probability.md) | Logic | Complete | ADR-0004 |
+| 007 | [实现 KPI 与诊断公式](story-007-kpi-formulas.md) | Logic | Complete | ADR-0004 |
+| 008 | [建立数值生命周期元数据与跨系统一致性扫描](story-008-balance-consistency-scan.md) | Integration | Complete | ADR-0004 |
+| 009 | [验证数值公式可复核性与随机统计边界](story-009-balance-statistical-validation.md) | Integration | Complete | ADR-0004 |
 
 ## Definition of Done
 
@@ -59,4 +59,4 @@ This epic is complete when:
 
 ## Next Step
 
-Run `/create-stories balance-system` to break this epic into implementable stories.
+Epic complete. No further story creation work is required in this epic.

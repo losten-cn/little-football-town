@@ -14,7 +14,7 @@ goal: "完成 HUD Framework 的收尾、验证与后续 MVP UI 屏幕落地准�
 start: "2026-05-19"
 end: "2026-06-02"
 generated: "2026-05-19"
-updated: "2026-05-19"
+updated: "2026-05-28"
 
 stories:
   - id: "S1-1"

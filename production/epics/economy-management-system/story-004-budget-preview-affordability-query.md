@@ -1,12 +1,12 @@
 # Story 004: 实现预算预览与可负担性查询合同
 
 > **Epic**: 经济管理系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -94,7 +94,16 @@ Implement preview as a pure read/query contract. It may reuse validation logic b
 **Required evidence**:
 - Integration: `tests/integration/economy/budget_preview_affordability_query_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and locally verified (`BUDGET_PREVIEW_AFFORDABILITY_QUERY_TEST_PASS`)
+
+---
+
+## Completion Notes
+**Completed**: 2026-05-26
+**Criteria**: 3/3 passing
+**Deviations**: `EconomyManager` preview logic now shares the same debt-capable funds policy as real facility-cost execution by removing the stale `funds_insufficient` branch from `accredit_facility_cost()`; integration evidence also verifies preview does not mutate balances, advance `tx_id`, append to transaction log, or emit warning events.
+**Test Evidence**: Integration: `tests/integration/economy/budget_preview_affordability_query_test.gd` present and locally verified with `D:/Program Files/godot/Godot_v4.6.2-stable_win64_console.exe` (PASS). Local runs still emit the existing economy test exit resource warnings.
+**Code Review**: Complete — initial affordability/reality mismatch was corrected and the final implementation passed review with no remaining blockers.
 
 ---
 

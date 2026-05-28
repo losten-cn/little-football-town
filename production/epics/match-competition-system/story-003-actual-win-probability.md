@@ -1,12 +1,12 @@
 # Story 003: 实现实际胜率修正与战术/状态影响
 
 > **Epic**: 比赛竞技系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-25
 
 ## Context
 
@@ -92,7 +92,7 @@ Use BalanceConfig's base win probability floor/ceiling and rating slope rather t
 **Required evidence**:
 - Logic: `tests/unit/match/actual_win_probability_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — tests/unit/match/actual_win_probability_test.gd
 
 ---
 
@@ -104,3 +104,10 @@ Use BalanceConfig's base win probability floor/ceiling and rating slope rather t
 - Unlocks:
   - `production/epics/match-competition-system/story-004-key-event-generation.md`
   - `production/epics/match-competition-system/story-007-match-rng-determinism.md`
+
+## Completion Notes
+**Completed**: 2026-05-25
+**Criteria**: 3/3 passing
+**Deviations**: None
+**Test Evidence**: Logic: `tests/unit/match/actual_win_probability_test.gd`
+**Code Review**: Approved

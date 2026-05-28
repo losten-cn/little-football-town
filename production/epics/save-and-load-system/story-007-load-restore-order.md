@@ -1,12 +1,12 @@
 # Story 007: 实现读档恢复顺序与权威状态重建
 
 > **Epic**: 存档与读档系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-28
 
 ## Context
 
@@ -39,11 +39,11 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *From GDD `design/gdd/save-and-load-system.md`, scoped to this story:*
 
-- [ ] `save_time_state` matches the instantaneous `TimeManager.get_state()` used for the snapshot.
-- [ ] Load order is exactly Time→Town→Player→League→Economy→Match.
-- [ ] A system restore failure aborts the load and prevents mixed old/new runtime state from becoming playable.
-- [ ] Runtime caches, UI displays, and derived values are rebuilt from restored authority data.
-- [ ] Match-in-progress snapshots are not restored as stable mid-match authority state.
+- [x] `save_time_state` matches the instantaneous `TimeManager.get_state()` used for the snapshot.
+- [x] Load order is exactly Time→Town→Player→League→Economy→Match.
+- [x] A system restore failure aborts the load and prevents mixed old/new runtime state from becoming playable.
+- [x] Runtime caches, UI displays, and derived values are rebuilt from restored authority data.
+- [x] Match-in-progress snapshots are not restored as stable mid-match authority state.
 
 ---
 
@@ -100,7 +100,7 @@ Use the ADR load order explicitly. Restore Time first so later systems can inter
 **Required evidence**:
 - Integration: `tests/integration/save/load_restore_order_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and verified — LOAD_RESTORE_ORDER_TEST_PASS
 
 ---
 
@@ -111,3 +111,10 @@ Use the ADR load order explicitly. Restore Time first so later systems can inter
   - `production/epics/save-and-load-system/story-006-save-migration.md` — must be DONE
 - Unlocks:
   - `production/epics/save-and-load-system/story-008-save-recovery-flow.md`
+
+## Completion Notes
+**Completed**: 2026-05-28
+**Criteria**: 5/5 passing
+**Deviations**: Advisory only — headless verification uses `tests/integration/save/load_restore_order_runner.gd` to host the Node-based integration test, while the evidence file remains `tests/integration/save/load_restore_order_test.gd`.
+**Test Evidence**: Integration test at `tests/integration/save/load_restore_order_test.gd` — PASS via `tests/integration/save/load_restore_order_runner.gd` (`LOAD_RESTORE_ORDER_TEST_PASS`)
+**Code Review**: Complete — no blocking issues

@@ -1,12 +1,12 @@
 # Story 005: 实现原子提交、完整性哈希与损坏检测
 
 > **Epic**: 存档与读档系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-28
 
 ## Context
 
@@ -32,17 +32,23 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 **Performance Note**: This story must respect the applicable Foundation guardrails from the control manifest. No per-frame gameplay work is expected unless explicitly listed in the acceptance criteria.
 
+## Asset / Resource References
+
+- `user://saves/slot_1.tres`, `slot_2.tres`, `slot_3.tres`, and `autosave.tres` are runtime save/output paths, not repository assets that must exist before implementation.
+- Any temporary commit path used for atomic replace (for example `user://saves/slot_1.tmp` or equivalent) is also a runtime output path, not a pre-existing asset.
+- Integrity hash data lives inside `SaveSnapshot` metadata/runtime save content and does not require a separate checked-in asset file.
+
 ---
 
 ## Acceptance Criteria
 
 *From GDD `design/gdd/save-and-load-system.md`, scoped to this story:*
 
-- [ ] Valid saves include an integrity hash computed from serialized gameplay state.
-- [ ] Hash mismatch or corrupted file returns failure and does not enter normal restore.
-- [ ] Save commit is atomic from the player perspective: new snapshot complete or old snapshot intact.
-- [ ] Failed save does not emit success semantics or overwrite the last valid snapshot.
-- [ ] Disk/write API failures are checked and surfaced as save failures.
+- [x] Valid saves include an integrity hash computed from serialized gameplay state.
+- [x] Hash mismatch or corrupted file returns failure and does not enter normal restore.
+- [x] Save commit is atomic from the player perspective: new snapshot complete or old snapshot intact.
+- [x] Failed save does not emit success semantics or overwrite the last valid snapshot.
+- [x] Disk/write API failures are checked and surfaced as save failures.
 
 ---
 
@@ -99,7 +105,7 @@ Compute and verify `integrity_hash` as part of metadata. If any write operation 
 **Required evidence**:
 - Integration: `tests/integration/save/save_integrity_atomic_commit_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and verified — `SAVE_INTEGRITY_ATOMIC_COMMIT_TEST_PASS`
 
 ---
 
@@ -112,3 +118,10 @@ Compute and verify `integrity_hash` as part of metadata. If any write operation 
 - Unlocks:
   - `production/epics/save-and-load-system/story-006-save-migration.md`
   - `production/epics/save-and-load-system/story-008-save-recovery-flow.md`
+
+## Completion Notes
+**Completed**: 2026-05-28
+**Criteria**: 5/5 passing
+**Deviations**: Advisory only — headless verification uses `tests/integration/save/save_integrity_atomic_commit_runner.gd` to host the Node-based integration test, while the evidence file remains `tests/integration/save/save_integrity_atomic_commit_test.gd`.
+**Test Evidence**: Integration test at `tests/integration/save/save_integrity_atomic_commit_test.gd` — PASS via `tests/integration/save/save_integrity_atomic_commit_runner.gd` (`SAVE_INTEGRITY_ATOMIC_COMMIT_TEST_PASS`)
+**Code Review**: Complete — no blocking issues

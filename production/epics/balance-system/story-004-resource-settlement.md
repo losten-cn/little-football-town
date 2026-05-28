@@ -1,12 +1,12 @@
 # Story 004: 实现资源结算共享公式
 
 > **Epic**: 数值系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Logic
 > **Estimate**: S
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-27
 
 ## Context
 
@@ -93,7 +93,7 @@ Implement the shared settlement formula as a reusable balance formula. Economy-s
 **Required evidence**:
 - Logic: `tests/unit/balance/resource_settlement_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `tests/unit/balance/resource_settlement_test.gd`
 
 ---
 
@@ -103,3 +103,12 @@ Implement the shared settlement formula as a reusable balance formula. Economy-s
   - `production/epics/balance-system/story-001-balance-config-validation.md` — must be DONE
 - Unlocks:
   - Downstream work: Economy Management resource settlement stories
+
+---
+
+## Completion Notes
+**Completed**: 2026-05-27
+**Criteria**: 5/5 passing
+**Deviations**: None
+**Test Evidence**: Logic test passed at `tests/unit/balance/resource_settlement_test.gd`
+**Code Review**: Complete

@@ -3,7 +3,7 @@
 > **Layer**: Foundation
 > **GDD**: design/gdd/save-and-load-system.md
 > **Architecture Module**: SaveManager
-> **Status**: Ready
+> **Status**: Complete
 > **Stories**: 9 stories
 
 ## Overview
@@ -37,15 +37,15 @@
 
 | # | Story | Type | Status | ADR |
 |---|-------|------|--------|-----|
-| 001 | [建立 SaveSnapshot 与存档槽结构](story-001-save-snapshot-slots.md) | Integration | Ready | ADR-0003 |
-| 002 | [实现系统注册契约与快照组装](story-002-save-registration-snapshot.md) | Integration | Ready | ADR-0003 |
-| 003 | [实现稳定节点判定与瞬时节点保存拦截](story-003-stable-node-save-gate.md) | Logic | Ready | ADR-0003 |
-| 004 | [接入自动保存触发与延后保存队列](story-004-autosave-triggers.md) | Integration | Ready | ADR-0003 |
-| 005 | [实现原子提交、完整性哈希与损坏检测](story-005-save-integrity-atomic-commit.md) | Integration | Ready | ADR-0003 |
-| 006 | [实现版本兼容判定与 additive-forward 迁移](story-006-save-migration.md) | Integration | Ready | ADR-0003 |
-| 007 | [实现读档恢复顺序与权威状态重建](story-007-load-restore-order.md) | Integration | Ready | ADR-0003 |
-| 008 | [实现存档恢复失败与玩家风险操作语义](story-008-save-recovery-flow.md) | Integration | Ready | ADR-0003 |
-| 009 | [实现存档摘要、性能预算与回归样本](story-009-save-summary-performance.md) | Integration | Ready | ADR-0003 |
+| 001 | [建立 SaveSnapshot 与存档槽结构](story-001-save-snapshot-slots.md) | Integration | Complete | ADR-0003 |
+| 002 | [实现系统注册契约与快照组装](story-002-save-registration-snapshot.md) | Integration | Complete | ADR-0003 |
+| 003 | [实现稳定节点判定与瞬时节点保存拦截](story-003-stable-node-save-gate.md) | Logic | Complete | ADR-0003 |
+| 004 | [接入自动保存触发与延后保存队列](story-004-autosave-triggers.md) | Integration | Complete | ADR-0003 |
+| 005 | [实现原子提交、完整性哈希与损坏检测](story-005-save-integrity-atomic-commit.md) | Integration | Complete | ADR-0003 |
+| 006 | [实现版本兼容判定与 additive-forward 迁移](story-006-save-migration.md) | Integration | Complete | ADR-0003 |
+| 007 | [实现读档恢复顺序与权威状态重建](story-007-load-restore-order.md) | Integration | Complete | ADR-0003 |
+| 008 | [实现存档恢复失败与玩家风险操作语义](story-008-save-recovery-flow.md) | Integration | Complete | ADR-0003 |
+| 009 | [实现存档摘要、性能预算与回归样本](story-009-save-summary-performance.md) | Integration | Complete | ADR-0003 |
 
 ## Definition of Done
 

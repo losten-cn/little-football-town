@@ -1,12 +1,12 @@
 # Story 004: 实现升级流转与 time_phase_changed 完工结算
 
 > **Epic**: 小镇建设系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -94,7 +94,7 @@ Subscribe to `time_phase_changed` through EventBus. Reject upgrades for non-Acti
 **Required evidence**:
 - Integration: `tests/integration/town/upgrade_completion_flow_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `tests/integration/town/upgrade_completion_flow_test.gd` (passes via Godot headless on 2026-05-26)
 
 ---
 
@@ -110,3 +110,10 @@ Subscribe to `time_phase_changed` through EventBus. Reject upgrades for non-Acti
   - `production/epics/town-building-system/story-007-stadium-adjacency-formulas.md`
   - `production/epics/town-building-system/story-008-downstream-query-maintenance.md`
   - `production/epics/town-building-system/story-009-serialization-restore-regression.md`
+
+## Completion Notes
+**Completed**: 2026-05-26
+**Criteria**: 3/3 passing
+**Deviations**: Code review verdict was `APPROVED WITH SUGGESTIONS`; no blocking issues remain for Story 004 completion.
+**Test Evidence**: Integration: test file at `tests/integration/town/upgrade_completion_flow_test.gd`
+**Code Review**: Complete — APPROVED WITH SUGGESTIONS

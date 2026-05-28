@@ -1,12 +1,12 @@
 # Story 007: 实现成长里程碑、训练历史与赛季年龄推进
 
 > **Epic**: 运动员培养系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-28
 
 ## Context
 
@@ -39,9 +39,9 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *From GDD `design/gdd/player-development-system.md`, scoped to this story:*
 
-- [ ] Crossing an attribute multiple of 10 or reaching cumulative training thresholds emits `player_milestone_reached`.
-- [ ] Every legal training settlement records training history and supports a recent-growth summary.
-- [ ] `time_season_ended` increments player age by 1 exactly once per season boundary.
+- [x] Crossing an attribute multiple of 10 or reaching cumulative training thresholds emits `player_milestone_reached`.
+- [x] Every legal training settlement records training history and supports a recent-growth summary.
+- [x] `time_season_ended` increments player age by 1 exactly once per season boundary.
 
 ---
 
@@ -92,7 +92,7 @@ Store `training_history`, `milestones`, and `total_training_sessions` on Player 
 **Required evidence**:
 - Integration: `tests/integration/player-dev/player_milestone_history_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `tests/integration/player-dev/player_milestone_history_test.gd` + `tests/integration/player-dev/player_milestone_history_test.tscn`; Godot 4.6.2 headless result: `PLAYER_MILESTONE_HISTORY_TEST_PASS` (non-blocking exit warnings remain)
 
 ---
 

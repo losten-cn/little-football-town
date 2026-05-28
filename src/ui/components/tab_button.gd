@@ -110,7 +110,7 @@ func _refresh_visual_state() -> void:
 		_tab_label.add_theme_color_override("font_color", Color("EAEAEA") if _selected else Color("9E9EB8"))
 	if _icon_rect:
 		_icon_rect.self_modulate = Color.WHITE if _selected else Color(1, 1, 1, 0.65)
-	accessibility_value = _localized_text("SELECTED", "已选中") if _selected else ""
+	accessibility_description = _localized_text("SELECTED", "已选中") if _selected else ""
 
 
 func _localized_text(key: String, fallback: String) -> String:

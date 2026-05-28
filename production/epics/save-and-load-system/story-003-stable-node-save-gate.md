@@ -1,12 +1,12 @@
 # Story 003: 实现稳定节点判定与瞬时节点保存拦截
 
 > **Epic**: 存档与读档系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Logic
 > **Estimate**: S
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-27
 
 ## Context
 
@@ -94,7 +94,7 @@ Use TimeManager state as the authority for runtime node semantics. This story on
 **Required evidence**:
 - Logic: `tests/unit/save/stable_node_save_gate_test.gd` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `tests/unit/save/stable_node_save_gate_test.gd` (runtime verified with `STABLE_NODE_SAVE_GATE_TEST_PASS`)
 
 ---
 
@@ -104,3 +104,10 @@ Use TimeManager state as the authority for runtime node semantics. This story on
 - Unlocks:
   - `production/epics/save-and-load-system/story-004-autosave-triggers.md`
   - `production/epics/save-and-load-system/story-005-save-integrity-atomic-commit.md`
+
+## Completion Notes
+**Completed**: 2026-05-27
+**Criteria**: 5/5 passing
+**Deviations**: None
+**Test Evidence**: Logic test at `tests/unit/save/stable_node_save_gate_test.gd` (runtime verified with `STABLE_NODE_SAVE_GATE_TEST_PASS`)
+**Code Review**: Complete (`APPROVED WITH SUGGESTIONS`)

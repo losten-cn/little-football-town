@@ -1,12 +1,12 @@
 # Story 004: 接入自动保存触发与延后保存队列
 
 > **Epic**: 存档与读档系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-28
 
 ## Context
 
@@ -43,11 +43,11 @@ This story implements only the mapped rules above; neighbouring requirements rem
 
 *From GDD `design/gdd/save-and-load-system.md`, scoped to this story:*
 
-- [ ] Autosave triggers on `match_completed`, `time_season_ended`, `town_facility_completed`, and `WM_CLOSE_REQUEST`.
-- [ ] Autosave targets `user://saves/autosave.tres`.
-- [ ] Autosave obeys the same stable-node gate as manual save.
-- [ ] If triggered at an unstable node, save is delayed to the next stable node or rejected with clear semantics.
-- [ ] Repeated deferred autosave requests coalesce into one latest-state autosave.
+- [x] Autosave triggers on `match_completed`, `time_season_ended`, `town_facility_completed`, and `WM_CLOSE_REQUEST`.
+- [x] Autosave targets `user://saves/autosave.tres`.
+- [x] Autosave obeys the same stable-node gate as manual save.
+- [x] If triggered at an unstable node, save is delayed to the next stable node or rejected with clear semantics.
+- [x] Repeated deferred autosave requests coalesce into one latest-state autosave.
 
 ---
 
@@ -104,7 +104,7 @@ Wire autosave to declared events only. Autosave may be triggered by EventBus or 
 **Required evidence**:
 - Integration: `tests/integration/save/autosave_triggers_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and verified — `AUTOSAVE_TRIGGERS_TEST_PASS`
 
 ---
 
@@ -115,3 +115,10 @@ Wire autosave to declared events only. Autosave may be triggered by EventBus or 
 - Unlocks:
   - `production/epics/save-and-load-system/story-005-save-integrity-atomic-commit.md`
   - `production/epics/save-and-load-system/story-009-save-summary-performance.md`
+
+## Completion Notes
+**Completed**: 2026-05-28
+**Criteria**: 5/5 passing
+**Deviations**: Advisory only — headless verification uses `tests/integration/save/autosave_triggers_runner.gd` to host the Node-based integration test, while the evidence file remains `tests/integration/save/autosave_triggers_test.gd`.
+**Test Evidence**: Integration test at `tests/integration/save/autosave_triggers_test.gd` — PASS via `tests/integration/save/autosave_triggers_runner.gd` (`AUTOSAVE_TRIGGERS_TEST_PASS`)
+**Code Review**: Complete — no blocking issues

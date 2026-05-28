@@ -1,12 +1,12 @@
 # Story 001: 建立 SaveSnapshot 与存档槽结构
 
 > **Epic**: 存档与读档系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -113,3 +113,10 @@ Define `SaveSnapshot` as a Resource with exported fields for `save_version`, tim
   - `production/epics/save-and-load-system/story-002-save-registration-snapshot.md`
   - `production/epics/save-and-load-system/story-005-save-integrity-atomic-commit.md`
   - `production/epics/save-and-load-system/story-009-save-summary-performance.md`
+
+## Completion Notes
+**Completed**: 2026-05-26
+**Criteria**: 5/5 passing
+**Deviations**: `snapshot_metadata` field name drifts from ADR example `metadata`; `SaveManager` includes early registration/assembly helpers beyond Story 001 minimum scope.
+**Test Evidence**: Integration test at `tests/integration/save/save_snapshot_slots_test.gd` (runtime verified with `SAVE_SNAPSHOT_SLOTS_TEST_PASS`)
+**Code Review**: Complete

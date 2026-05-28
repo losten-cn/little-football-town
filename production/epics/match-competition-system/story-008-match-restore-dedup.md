@@ -1,12 +1,12 @@
 # Story 008: 实现存档降级恢复与重复触发防重赛
 
 > **Epic**: 比赛竞技系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: 2026-05-19
-> **Last Updated**: set by /dev-story when implementation begins
+> **Last Updated**: 2026-05-26
 
 ## Context
 
@@ -92,7 +92,18 @@ Implement `_serialize()` and `_deserialize()` for MatchCompetition/MatchSimulati
 **Required evidence**:
 - Integration: `tests/integration/match/match_restore_dedup_test.gd` OR playtest doc
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — tests/integration/match/match_restore_dedup_test.gd
+
+---
+
+## Completion Notes
+
+**Completed**: 2026-05-27  
+**Criteria**: 3/3 passing  
+**Deviations**: None  
+**Test Evidence**: Integration: `tests/integration/match/match_restore_dedup_test.gd`  
+**Code Review**: Approved with suggestions  
+**Review Notes**: Restore-boundary behavior, mid-match degradation, and confirmed-result dedup all passed review. Remaining feedback is advisory only around making the retrigger event-contract assertion more explicit if that contract is later frozen.
 
 ---
 
