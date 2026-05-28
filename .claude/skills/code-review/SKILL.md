@@ -36,7 +36,7 @@ Search for ADR references in, in priority order:
 2. Header comments at the top of the implementation files
 3. Commit messages referencing these files (`git log --oneline -- [file]`)
 
-Look for patterns like `ADR-NNN` or `docs/architecture/ADR-`.
+Look for patterns like `ADR-NNN` or `docs/architecture/adr-`.
 
 If no ADR references found, note: "No ADR references found — ADR compliance check skipped. For full ADR compliance review, provide the story path: `/code-review [files] [story-path]`."
 

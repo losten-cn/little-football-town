@@ -47,120 +47,120 @@ state_ownership:
   - state: timeline_position
     status: active
     owner_system: TimeManager
-    adr: docs/architecture/ADR-0002-event-signal-architecture.md
+    adr: docs/architecture/adr-0002-event-signal-architecture.md
     interface: "TimeManager.get_state().timeline_position (read-only float)"
     write_access: TimeManager-only
     referenced_by:
-      - docs/architecture/ADR-0002-event-signal-architecture.md
+      - docs/architecture/adr-0002-event-signal-architecture.md
     added: 2026-05-16
 
   - state: game_phase
     status: active
     owner_system: TimeManager
-    adr: docs/architecture/ADR-0002-event-signal-architecture.md
+    adr: docs/architecture/adr-0002-event-signal-architecture.md
     interface: "TimeManager.get_state().phase (read-only String: Planning|Action Resolution|Match Trigger|Match In Progress|Post-Match Settlement|Stage Settlement|Season Settlement|Offseason|SeasonStart)"
     write_access: TimeManager-only
     referenced_by:
-      - docs/architecture/ADR-0002-event-signal-architecture.md
-      - docs/architecture/ADR-0001-scene-management.md
+      - docs/architecture/adr-0002-event-signal-architecture.md
+      - docs/architecture/adr-0001-scene-management.md
     added: 2026-05-16
 
   - state: season_state
     status: active
     owner_system: TimeManager
-    adr: docs/architecture/ADR-0002-event-signal-architecture.md
+    adr: docs/architecture/adr-0002-event-signal-architecture.md
     interface: "TimeManager.get_state() (read-only Dictionary: season_number, current_stage, season_units_completed, season_progress_ratio)"
     write_access: TimeManager-only
     referenced_by:
-      - docs/architecture/ADR-0002-event-signal-architecture.md
+      - docs/architecture/adr-0002-event-signal-architecture.md
   - state: player_attributes
     status: active
     owner_system: PlayerDevelopment
-    adr: docs/architecture/ADR-0005-player-data-model.md
+    adr: docs/architecture/adr-0005-player-data-model.md
     interface: "player.attributes.spd.current / .potential (read-only from external systems). Player.Attributes.get_attr(name) for programmatic access. Write via PlayerDevelopment.train() only."
     write_access: PlayerDevelopment-only
     referenced_by:
-      - docs/architecture/ADR-0005-player-data-model.md
+      - docs/architecture/adr-0005-player-data-model.md
     added: 2026-05-16
 
   - state: player_tier
     status: active
     owner_system: PlayerDevelopment
-    adr: docs/architecture/ADR-0005-player-data-model.md
+    adr: docs/architecture/adr-0005-player-data-model.md
     interface: "player.tier: String (read-only: 普通 | 优秀 | 明星 | 传奇胚子). Determines potential band and training_efficiency range."
     write_access: PlayerDevelopment-only (set at creation; changes only via revision system)
     referenced_by:
-      - docs/architecture/ADR-0005-player-data-model.md
+      - docs/architecture/adr-0005-player-data-model.md
     added: 2026-05-16
 
   - state: match_state
     status: active
     owner_system: MatchCompetition
-    adr: docs/architecture/ADR-0006-match-simulation-architecture.md
+    adr: docs/architecture/adr-0006-match-simulation-architecture.md
     interface: "MatchData.state (read-only State enum: IDLE|ENTRY|PRE_MATCH_PREPARATION|CONFIRMATION|FIRST_HALF|HALFTIME_ADJUSTMENT|SECOND_HALF|RESULT_REVIEW|SETTLEMENT_HANDOFF)"
     write_access: MatchCompetition-only (via advance() state machine)
     referenced_by:
-      - docs/architecture/ADR-0006-match-simulation-architecture.md
+      - docs/architecture/adr-0006-match-simulation-architecture.md
     added: 2026-05-16
 
   - state: funds
     status: active
     owner_system: EconomyManager
-    adr: docs/architecture/ADR-0007-economy-transaction-framework.md
+    adr: docs/architecture/adr-0007-economy-transaction-framework.md
     interface: "EconomyManager.funds: float (read-only). Write via execute_transaction() or accredit_match_reward() only."
     write_access: EconomyManager-only
     referenced_by:
-      - docs/architecture/ADR-0007-economy-transaction-framework.md
+      - docs/architecture/adr-0007-economy-transaction-framework.md
     added: 2026-05-17
 
   - state: action_points
     status: active
     owner_system: EconomyManager
-    adr: docs/architecture/ADR-0007-economy-transaction-framework.md
+    adr: docs/architecture/adr-0007-economy-transaction-framework.md
     interface: "EconomyManager.action_points: float (read-only). Floor: 1.0. Write via execute_transaction() only."
     write_access: EconomyManager-only
     referenced_by:
-      - docs/architecture/ADR-0007-economy-transaction-framework.md
+      - docs/architecture/adr-0007-economy-transaction-framework.md
     added: 2026-05-17
 
   - state: town_grid
     status: active
     owner_system: TownBuilding
-    adr: docs/architecture/ADR-0008-town-grid-facility-system.md
+    adr: docs/architecture/adr-0008-town-grid-facility-system.md
     interface: "TownBuilding.get_facility_at(grid_x, grid_y) → Facility (read-only); TownBuilding.get_facility(id) → Facility (read-only). Write via build_facility(), upgrade_facility(), demolish_facility() only."
     write_access: TownBuilding-only
     referenced_by:
-      - docs/architecture/ADR-0008-town-grid-facility-system.md
+      - docs/architecture/adr-0008-town-grid-facility-system.md
     added: 2026-05-17
 
   - state: facility_bonuses
     status: active
     owner_system: TownBuilding
-    adr: docs/architecture/ADR-0008-town-grid-facility-system.md
+    adr: docs/architecture/adr-0008-town-grid-facility-system.md
     interface: "TownBuilding.compute_*() read-only methods (compute_training_efficiency_multiplier, compute_home_advantage_bonus, compute_stadium_revenue_multiplier, compute_facility_ap_bonus, compute_injury_recovery_reduction, compute_potential_floor_boost, compute_youth_training_bonus, compute_facility_training_multiplier, compute_facility_total_maintenance). Consumed by PlayerDevelopment, MatchCompetition, EconomyManager."
     write_access: TownBuilding-only (recomputed on facility state change)
     referenced_by:
-      - docs/architecture/ADR-0008-town-grid-facility-system.md
+      - docs/architecture/adr-0008-town-grid-facility-system.md
     added: 2026-05-17
 
   - state: league_standings
     status: active
     owner_system: LeagueStructure
-    adr: docs/architecture/ADR-0009-league-competition-structure.md
+    adr: docs/architecture/adr-0009-league-competition-structure.md
     interface: "LeagueStructure.get_standings() → Array[StandingsEntry] (read-only, sorted by points→GD→GF→team_id); LeagueStructure.get_player_rank() → int. Write via _on_match_completed() only."
     write_access: LeagueStructure-only
     referenced_by:
-      - docs/architecture/ADR-0009-league-competition-structure.md
+      - docs/architecture/adr-0009-league-competition-structure.md
     added: 2026-05-17
 
   - state: season_schedule
     status: active
     owner_system: LeagueStructure
-    adr: docs/architecture/ADR-0009-league-competition-structure.md
+    adr: docs/architecture/adr-0009-league-competition-structure.md
     interface: "LeagueStructure.get_upcoming_matches(count) → Array[ScheduledMatch]; LeagueStructure.get_season_progress() → {completed, total, progress}. Schedule generated at season start via circle method, never modified mid-season."
     write_access: LeagueStructure-only (generated once at season start)
     referenced_by:
-      - docs/architecture/ADR-0009-league-competition-structure.md
+      - docs/architecture/adr-0009-league-competition-structure.md
     added: 2026-05-17
 
 # Example:
@@ -204,11 +204,11 @@ interfaces:
       - PlayerMgmtUI
       - MatchPerfUI
       - Onboarding
-    adr: docs/architecture/ADR-0002-event-signal-architecture.md
+    adr: docs/architecture/adr-0002-event-signal-architecture.md
     signal_signature: "EventBus.emit(event_name: String, payload: Dictionary) — 16 signals defined in ADR-0002"
     referenced_by:
-      - docs/architecture/ADR-0002-event-signal-architecture.md
-      - docs/architecture/ADR-0001-scene-management.md
+      - docs/architecture/adr-0002-event-signal-architecture.md
+      - docs/architecture/adr-0001-scene-management.md
     added: 2026-05-16
 
   - contract: time_node_scheduling
@@ -221,10 +221,10 @@ interfaces:
       - LeagueStructure (time_season_ended)
       - TownBuilding (time_stage_settled)
       - SaveManager (time_phase_changed)
-    adr: docs/architecture/ADR-0002-event-signal-architecture.md
+    adr: docs/architecture/adr-0002-event-signal-architecture.md
     signal_signature: "via EventBus: time_phase_changed, time_match_triggered, time_stage_settled, time_season_ended"
     referenced_by:
-      - docs/architecture/ADR-0002-event-signal-architecture.md
+      - docs/architecture/adr-0002-event-signal-architecture.md
     added: 2026-05-16
 
   - contract: save_system_registration
@@ -238,10 +238,10 @@ interfaces:
       - EconomyManager
       - TownBuilding
       - LeagueStructure
-    adr: docs/architecture/ADR-0003-save-load-persistence.md
+    adr: docs/architecture/adr-0003-save-load-persistence.md
     signal_signature: "SaveManager.register_system(system_id: String, serialize_fn: Callable, deserialize_fn: Callable) — register then SaveManager.save() collects from all registered systems"
     referenced_by:
-      - docs/architecture/ADR-0003-save-load-persistence.md
+      - docs/architecture/adr-0003-save-load-persistence.md
     added: 2026-05-16
 
   - contract: config_loader_access
@@ -257,10 +257,10 @@ interfaces:
       - TownBuilding
       - LeagueStructure
       - BalanceSystem
-    adr: docs/architecture/ADR-0004-data-driven-configuration.md
+    adr: docs/architecture/adr-0004-data-driven-configuration.md
     signal_signature: "ConfigLoader exposes typed properties (e.g., ConfigLoader.balance_config: BalanceConfig). Core systems read config in _ready() via direct property access. No string-keyed lookups."
     referenced_by:
-      - docs/architecture/ADR-0004-data-driven-configuration.md
+      - docs/architecture/adr-0004-data-driven-configuration.md
     added: 2026-05-16
 
   - contract: player_roster_access
@@ -274,10 +274,10 @@ interfaces:
       - EconomyManager
       - TownBuilding
       - Onboarding
-    adr: docs/architecture/ADR-0005-player-data-model.md
+    adr: docs/architecture/adr-0005-player-data-model.md
     signal_signature: "PlayerDevelopment.roster.get_player(id) → Player, roster.query_by_tier(tier) → Array[Player], roster.query_by_position(pos) → Array[Player]. Player field access via typed properties."
     referenced_by:
-      - docs/architecture/ADR-0005-player-data-model.md
+      - docs/architecture/adr-0005-player-data-model.md
     added: 2026-05-16
 
   - contract: match_result_packet
@@ -289,10 +289,10 @@ interfaces:
       - EconomyManager
       - TimeManager
       - MatchPerfUI
-    adr: docs/architecture/ADR-0006-match-simulation-architecture.md
+    adr: docs/architecture/adr-0006-match-simulation-architecture.md
     signal_signature: "MatchResultPacket.to_dict() → Dictionary: {home_score, away_score, result, events, player_performances, condition_changes, morale_changes, win_reasons, match_stats, post_match_tags}. Delivered via EventBus match_completed signal."
     referenced_by:
-      - docs/architecture/ADR-0006-match-simulation-architecture.md
+      - docs/architecture/adr-0006-match-simulation-architecture.md
     added: 2026-05-16
 
   - contract: economy_transaction_execution
@@ -303,10 +303,10 @@ interfaces:
       - MatchCompetition (accredit_match_reward)
       - TownBuilding (accredit_facility_cost)
       - PlayerDevelopment (accredit_training_cost)
-    adr: docs/architecture/ADR-0007-economy-transaction-framework.md
+    adr: docs/architecture/adr-0007-economy-transaction-framework.md
     signal_signature: "execute_transaction(tx: Transaction) → Dictionary {success: bool, tx_id: int}. All resource mutations route through this single entry point. External systems use typed accredit_* methods."
     referenced_by:
-      - docs/architecture/ADR-0007-economy-transaction-framework.md
+      - docs/architecture/adr-0007-economy-transaction-framework.md
     added: 2026-05-17
 
   - contract: town_facility_signals
@@ -318,10 +318,10 @@ interfaces:
       - PlayerDevelopment (town_facility_completed → refresh training multipliers)
       - MatchCompetition (town_grid_changed → refresh home advantage)
       - EconomyManager (town_facility_completed → refresh maintenance cost)
-    adr: docs/architecture/ADR-0008-town-grid-facility-system.md
+    adr: docs/architecture/adr-0008-town-grid-facility-system.md
     signal_signature: "via EventBus: town_facility_completed(facility_id, facility_type, level, grid_x, grid_y), town_grid_changed(action, facility_id, ...), town_facility_demolished(facility_id, facility_type, level)"
     referenced_by:
-      - docs/architecture/ADR-0008-town-grid-facility-system.md
+      - docs/architecture/adr-0008-town-grid-facility-system.md
     added: 2026-05-17
 
   - contract: league_season_signals
@@ -332,10 +332,10 @@ interfaces:
       - MainLoopUI (league_standings_updated → refresh standings display; league_season_started → show new season banner)
       - EconomyManager (league_season_completed → consume promotion/relegation tags for prize calculation)
       - MatchCompetition (league_season_started → prepare opponent data for new season)
-    adr: docs/architecture/ADR-0009-league-competition-structure.md
+    adr: docs/architecture/adr-0009-league-competition-structure.md
     signal_signature: "via EventBus: league_standings_updated(season_number, standings: Array[StandingsEntry]), league_season_completed(season_number, tier, player_rank, points, promoted: bool, relegated: bool, next_tier, summary: Dictionary), league_season_started(season_number, tier, tier_name, team_count)"
     referenced_by:
-      - docs/architecture/ADR-0009-league-competition-structure.md
+      - docs/architecture/adr-0009-league-competition-structure.md
     added: 2026-05-17
 
 # Example:
@@ -399,50 +399,50 @@ api_decisions:
     status: active
     api: Godot Resource (.tres) via ResourceSaver.save() and ResourceLoader.load()
     not: JSON (.json), ConfigFile (.cfg), SQLite   # explicitly rejected in ADR-0003
-    adr: docs/architecture/ADR-0003-save-load-persistence.md
+    adr: docs/architecture/adr-0003-save-load-persistence.md
     reason: ".tres provides type-safe @export var serialization, Editor visibility for debugging, and native nested Resource handling. JSON requires manual type coercion; ConfigFile lacks nested support; SQLite adds native dependency for no benefit in single-player snapshot saves."
     referenced_by:
-      - docs/architecture/ADR-0003-save-load-persistence.md
+      - docs/architecture/adr-0003-save-load-persistence.md
     added: 2026-05-16
 
   - purpose: custom_resource_config
     status: active
     api: Godot Custom Resources (.tres) via class_name extends Resource with @export var and validate()
     not: JSON (.json), ConfigFile (.cfg), inline GDScript const   # explicitly rejected in ADR-0004
-    adr: docs/architecture/ADR-0004-data-driven-configuration.md
+    adr: docs/architecture/adr-0004-data-driven-configuration.md
     reason: "Custom Resources provide type-safe @export var fields, Editor Inspector editing for designers, native ResourceLoader for fast binary deserialization, and self-validating validate() methods. JSON lacks type safety and Editor integration. ConfigFile has no nested support and is string-keyed. Inline const violates the hardcoded-values forbidden pattern."
     referenced_by:
-      - docs/architecture/ADR-0004-data-driven-configuration.md
+      - docs/architecture/adr-0004-data-driven-configuration.md
     added: 2026-05-16
 
   - purpose: player_refcounted_not_resource
     status: active
     api: RefCounted (class_name Player extends RefCounted) with manual to_dict()/from_dict() serialization
     not: Player extends Resource, Dictionary-based player   # explicitly rejected in ADR-0005
-    adr: docs/architecture/ADR-0005-player-data-model.md
+    adr: docs/architecture/adr-0005-player-data-model.md
     reason: "RefCounted is lighter than Resource per instance. 100 players as Resources = ~10KB wasted + file-per-instance expectation. Manual to_dict()/from_dict() gives explicit control over serialization boundary — only authoritative fields are saved, derived fields (effective) are recomputed on load."
     referenced_by:
-      - docs/architecture/ADR-0005-player-data-model.md
+      - docs/architecture/adr-0005-player-data-model.md
     added: 2026-05-16
 
   - purpose: facility_refcounted_not_resource
     status: active
     api: RefCounted (class_name Facility extends RefCounted) with manual to_dict()/from_dict() serialization
     not: Facility extends Resource, Dictionary-based facility   # explicitly rejected in ADR-0008
-    adr: docs/architecture/ADR-0008-town-grid-facility-system.md
+    adr: docs/architecture/adr-0008-town-grid-facility-system.md
     reason: "RefCounted is lighter than Resource per instance (max 25 facilities). Manual to_dict()/from_dict() is consistent with Player model (ADR-0005). Grid stores object references — Resources would add file-path tracking overhead for in-memory-only objects."
     referenced_by:
-      - docs/architecture/ADR-0008-town-grid-facility-system.md
+      - docs/architecture/adr-0008-town-grid-facility-system.md
     added: 2026-05-17
 
   - purpose: league_refcounted_not_resource
     status: active
     api: RefCounted (class_name LeagueSeason, StandingsEntry, ScheduledMatch extends RefCounted) with manual to_dict()/from_dict() serialization
     not: LeagueSeason extends Resource, Dictionary-based season state   # explicitly rejected in ADR-0009
-    adr: docs/architecture/ADR-0009-league-competition-structure.md
+    adr: docs/architecture/adr-0009-league-competition-structure.md
     reason: "RefCounted is consistent with Player (ADR-0005), Facility (ADR-0008), and Transaction (ADR-0007). Season state is runtime data that changes every match — Resource file-path tracking is unnecessary overhead for 38 matches × ~150 bytes = ~6KB of data."
     referenced_by:
-      - docs/architecture/ADR-0009-league-competition-structure.md
+      - docs/architecture/adr-0009-league-competition-structure.md
     added: 2026-05-17
 
 # Example:
@@ -472,56 +472,56 @@ forbidden_patterns:
     status: active
     description: "Systems must not connect signals directly to other system nodes. All cross-system communication must route through EventBus.emit() / EventBus.subscribe()."
     why: "Direct signal connections create tight coupling between producer and consumer nodes. This violates the Core↔UI ownership boundary (ADR-0001) and prevents save/load from capturing communication state."
-    adr: docs/architecture/ADR-0002-event-signal-architecture.md
+    adr: docs/architecture/adr-0002-event-signal-architecture.md
     added: 2026-05-16
 
   - pattern: direct_file_access_by_core_systems
     status: active
     description: "Core systems must not call FileAccess, ResourceSaver, or ResourceLoader directly. Only SaveManager touches disk. Core systems provide serialize()/deserialize() Callables via SaveManager.register_system()."
     why: "Direct file access by Core systems creates multiple persistence paths, breaking the unified save/load boundary. SaveManager's ordered deserialization, version migration, and integrity checking cannot function if systems bypass it."
-    adr: docs/architecture/ADR-0003-save-load-persistence.md
+    adr: docs/architecture/adr-0003-save-load-persistence.md
     added: 2026-05-16
 
   - pattern: hardcoded_tuning_values
     status: active
     description: "Game tuning values (formula parameters, resource caps, phase durations, training costs, etc.) must not be hardcoded as GDScript const in src/. All tuning values must live in res://config/*.tres Custom Resource files and be read via ConfigLoader typed properties."
     why: "Hardcoded values require recompilation to change, prevent designer tuning without code access, and scatter related parameters across files. Data-driven config enables Editor Inspector editing, centralizes all tuning knobs, and enables unit tests that load specific config values in isolation."
-    adr: docs/architecture/ADR-0004-data-driven-configuration.md
+    adr: docs/architecture/adr-0004-data-driven-configuration.md
     added: 2026-05-16
 
   - pattern: direct_player_attribute_write
     status: active
     description: "External systems must not directly assign to Player.Attributes fields (e.g., player.attributes.spd.current += 5). All attribute changes must go through PlayerDevelopment.train() or a formally declared interface. MatchSimulation may READ attributes but must never write them."
     why: "Direct attribute writes from multiple systems create untraceable state changes, break the serialization boundary, and violate the single-writer-per-state ownership model established in ADR-0001."
-    adr: docs/architecture/ADR-0005-player-data-model.md
+    adr: docs/architecture/adr-0005-player-data-model.md
     added: 2026-05-16
 
   - pattern: direct_match_outcome_override
     status: active
     description: "External systems must not directly set MatchResultPacket.result, home_score, or away_score. All match outcomes are determined exclusively by MatchSimulation's event generation pipeline. LeagueStructure and EconomyManager consume the result packet as read-only."
     why: "Direct outcome overrides would invalidate the match simulation's event generation, player performance tracking, and win reason analysis. It would create untraceable result manipulation and break the '看懂为什么输赢' design goal."
-    adr: docs/architecture/ADR-0006-match-simulation-architecture.md
+    adr: docs/architecture/adr-0006-match-simulation-architecture.md
     added: 2026-05-16
 
   - pattern: direct_resource_balance_mutation
     status: active
     description: "External systems must not directly assign to EconomyManager.funds, .action_points, or .research_points. All resource mutations must go through execute_transaction() or typed accredit_* entry points (accredit_facility_cost, accredit_training_cost, accredit_match_reward)."
     why: "Direct balance writes bypass validation (floor enforcement, debt ceiling), break the audit trail (no Transaction log entry), and violate the GDD Core Rule that EconomyManager is the sole authorizer of resource changes."
-    adr: docs/architecture/ADR-0007-economy-transaction-framework.md
+    adr: docs/architecture/adr-0007-economy-transaction-framework.md
     added: 2026-05-17
 
   - pattern: direct_facility_state_write
     status: active
     description: "External systems must not directly assign to Facility fields (level, state, grid_x, grid_y, remaining_construction_units). All facility mutations must go through TownBuilding.build_facility(), .upgrade_facility(), or .demolish_facility(). External systems read facility bonuses via compute_*() methods only."
     why: "Direct facility writes bypass state machine validation (e.g., upgrading an already-upgrading facility), break adjacency recomputation triggers, and violate the single-writer-per-state ownership model."
-    adr: docs/architecture/ADR-0008-town-grid-facility-system.md
+    adr: docs/architecture/adr-0008-town-grid-facility-system.md
     added: 2026-05-17
 
   - pattern: direct_standings_write
     status: active
     description: "External systems must not directly assign to StandingsEntry fields (points, wins, draws, goals_for, etc.) or modify the season schedule. All standings updates go through LeagueStructure._on_match_completed() which consumes MatchResultPacket from EventBus."
     why: "Direct standings writes bypass the match_id deduplication check, break the single-writer-per-state ownership model, and would create untraceable ranking manipulation. Standings are a deterministic projection of match results — bypassing the match→standings pipeline breaks auditability."
-    adr: docs/architecture/ADR-0009-league-competition-structure.md
+    adr: docs/architecture/adr-0009-league-competition-structure.md
     added: 2026-05-17
 
 # Example:
