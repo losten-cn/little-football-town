@@ -1,0 +1,64 @@
+name: Automated Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Run Godot Headless Tests
+    runs-on: ubuntu-latest
+
+    env:
+      GODOT_VERSION: 4.6.3-stable
+      GODOT_ZIP: Godot_v4.6.3-stable_linux.x86_64.zip
+      GODOT_URL: https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip
+
+      - name: Download Godot
+        run: |
+          curl -L "$GODOT_URL" -o "$GODOT_ZIP"
+          unzip -q "$GODOT_ZIP" -d godot-bin
+          chmod +x godot-bin/Godot_v4.6.3-stable_linux.x86_64
+
+      - name: Run automated tests
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p test-logs
+          fail_count=0
+
+          while IFS= read -r test_file; do
+            test_res_path="res://${test_file#./}"
+            log_file="test-logs/$(basename "${test_file%.gd}").log"
+            echo "Running ${test_res_path}"
+            if ! godot-bin/Godot_v4.6.3-stable_linux.x86_64 --headless --path "$GITHUB_WORKSPACE" \
+              --script res://tests/test_script_runner.gd -- \
+              --test-script="$test_res_path" 2>&1 | tee "$log_file"; then
+              fail_count=$((fail_count + 1))
+            fi
+          done < <(find ./tests/unit ./tests/integration -type f -name '*_test.gd' | sort)
+
+          if [ "$fail_count" -ne 0 ]; then
+            echo "${fail_count} automated test(s) failed."
+            exit 1
+          fi
+
+      - name: Upload test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-test-logs
+          path: test-logs/

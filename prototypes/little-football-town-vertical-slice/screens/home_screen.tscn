@@ -1,0 +1,42 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://prototypes/little-football-town-vertical-slice/screens/home_screen.gd" id="1_home"]
+
+[node name="HomeScreen" type="VBoxContainer"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_home")
+theme_override_constants/separation = 16
+
+[node name="Header" type="VBoxContainer" parent="."]
+theme_override_constants/separation = 8
+
+[node name="PhaseLabel" type="Label" parent="Header"]
+text = "当前阶段：Planning"
+
+[node name="DateLabel" type="Label" parent="Header"]
+text = "日期：Week 1 / Day 1"
+
+[node name="MatchLabel" type="Label" parent="Header"]
+text = "下一场：待定"
+
+[node name="ResourceLabel" type="Label" parent="Header"]
+text = "经费 0 / AP 0"
+
+[node name="Summary" type="RichTextLabel" parent="."]
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+text = "[b]目标[/b]：先看球员，再安排一次训练，然后进入周末比赛。"
+
+[node name="Actions" type="HBoxContainer" parent="."]
+theme_override_constants/separation = 12
+
+[node name="TeamButton" type="Button" parent="Actions"]
+text = "查看球队 / 训练"
+size_flags_horizontal = 3
+
+[node name="MatchButton" type="Button" parent="Actions"]
+text = "进入比赛中心"
+size_flags_horizontal = 3

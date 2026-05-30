@@ -1,42 +1,67 @@
 # Active Session State
 
-Task: Core epics story decomposition
-Date: 2026-05-24
-Pipeline: Production planning — create-stories for Foundation and Core epics
+Task: Vertical slice scope confirmed for Pre-Production
+Date: 2026-05-30
+Pipeline: Pre-Production vertical slice planning — scope locked, implementation not started
 
 ## Pipeline Progress
 
 | Area | Status |
 |------|--------|
-| Foundation epics | Complete — balance, save/load, time/season each have 9 stories |
-| Core epics | Complete — player development, match, economy, town each have 9 stories |
-| Epic index | Updated — all Foundation + Core epics list 9 stories |
-| Sprint implementation | Pending — P0/P1/P2 story-readiness gaps repaired; run `/story-readiness` then `/dev-story` per selected story |
+| Technical Setup → Pre-Production gate | Complete with CONCERNS — blockers cleared, report written to `production/gate-checks/2026-05-30-technical-setup-to-pre-production.md` |
+| Test infrastructure blocker | Complete — added `tests/test_script_runner.gd`, `tests/README.md`, `tests/smoke/critical-paths.md`, `.github/workflows/tests.yml` |
+| Test framework documentation alignment | Complete — `.claude/docs/technical-preferences.md` now reflects the custom headless runner path |
+| Vertical slice scope | Confirmed — ready to request prototype directory creation and begin implementation |
 
-## Files Updated This Session
+## Vertical Slice Checkpoint
 
-- `production/epics/match-competition-system/` — 9 story files written, EPIC story table updated
-- `production/epics/economy-management-system/` — 9 story files written, EPIC story table updated
-- `production/epics/town-building-system/` — 9 story files written, EPIC story table updated
-- `production/epics/index.md` — match, economy, and town story counts updated to `9 stories`
-- `production/epics/**/story-*.md` — P1 readiness pass: added concrete GDD/TR rule mappings and standardized dependency references
-- `production/epics/**/story-*.md` — P2 readiness pass: added explicit performance notes and clarified asset-like resource/output paths
+- **Concept**: 足球小镇 / Little Football Town
+- **Slice name**: `训练日 → 比赛日 → 赛后回流`
+- **Validation question**: 玩家能否在 5 分钟内、无需开发者讲解，完成一次“查看球队 → 安排训练 → 推进到比赛 → 完成比赛 → 查看赛后反馈 → 回到主界面继续做培养决策”的完整闭环，并明确感受到温馨、低压力、长期成长的足球小镇经营体验？
+- **Current phase**: Phase 4 — Implement
+- **Art/UI quality level**: Placeholder art acceptable; UI hierarchy, interaction clarity, and feedback readability must be representative of production direction.
+- **Hard time limit**: 5 working days; if the full loop is not demonstrable by Day 3, cut scope and reassess.
 
-## Known Review Notes
+## Systems In Scope
 
-- Economy: `funds` debt policy differs between one GDD wording and EPIC/TR/ADR; story 002 follows EPIC/TR/ADR debt-capable funds baseline.
-- Economy: `TR-economy-006` mentions `season_bonus`, while the GDD post-match formula uses `league_tier_multiplier × match_result_multiplier × stadium_revenue_multiplier`; story 006 flags this for readiness review.
-- Economy: Budget Preview now has registered `TR-economy-013`; story 004 references the formal TR-ID instead of the former placeholder.
-- Town: GDD/EPIC name `Demolishing`, while ADR-0008 treats demolition as immediate for MVP; story 005 implements it as an instantaneous controlled transition and flags the mismatch.
+- **Foundation**: `ConfigLoader`, `TimeManager`, `SaveManager`, `EventBus`, `ScreenManager`
+- **Core**: `PlayerDevelopment`, `MatchCompetition`, minimum `EconomyManager`, minimum `LeagueStructure`
+- **Presentation**: `MainLoopUI`, minimum `PlayerMgmtUI`, minimum `MatchPerfUI`
+- **Support**: minimum onboarding / “what to do next” guidance only
+
+## Loop In Scope
+
+`Home → Roster/Training → one training resolution → advance to match day → Match Center / Pre-Match → one full match → Match Result → return Home`
+
+## Explicitly Out of Scope
+
+- Full town-building gameplay
+- Full economy depth
+- Multiple-season progression
+- Reputation / achievements
+- Random events
+- Skills & traits
+- Full onboarding/tutorial stack
+- Deep schedule interaction
+- Complete player sorting/filtering suite
+- Audio polish
+- Multi-run / New Game+
+
+## Known Concerns to Carry Forward
+
+- `production/stage.txt` is still absent; stage-aware workflows remain inference-based until a future PASS gate confirms advancement.
+- `TR-economy-008` and `TR-town-013` remain partial traceability items and must be attached to later story acceptance criteria or ADR follow-up.
+- One sampled unit test passes via the new runner but emits Godot object/resource leak warnings at exit; investigate before the Production gate.
+- Scope discipline is critical: do not expand this slice into full HUD, full Player UI, and full Match UI production scope.
 
 ## Next Recommended Step
 
-Run `/story-readiness` on the first story selected for implementation, then `/dev-story` if readiness passes.
+Request permission to create the vertical-slice prototype directory and begin implementation.
 
 <!-- STATUS -->
-Epic: Balance System
-Feature: Consistency Scan
-Task: Story 008 complete; next recommended work is downstream player-development validation or broader downstream readiness work
+Epic: Pre-Production
+Feature: Vertical Slice
+Task: Scope confirmed for “训练日 → 比赛日 → 赛后回流”; awaiting approval to create prototype directory and start implementation
 <!-- /STATUS -->
 
 ## Session Extract — /dev-story 2026-05-25

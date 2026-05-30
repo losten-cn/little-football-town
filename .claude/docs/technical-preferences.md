@@ -39,7 +39,9 @@
 
 ## Testing
 
-- **Framework**: GUT (Godot Unit Test) — `gdunit4` addon
+- **Framework**: Custom headless script runner (Godot CLI)
+- **Current Pattern**: Automated tests are Node-based GDScript scripts under `tests/unit/` and `tests/integration/`, launched headlessly via `tests/test_script_runner.gd` or story-specific `*_runner.gd` wrappers.
+- **Migration Note**: GdUnit4 or GUT may be adopted later via a dedicated migration decision, but they are not the active project-standard framework today.
 - **Minimum Coverage**: 70% on formula/logic systems (balance formulas, match simulation, economy settlement)
 - **Required Tests**: All cross-system formulas registered in `design/registry/entities.yaml` must have unit tests with boundary-value inputs. All GDD acceptance criteria for Logic-type systems must map to at least one automated test.
 
@@ -58,7 +60,7 @@
 ## Allowed Libraries / Addons
 
 <!-- Add approved third-party dependencies here -->
-- **GUT** (gdunit4) — unit testing framework
+- **No required third-party test addon** — the active automated test path uses the project's custom headless runner
 - **TBD** — additional addons approved via `/architecture-decision`
 
 ## Architecture Decisions Log
@@ -96,8 +98,9 @@
 ## Engine-Specific Test Commands
 
 ### Godot 4 (GDScript)
-- Unit tests: `godot --headless -s addons/gut/gut_cmdln.gd -gdir=res://test/unit -gexit`
-- Integration tests: `godot --headless -s addons/gut/gut_cmdln.gd -gdir=res://test/integration -gexit`
+- Single unit/integration test: `godot --headless --path <project> --script res://tests/test_script_runner.gd -- --test-script=res://tests/unit/..._test.gd`
+- Single integration test: `godot --headless --path <project> --script res://tests/test_script_runner.gd -- --test-script=res://tests/integration/..._test.gd`
+- CI path: `.github/workflows/tests.yml` enumerates `*_test.gd` files and runs them through `tests/test_script_runner.gd`
 
 ### Unity (C#)
 - Unit tests: `UnityTestRunner --runTests --testPlatform EditMode --testResults result.xml`

@@ -1,0 +1,53 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://prototypes/little-football-town-vertical-slice/screens/team_screen.gd" id="1_team"]
+
+[node name="TeamScreen" type="VBoxContainer"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_team")
+theme_override_constants/separation = 16
+
+[node name="Top" type="VBoxContainer" parent="."]
+
+[node name="SummaryLabel" type="Label" parent="Top"]
+text = "选择一名球员并安排一次训练。"
+autowrap_mode = 3
+
+[node name="Players" type="VBoxContainer" parent="."]
+theme_override_constants/separation = 8
+
+[node name="PlayersLabel" type="Label" parent="Players"]
+text = "球队名单"
+
+[node name="PlayerList" type="ItemList" parent="Players"]
+size_flags_vertical = 3
+select_mode = 0
+
+[node name="Training" type="VBoxContainer" parent="."]
+theme_override_constants/separation = 8
+
+[node name="TrainingLabel" type="Label" parent="Training"]
+text = "训练项目"
+
+[node name="ProjectList" type="ItemList" parent="Training"]
+size_flags_vertical = 3
+select_mode = 0
+
+[node name="Result" type="RichTextLabel" parent="."]
+fit_content = true
+scroll_active = false
+bbcode_enabled = true
+text = "[b]训练反馈[/b]\n还没有进行训练。"
+
+[node name="Actions" type="HBoxContainer" parent="."]
+theme_override_constants/separation = 12
+
+[node name="TrainButton" type="Button" parent="Actions"]
+text = "执行训练"
+size_flags_horizontal = 3
+disabled = true
+
+[node name="HomeButton" type="Button" parent="Actions"]
+text = "返回 Home"
+size_flags_horizontal = 3
