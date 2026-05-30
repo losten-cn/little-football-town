@@ -1,8 +1,8 @@
 # Active Session State
 
-Task: Vertical slice scope confirmed for Pre-Production
+Task: Vertical slice implementation started for Pre-Production
 Date: 2026-05-30
-Pipeline: Pre-Production vertical slice planning — scope locked, implementation not started
+Pipeline: Pre-Production vertical slice — scope locked, user approved prototype directory creation and implementation start
 
 ## Pipeline Progress
 
@@ -11,14 +11,14 @@ Pipeline: Pre-Production vertical slice planning — scope locked, implementatio
 | Technical Setup → Pre-Production gate | Complete with CONCERNS — blockers cleared, report written to `production/gate-checks/2026-05-30-technical-setup-to-pre-production.md` |
 | Test infrastructure blocker | Complete — added `tests/test_script_runner.gd`, `tests/README.md`, `tests/smoke/critical-paths.md`, `.github/workflows/tests.yml` |
 | Test framework documentation alignment | Complete — `.claude/docs/technical-preferences.md` now reflects the custom headless runner path |
-| Vertical slice scope | Confirmed — ready to request prototype directory creation and begin implementation |
+| Vertical slice implementation | Complete initial prototype — `prototypes/training-match-loop-vertical-slice/` contains the Home → Training → Match → Result → Home loop; Godot 4.6.2 console smoke passed with `TRAINING_MATCH_LOOP_VERTICAL_SLICE_PASS` |
 
 ## Vertical Slice Checkpoint
 
 - **Concept**: 足球小镇 / Little Football Town
 - **Slice name**: `训练日 → 比赛日 → 赛后回流`
 - **Validation question**: 玩家能否在 5 分钟内、无需开发者讲解，完成一次“查看球队 → 安排训练 → 推进到比赛 → 完成比赛 → 查看赛后反馈 → 回到主界面继续做培养决策”的完整闭环，并明确感受到温馨、低压力、长期成长的足球小镇经营体验？
-- **Current phase**: Phase 4 — Implement
+- **Current phase**: Phase 4 — Implement / initial loop ready for playtest
 - **Art/UI quality level**: Placeholder art acceptable; UI hierarchy, interaction clarity, and feedback readability must be representative of production direction.
 - **Hard time limit**: 5 working days; if the full loop is not demonstrable by Day 3, cut scope and reassess.
 
@@ -56,12 +56,12 @@ Pipeline: Pre-Production vertical slice planning — scope locked, implementatio
 
 ## Next Recommended Step
 
-Request permission to create the vertical-slice prototype directory and begin implementation.
+Manually play `res://prototypes/training-match-loop-vertical-slice/vertical_slice_main.tscn` and report whether the full Training Day → Match Day → Post-Match Return loop completes without guidance. Automated smoke passed via `D:/Program Files/godot/Godot_v4.6.2-stable_win64_console.exe --headless --path "E:/code/little-football-town" "res://prototypes/training-match-loop-vertical-slice/vertical_slice_smoke.tscn"`.
 
 <!-- STATUS -->
 Epic: Pre-Production
 Feature: Vertical Slice
-Task: Scope confirmed for “训练日 → 比赛日 → 赛后回流”; awaiting approval to create prototype directory and start implementation
+Task: Initial “训练日 → 比赛日 → 赛后回流” vertical slice implemented; awaiting Godot smoke run and manual playtest
 <!-- /STATUS -->
 
 ## Session Extract — /dev-story 2026-05-25

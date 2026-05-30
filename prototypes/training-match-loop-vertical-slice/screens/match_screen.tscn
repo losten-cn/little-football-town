@@ -1,0 +1,41 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://prototypes/training-match-loop-vertical-slice/screens/match_screen.gd" id="1_match"]
+
+[node name="MatchScreen" type="VBoxContainer"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_match")
+theme_override_constants/separation = 16
+
+[node name="Top" type="VBoxContainer" parent="."]
+theme_override_constants/separation = 8
+
+[node name="SummaryLabel" type="Label" parent="Top"]
+text = "对手：待定"
+autowrap_mode = 3
+
+[node name="StateLabel" type="Label" parent="Top"]
+text = "当前比赛状态：Idle"
+
+[node name="HistoryLabel" type="Label" parent="Top"]
+text = "状态序列："
+autowrap_mode = 3
+
+[node name="Result" type="RichTextLabel" parent="."]
+size_flags_vertical = 3
+fit_content = true
+scroll_active = false
+bbcode_enabled = true
+text = "[b]目标[/b]\n连续点击“继续推进比赛”，完成赛前确认、上半场、中场调整、下半场与赛后结算。"
+
+[node name="Actions" type="HBoxContainer" parent="."]
+theme_override_constants/separation = 12
+
+[node name="ContinueButton" type="Button" parent="Actions"]
+text = "继续推进比赛"
+size_flags_horizontal = 3
+
+[node name="HomeButton" type="Button" parent="Actions"]
+text = "返回 Home"
+size_flags_horizontal = 3
