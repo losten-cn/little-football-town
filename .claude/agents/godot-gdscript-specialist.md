@@ -86,6 +86,7 @@ Before writing any code:
   @onready var sprite: Sprite2D = $Visuals/Sprite2D    # YES - typed path
   ```
 - Enable `unsafe_*` warnings in project settings to catch untyped code
+- Typed `Dictionary` values are mandatory for stable API contracts, but Godot 4 runtime containers do not automatically become `Dictionary[String, Variant]` when they cross `Variant`, signal, serialization, `Dictionary.get(..., {})`, or untyped array boundaries. Normalize those values with a local helper before assigning them to typed dictionaries. UI/prototype view-only locals may use plain `Dictionary` when they only read scalar display values; see `.claude/docs/technical-preferences.md` → "GDScript Typed Collection Boundaries".
 
 ### Naming Conventions
 - Classes: `PascalCase` (`class_name PlayerCharacter`)

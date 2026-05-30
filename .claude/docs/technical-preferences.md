@@ -45,6 +45,28 @@
 - **Minimum Coverage**: 70% on formula/logic systems (balance formulas, match simulation, economy settlement)
 - **Required Tests**: All cross-system formulas registered in `design/registry/entities.yaml` must have unit tests with boundary-value inputs. All GDD acceptance criteria for Logic-type systems must map to at least one automated test.
 
+## GDScript Typed Collection Boundaries
+
+<!-- Added after typed Dictionary runtime failures in vertical slice UI/session flow, 2026-05-30. -->
+
+- Keep `Dictionary[String, Variant]` and `Array[Type]` for stable API contracts in `src/`, save payloads, event payloads, and test assertions that validate production interfaces.
+- Do not assign untyped runtime containers directly into typed dictionary variables. Values from `Variant`, `Dictionary.get(..., {})`, signal payloads, serialized resources, `duplicate(true)` on untyped sources, and untyped array elements must be normalized first.
+- Preferred normalization helper for typed payload contracts:
+
+  ```gdscript
+  func _to_string_variant_dictionary(value: Variant) -> Dictionary[String, Variant]:
+	var typed_dictionary: Dictionary[String, Variant] = {}
+	if value is Dictionary:
+		var source: Dictionary = value as Dictionary
+		for key: Variant in source.keys():
+			typed_dictionary[String(key)] = source[key]
+	return typed_dictionary
+  ```
+
+- In UI screens and prototypes, local view-only data pulled from session view models may use plain `Dictionary` when the code only reads scalar values for labels, buttons, or list metadata. Coerce scalars at use sites with `String()`, `int()`, `float()`, and `bool()`.
+- For loops over `Array[Dictionary]` or untyped arrays returned from runtime systems, iterate as `Variant` or plain `Dictionary`, then normalize only when passing the data into a typed API.
+- Every bug fix for typed collection boundary failures must include a regression test that exercises the original boundary path, such as binding a scene to its session and letting `_refresh()` run for at least one frame.
+
 ## Forbidden Patterns
 
 <!-- Add patterns that should never appear in this project's codebase -->
@@ -52,7 +74,7 @@
 - `instance()` — use `instantiate()` (deprecated since Godot 4.0)
 - String-based `connect("signal", obj, "method")` — use `signal.connect(callable)` (deprecated since Godot 4.0)
 - `$NodePath` in `_process()` — cache with `@onready var` (performance)
-- Untyped `Array` / `Dictionary` — use `Array[Type]` and typed dictionaries (GDScript compiler optimization)
+- Untyped `Array` / `Dictionary` for stable contracts — use `Array[Type]` and typed dictionaries for production APIs; plain local dictionaries are allowed at volatile UI/prototype `Variant` boundaries per "GDScript Typed Collection Boundaries" above
 - `TileMap` (single-node multi-layer) — use `TileMapLayer` (since Godot 4.3)
 - Hardcoded game values in `src/` — all tuning values must read from data-driven config (Custom Resources)
 - GodotPhysics3D — use Jolt Physics (default since Godot 4.6, if physics ever needed)
