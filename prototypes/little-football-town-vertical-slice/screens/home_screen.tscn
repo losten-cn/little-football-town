@@ -28,7 +28,7 @@ size_flags_vertical = 3
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
-text = "[b]目标[/b]：先看球员，再安排一次训练，然后进入周末比赛。"
+text = "[b]下一步[/b]：先点击查看球队 / 训练，完成一次训练。比赛中心按钮当前不可用，因为还没推进到周末比赛；完成训练后会自动推进到周末比赛，届时按钮会开放。"
 
 [node name="Actions" type="HBoxContainer" parent="."]
 theme_override_constants/separation = 12

@@ -40,10 +40,14 @@ func _refresh() -> void:
 	_date_label.text = "日期：%s" % String(summary.get("date_display", "Week 1 / Day 1"))
 	_match_label.text = "下一场：%s" % String(summary.get("next_match_display", "待定"))
 	_resource_label.text = "经费 %d / AP %d" % [int(summary.get("funds", 0)), int(summary.get("action_points", 0))]
-	_match_button.disabled = not bool(summary.get("can_open_match_center", false))
+	var can_open_match_center: bool = bool(summary.get("can_open_match_center", false))
+	_match_button.disabled = not can_open_match_center
 	var latest_match_result: Dictionary[String, Variant] = summary.get("latest_match_result", {})
 	if latest_match_result.is_empty():
-		_summary_label.text = "[b]目标[/b]：先看球员，再安排一次训练，然后进入周末比赛。"
+		if can_open_match_center:
+			_summary_label.text = "[b]下一步[/b]：已完成训练，时间已推进到周末比赛。比赛中心按钮现已开放，点击进入比赛中心开始本周比赛。"
+		else:
+			_summary_label.text = "[b]下一步[/b]：先点击查看球队 / 训练，完成一次训练。比赛中心按钮当前不可用，因为还没推进到周末比赛；完成训练后会自动推进到周末比赛，届时按钮会开放。"
 	else:
 		_summary_label.text = "[b]赛后总结[/b]\n%s" % String(latest_match_result.get("summary_text", "比赛已结束。"))
 
