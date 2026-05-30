@@ -23,7 +23,7 @@ func bind_session(session: Node, show_home_screen: Callable) -> void:
 	_session.state_changed.connect(_refresh)
 	_session.match_state_changed.connect(_refresh)
 	_session.match_finished.connect(_refresh)
-	var open_result: Dictionary[String, Variant] = _session.open_match_center()
+	var open_result: Dictionary = _session.open_match_center()
 	if not bool(open_result.get("success", false)):
 		_result_label.text = "[b]比赛中心不可用[/b]\n请先完成训练并推进到比赛日。"
 	_refresh()
@@ -42,14 +42,14 @@ func _exit_tree() -> void:
 func _refresh(_payload: Variant = null) -> void:
 	if _session == null:
 		return
-	var match_view: Dictionary[String, Variant] = _session.get_match_view_model()
+	var match_view: Dictionary = _session.get_match_view_model()
 	_summary_label.text = "对手：%s｜%s" % [
 		String(match_view.get("opponent_name", "待定")),
 		String(match_view.get("next_match_display", "")),
 	]
 	_state_label.text = "当前比赛状态：%s" % String(match_view.get("match_state_name", "Idle"))
 	_history_label.text = "状态序列：%s" % ", ".join(match_view.get("formal_state_history", []))
-	var latest_match_result: Dictionary[String, Variant] = match_view.get("latest_match_result", {})
+	var latest_match_result: Dictionary = match_view.get("latest_match_result", {}) as Dictionary
 	if latest_match_result.is_empty():
 		_result_label.text = "[b]目标[/b]\n连续点击“继续推进比赛”，完成赛前确认、上半场、中场调整、下半场与赛后结算。"
 		_continue_button.text = "继续推进比赛"
@@ -70,12 +70,12 @@ func _refresh(_payload: Variant = null) -> void:
 func _on_continue_pressed() -> void:
 	if _session == null:
 		return
-	var match_view: Dictionary[String, Variant] = _session.get_match_view_model()
-	var latest_match_result: Dictionary[String, Variant] = match_view.get("latest_match_result", {})
+	var match_view: Dictionary = _session.get_match_view_model()
+	var latest_match_result: Dictionary = match_view.get("latest_match_result", {}) as Dictionary
 	if latest_match_result.is_empty():
 		_session.advance_match_step()
 		return
-	var result: Dictionary[String, Variant] = _session.confirm_match_result_and_return_home()
+	var result: Dictionary = _session.confirm_match_result_and_return_home()
 	if bool(result.get("success", false)) and _show_home_screen.is_valid():
 		_show_home_screen.call()
 
