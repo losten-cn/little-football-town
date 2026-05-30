@@ -150,10 +150,10 @@ Growth Review 在 MVP 中不是占位页，而是训练完成后的必经结果�
 
 | 组件 | 类型 | 内容 | 交互 | 引用模式 |
 |------|------|------|------|----------|
-| 返回按钮 | Icon Button | ← 返回 | 返回来源页（球员详情或小镇主视图） | #4 Icon Button |
-| 球员摘要 | Stat Display | 32×32px 头像 + 名字 + 稀有度边框 + 位置标签 + 综合评分 | 只读身份锚点 | #12 Data Card |
+| 返回按钮 | Icon Button | ← 返回 | 返回来源页（球员详情或小镇主视图） | #4 Icon Button Feedback |
+| 球员摘要 | Stat Display | 32×32px 头像 + 名字 + 稀有度边框 + 位置标签 + 综合评分 | 只读身份锚点 | #12 Data Card Display |
 | AP 余量 | Progress Bar + Stat | `⚡ 180/200` + 进度条 | 悬停 tooltip 显示消耗明细 | — |
-| 切换球员 | Icon Button | ← 上一个 / 下一个 → | 点击切换到相邻球员（按训练价值排序） | #4 Icon Button |
+| 切换球员 | Icon Button | ← 上一个 / 下一个 → | 点击切换到相邻球员（按训练价值排序） | #4 Icon Button Feedback |
 
 **Zone 2: 左侧面板 (240px)**
 
@@ -166,8 +166,8 @@ Growth Review 在 MVP 中不是占位页，而是训练完成后的必经结果�
 
 | 组件 | 类型 | 内容 | 交互 | 引用模式 |
 |------|------|------|------|----------|
-| 训练项目行 | List Item | 图标 + 项目名 + 主属性标签 + 匹配度星级 + AP 消耗 + 时间窗口数 | 点击选中，高亮边框 | #5 List Item |
-| 项目筛选标签 | Tab Bar | `[全部] [体能] [技术] [战术] [守门]` | 点击过滤项目类型 | #2 Tab Switching |
+| 训练项目行 | List Item | 图标 + 项目名 + 主属性标签 + 匹配度星级 + AP 消耗 + 时间窗口数 | 点击选中，高亮边框 | #5 List Item Selection |
+| 项目筛选标签 | Tab Bar | `[全部] [体能] [技术] [战术] [守门]` | 点击过滤项目类型 | #2 Tab-Based Section Switching |
 
 **Zone 4: 右侧主区域 — 消耗/收益预览 (L3，选中项目后从底部滑入)**
 
@@ -256,8 +256,8 @@ Growth Review 在 MVP 中不是占位页，而是训练完成后的必经结果�
 
 | 组件 | 类型 | 内容 | 交互 | 引用模式 |
 |------|------|------|------|----------|
-| 返回按钮 | Icon Button | ← 返回 | 返回来源页；若来自连续训练流，则返回上一稳定页面 | #4 Icon Button |
-| 球员摘要 | Stat Display | 头像 + 名字 + 稀有度 + 位置 + 综合评分 | 只读身份锚点 | #12 Data Card |
+| 返回按钮 | Icon Button | ← 返回 | 返回来源页；若来自连续训练流，则返回上一稳定页面 | #4 Icon Button Feedback |
+| 球员摘要 | Stat Display | 头像 + 名字 + 稀有度 + 位置 + 综合评分 | 只读身份锚点 | #12 Data Card Display |
 | 训练评价标签 | Status Badge | `爆发成长` / `出色` / `正常` / `收效甚微` | 只读；不可只靠颜色表达 | #21 Color-Blind Friendly |
 | AP 余量 | Progress Bar + Stat | 训练后的当前 AP | 只读；让玩家理解本轮训练后的剩余资源 | #24 Progress Bar |
 
@@ -404,6 +404,30 @@ Growth Review 在 MVP 中不是占位页，而是训练完成后的必经结果�
 
 **UX 边界**: 本文只约束玩家可见的数据、反馈与状态一致性，不定义具体事务接口、原子调用方式或内部写路径。
 
+### Implementation Readiness Notes
+
+当前训练界面所依赖的训练项目数据源已存在于：
+- `assets/data/training-items.csv`
+
+因此，训练项目列表、主/副属性标签、资源消耗、匹配度字段不再属于“缺文件导致无法实现”的阻塞项。
+
+但在进入 UI 实装前，仍需确认以下实现就绪性条件：
+
+1. **唯一权威数据源**
+   - 需确认训练项目数据是否以 `assets/data/training-items.csv` 为唯一权威源，
+   - 或是否还存在并行的 config/resource 数据副本。
+   - 若存在双源，必须在实现前先统一口径，避免 UI 显示与训练结算逻辑读取的来源不一致。
+
+2. **ConfigLoader / 运行时接入方式**
+   - 需确认运行时是直接消费该 CSV，还是通过 `ConfigLoader` / 预处理资源加载。
+   - 本 UX spec 只要求玩家可见字段完整、一致、可解释，不规定具体装载技术路径。
+
+3. **字段完整性验证**
+   - 至少应验证每个训练项目具备：项目名、主属性、副属性、资源消耗、匹配度相关字段。
+   - 若部分字段缺失，Training Planning 必须降级为可解释占位，而不是静默留空。
+
+结论：当前训练界面已具备“数据文件存在”的实现前提；剩余风险不在 UX 结构，而在数据接入口径确认。
+
 ---
 
 ## Accessibility
@@ -470,7 +494,7 @@ Growth Review 在 MVP 中不是占位页，而是训练完成后的必经结果�
 | ID | 问题 | 优先级 | 备注 |
 |----|------|--------|------|
 | QQ-TRAIN-02 | 无障碍层级已正式确认为 WCAG-AA | Medium | RESOLVED — 见 `design/accessibility-requirements.md`，本 spec 已更新引用 |
-| QQ-TRAIN-03 | 训练项目数据表 `assets/data/training-items.csv` 尚未创建 — MVP 需要最少 3 个项目 | High | 阻塞训练界面实际可用性——训练项目行内容依赖此数据 |
+| QQ-TRAIN-03 | 训练项目数据源口径尚未最终确认（`assets/data/training-items.csv` 已存在） | High | 当前阻塞点不再是“文件缺失”，而是需确认该 CSV 是否为唯一权威源，以及其字段是否与运行时加载口径一致 |
 | QQ-TRAIN-04 | Development Milestone 的具体阈值和触发条件尚未定义 | Medium | 当前 spec 预留了里程碑卡片位置，但触发规则需等培养系统调参确定 |
 | QQ-TRAIN-05 | Growth Review 中的角色对比（"离 XX 位置要求还差 N 点"）依赖球员位置/角色定义 | Medium | 若 MVP 不做位置体系，角色对比按本 spec 隐藏，而不是显示占位 |
 | QQ-TRAIN-06 | Player journey map 尚未创建 | Low | 模板在 `.claude/docs/templates/player-journey.md`——影响训练界面的首次体验引导设计 |

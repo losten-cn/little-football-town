@@ -68,6 +68,18 @@
 | 31 | Empty State | State | Guided placeholder with illustration, explanation, and call-to-action |
 | 32 | Radar Chart | Information | Five-axis attribute visualization with current/potential dual-line, per-axis tooltip, and keyboard navigation |
 
+### Pattern Naming Rule
+
+所有 UX spec 在引用本模式库时，必须使用 **Pattern Catalog** 中登记的正式模式名，不得自行缩写、改写或替换编号对应的标题。
+
+示例：
+- 使用 `#4 Icon Button Feedback`，不要写成 `#4 Icon Button`
+- 使用 `#12 Data Card Display`，不要写成 `#12 Data Card`
+
+若某个界面只想引用模式编号，也必须保证编号与正式模式名一一对应，且在首次出现时写出完整名称。
+
+若发现现有 UX spec 中存在缩写或别名，视为文档一致性问题，应在下次修订时统一回正式模式名。
+
 ---
 
 ## Patterns
@@ -223,7 +235,24 @@
 - 键盘：Tab 切换选中球员，方向键移动位置，Enter 确认
 
 **When to Use**: Future 阵容或排序系统正式进入 UX 范围，且需要空间化调整顺序时。
-**When NOT to Use**: MVP 球员管理列表、MVP 比赛观看流程、或任何没有非拖拽替代路径的关键操作。
+**When NOT to Use**: MVP 球员管理列表、MVP 比赛观看流程、或任何没有非拖拽替代路径的关键操作。当前 MVP 中任何赛前阵容、换人或排序交互，都必须先以键盘/点击主路径成立后，才可追加此模式作为增强交互。
+
+---
+
+### Future-only Drag Pattern Boundary
+
+本模式库中的拖拽类模式（`#6 Map Pan & Zoom`、`#7 Building Placement Drag`、`#8 Player Roster Drag`）在当前项目阶段统一遵守以下边界：
+
+- 它们属于 **future-only pattern**，不是当前 MVP 的默认交互承诺。
+- 任何当前 MVP 界面若需要实现同类功能，必须先提供**键盘/点击式主路径**，拖拽只能作为可选增强交互。
+- 不允许把拖拽写成唯一完成关键操作的方式。
+- 不允许在尚未补齐焦点顺序、替代输入路径、错误/取消路径之前，把 future-only 拖拽模式升级为当前正式模式。
+- 若后续某个界面要把拖拽提升为正式交互，必须先在对应 UX spec 中明确：
+  - 该拖拽行为服务什么玩家目标
+  - 非拖拽替代路径是什么
+  - 焦点与取消规则是什么
+  - reduced-motion 与无障碍要求如何满足
+- 在这些条件未满足前，所有拖拽类模式默认视为“可引用作 future 方向”，不可作为当前 `/ux-review` 的 MVP 主路径依据。
 
 ---
 
@@ -744,6 +773,72 @@
 
 **When to Use**: 需要在 3+ 维度上同时展示当前能力和成长空间。
 **When NOT to Use**: 单维度进度——用 Progress Bar（#24）；少于 3 维度的比较——用 Stat Display。
+
+---
+
+## Animation Standards
+
+所有 UI 动画首先服务于**状态确认、注意力引导与层级切换**，而不是装饰表演。
+本节是全局动画基线；各个具体模式（如 `#16 Screen Transition`、`#17 Micro-interaction`、`#18 Pixel Animation Frames`）必须在此范围内细化，不得冲突。
+
+### Timing Table
+
+| 类别 | 默认时长 | 最大时长 | Reduced-motion | 用途 |
+|---|---:|---:|---:|---|
+| Screen Transition | 200–250ms | 400ms | 50ms fade | L1/L2/L3 界面切换、返回、主流程跳转 |
+| Dialog / Overlay | 150–200ms | 250ms | 50ms fade | 确认框、暂停菜单、中场覆盖层、模态层 |
+| Micro-interaction | 150–300ms | 300ms | 50ms 或静态高亮 | 按钮反馈、数值变化、轻量状态切换 |
+| Emphasis Animation | 200–500ms | 500ms | 静态高亮 | 比分变化、成长结果、关键可进入状态 |
+| Auto-dismiss Feedback | 200ms 进入 / 200ms 退出 | 250ms | 50ms fade | Toast、轻量提示 |
+| Looping Ambient Motion | 2s 周期 | 2s 周期 | 停止或静态帧 | 环境像素循环、背景装饰演出 |
+
+### Usage Rules
+
+- **Screen Transition** 只用于屏幕级或容器级切换，不用于局部组件反馈。
+- **Dialog / Overlay** 动画必须比主屏切换更轻，避免模态层显得“比主流程更重”。
+- **Micro-interaction** 只用于局部反馈：点击、选中、数值更新、状态确认。
+- **Emphasis Animation** 只用于单次关键事件强调，不得作为持续噪声常驻存在。
+- **Looping Ambient Motion** 只服务气氛和世界活性，不得承载关键状态信息。
+
+### Priority Rules
+
+当多个动画可能同时触发时，按以下优先级保留最高层级，避免视觉冲突：
+
+1. Blocking modal / critical overlay
+2. Screen transition
+3. Emphasis animation
+4. Micro-interaction
+5. Ambient looping motion
+
+若高优先级动画触发，低优先级动画应暂停、延后或直接静态结算，不得叠加成视觉噪音。
+
+### Reduced-Motion Rules
+
+当系统或游戏设置启用 reduced-motion 时：
+
+- 所有 Screen Transition 与 Dialog / Overlay 降级为 **50ms 淡入淡出**
+- 所有 Micro-interaction 降级为 **50ms 亮度变化** 或 **静态高亮**
+- 所有 Emphasis Animation 降级为 **静态高亮 / 边框变化 / 图标提示**
+- 所有粒子、脉冲、抖动、数字滚动、连续缩放一律禁用
+- 所有循环环境动画停止，或停留在可读静态帧
+- 不允许 reduced-motion 模式下保留“轻微震动也没关系”的例外写法
+
+### Forbidden
+
+以下动画做法在项目中一律视为不合规：
+
+- **≥ 3Hz 的快速频闪**
+- **无限循环的强调脉冲**（尤其是按钮、提醒入口、状态警告）
+- **把动画作为唯一状态表达方式**
+- **需要玩家等待动画播完才能继续关键操作**
+- **多个同级强调动画同时争抢注意力**
+- **reduced-motion 开启后仍保留粒子、抖动、连续缩放或数字滚动**
+
+### Implementation Notes
+
+- 若某个具体界面需要更慢或更重的动画，必须在对应 UX spec 中说明理由，且不得突破本表最大时长。
+- 若某个界面引入新的动画类别，应先在本模式库补充，而不是只在单一 UX spec 中私有定义。
+- `#16 Screen Transition`、`#17 Micro-interaction`、`#18 Pixel Animation Frames` 是本标准的下游细化模式；若细节冲突，以本节为准并回修对应模式。
 
 ---
 
