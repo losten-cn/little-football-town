@@ -460,7 +460,7 @@ func evaluate_save_gate(time_state: Dictionary[String, Variant]) -> Dictionary[S
 
 
 func request_autosave(reason: String, ui_state: Dictionary[String, Variant] = {}, slot_metadata: Dictionary[String, Variant] = {}, playtime_seconds: float = 0.0, timestamp: int = 0) -> Dictionary[String, Variant]:
-	var resolved_ui_state: Dictionary[String, Variant] = ui_state.duplicate(true)
+	var resolved_ui_state: Dictionary[String, Variant] = _to_string_variant_dictionary(ui_state)
 	if resolved_ui_state.is_empty():
 		resolved_ui_state = _resolve_autosave_ui_state()
 	var time_state: Dictionary[String, Variant] = serialize_registered_system("time")
@@ -496,8 +496,8 @@ func flush_pending_autosave() -> Dictionary[String, Variant]:
 			"flushed": false,
 		}
 	var pending_reason: String = _pending_autosave_reason
-	var pending_ui_state: Dictionary[String, Variant] = _pending_autosave_ui_state.duplicate(true)
-	var pending_slot_metadata: Dictionary[String, Variant] = _pending_autosave_slot_metadata.duplicate(true)
+	var pending_ui_state: Dictionary[String, Variant] = _to_string_variant_dictionary(_pending_autosave_ui_state)
+	var pending_slot_metadata: Dictionary[String, Variant] = _to_string_variant_dictionary(_pending_autosave_slot_metadata)
 	var pending_playtime_seconds: float = _pending_autosave_playtime_seconds
 	var pending_timestamp: int = _pending_autosave_timestamp
 	var time_state: Dictionary[String, Variant] = serialize_registered_system("time")
@@ -548,7 +548,7 @@ func assemble_snapshot(ui_state: Dictionary[String, Variant], slot_metadata: Dic
 	snapshot.playtime_seconds = maxf(playtime_seconds, 0.0)
 	snapshot.ui_screen_id = String(ui_state.get("ui_screen_id", ""))
 	snapshot.ui_stack_depth = maxi(int(ui_state.get("ui_stack_depth", 0)), 0)
-	snapshot.snapshot_metadata = slot_metadata.duplicate(true)
+	snapshot.snapshot_metadata = _to_string_variant_dictionary(slot_metadata)
 	snapshot.time_state = serialize_registered_system("time")
 	snapshot.town_state = serialize_registered_system("town")
 	snapshot.player_state = serialize_registered_system("player")
@@ -769,7 +769,7 @@ func inspect_slot(slot_id: String) -> Dictionary[String, Variant]:
 	var migration_result: Dictionary[String, Variant] = migrate_snapshot_if_needed(snapshot)
 	var migrated_snapshot: SaveSnapshot = migration_result.get("snapshot", snapshot) as SaveSnapshot
 	var validation: Dictionary[String, Variant] = validate_snapshot(migrated_snapshot)
-	var snapshot_metadata: Dictionary[String, Variant] = (migrated_snapshot.snapshot_metadata as Dictionary[String, Variant]).duplicate(true)
+	var snapshot_metadata: Dictionary[String, Variant] = _to_string_variant_dictionary(migrated_snapshot.snapshot_metadata)
 	var errors: Array[String] = (migration_result.get("errors", []) as Array[String]).duplicate()
 	var is_structurally_valid: bool = validation["is_valid"] as bool
 	var status: String = SLOT_STATUS_VALID if (migration_result.get("success", false) as bool) else SLOT_STATUS_INVALID
@@ -803,6 +803,23 @@ func _build_validation_result(is_valid: bool, present_required_fields: int, miss
 		"missing_fields": missing_fields,
 		"errors": errors,
 	}
+
+
+func _to_string_variant_dictionary(value: Variant) -> Dictionary[String, Variant]:
+	var typed_dictionary: Dictionary[String, Variant] = {}
+	if value is Dictionary:
+		var source: Dictionary = value as Dictionary
+		for key: Variant in source.keys():
+			typed_dictionary[String(key)] = _duplicate_variant_deep(source[key])
+	return typed_dictionary
+
+
+func _duplicate_variant_deep(value: Variant) -> Variant:
+	if value is Dictionary:
+		return (value as Dictionary).duplicate(true)
+	if value is Array:
+		return (value as Array).duplicate(true)
+	return value
 
 
 func _validate_required_dictionary_field(field_name: String, value: Variant, missing_fields: Array[String], errors: Array[String]) -> int:
@@ -1049,8 +1066,8 @@ func _resolve_temp_slot_path(path: String) -> String:
 func _capture_autosave_request(reason: String, ui_state: Dictionary[String, Variant], slot_metadata: Dictionary[String, Variant], playtime_seconds: float, timestamp: int) -> void:
 	_pending_autosave_requested = true
 	_pending_autosave_reason = reason
-	_pending_autosave_ui_state = ui_state.duplicate(true)
-	_pending_autosave_slot_metadata = slot_metadata.duplicate(true)
+	_pending_autosave_ui_state = _to_string_variant_dictionary(ui_state)
+	_pending_autosave_slot_metadata = _to_string_variant_dictionary(slot_metadata)
 	_pending_autosave_playtime_seconds = playtime_seconds
 	_pending_autosave_timestamp = timestamp
 

@@ -11,6 +11,7 @@ func _ready() -> void:
 	test_save_manager_registers_required_system_pairs()
 	test_save_manager_returns_empty_state_when_serializer_does_not_return_dictionary()
 	test_save_manager_assembles_registered_systems_into_one_snapshot()
+	test_save_manager_deep_copies_slot_metadata_into_snapshot()
 	test_save_manager_fails_snapshot_assembly_when_required_system_missing()
 	test_save_manager_blocks_commit_when_cross_system_consistency_ratio_is_below_one()
 	_cleanup_save_directory()
@@ -96,6 +97,36 @@ func test_save_manager_assembles_registered_systems_into_one_snapshot() -> void:
 	_expect(int(snapshot.player_state.get("roster_count", 0)) == 16, "assembled snapshot should include player state")
 	_expect(commit_result["success"] as bool, "commit should succeed when assembly is complete and consistent")
 	_expect(saved_snapshot != null and saved_snapshot.get_script() == SaveSnapshotScript, "commit should write the assembled snapshot through SaveManager")
+	_free_if_node(save_manager)
+
+
+func test_save_manager_deep_copies_slot_metadata_into_snapshot() -> void:
+	# Arrange
+	_cleanup_save_directory()
+	var save_manager: Variant = SaveManagerScript.new()
+	save_manager.set_save_directory_path(TEST_SAVE_DIRECTORY_PATH)
+	_register_required_systems(save_manager, false)
+	var ui_state: Dictionary[String, Variant] = {
+		"ui_screen_id": "home",
+		"ui_stack_depth": 2,
+	}
+	var nested_metadata: Dictionary[String, Variant] = {
+		"coach": "Kai",
+	}
+	var slot_metadata: Dictionary[String, Variant] = {
+		"town_name": "Town Alpha",
+		"staff": nested_metadata,
+	}
+
+	# Act
+	var assembly: Dictionary[String, Variant] = save_manager.assemble_snapshot(ui_state, slot_metadata, 12.0, 3030)
+	var snapshot: Variant = assembly.get("snapshot", null)
+	nested_metadata["coach"] = "Mutated"
+
+	# Assert
+	_expect(assembly.get("success", false) as bool, "assembly should accept slot metadata")
+	_expect(snapshot != null and snapshot.get_script() == SaveSnapshotScript, "assembly should return a SaveSnapshot resource")
+	_expect(String((snapshot.snapshot_metadata.get("staff", {}) as Dictionary).get("coach", "")) == "Kai", "snapshot metadata should deep-copy nested dictionaries")
 	_free_if_node(save_manager)
 
 
