@@ -294,4 +294,4 @@ func _emit_match_state_changed() -> void:
 
 
 func _on_match_completed(_event_name: String, payload: Dictionary) -> void:
-	_latest_match_result = payload.duplicate(true)
+	_latest_match_result = _to_string_variant_dictionary(payload)
