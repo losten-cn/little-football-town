@@ -2,7 +2,7 @@
 
 > **Status**: In Design
 > **Author**: 用户 + Claude
-> **Last Updated**: 2026-05-16
+> **Last Updated**: 2026-05-31
 > **Source Set**:
 > - `design/gdd/game-concept.md`
 > - `E:\code\game\game-design\00-足球小镇-策划总览.md`
@@ -25,7 +25,7 @@
 | 运动员培养系统 | Progression / Character | Core | MVP | Approved | Explicit | 负责球员招募、训练、成长、技能、状态与长期养成反馈。 |
 | 比赛竞技系统 | Gameplay / Match | Core | MVP | Designed | Explicit | 负责阵型、战术、比赛演算、胜负结果与赛后反馈。 |
 | 经济管理系统 | Economy | Core | MVP | Designed | Explicit | 负责经费、研究点数、运动点数的获取、消耗与经营压力；MVP 展示经费和运动点数，研究点数后台累积。 |
-| 小镇建设系统 | World / Management | Core | Alpha | Designed | Explicit | 负责设施建造、升级、布局规划以及对培养和比赛的长期加成。 |
+| 小镇建设系统 | World / Management | Core | MVP | Designed | Explicit | MVP 提供最小城镇建设切片：4 类设施、建造/升级/维护、设施加成查询与主界面小镇触点；Alpha 扩展完整建设与经营 UI。 |
 | 声望与成就系统 | Meta Progression | Feature | Alpha | Not Started | Explicit | 负责阶段性解锁、等级成长、长期收集与重玩动力。 |
 | 随机事件系统 | Content / Event | Feature | Beta | Not Started | Explicit | 负责制造变化、提供剧情化决策点并增强世界活力。 |
 | 技能与特性系统 | Character Depth | Feature | Alpha | Not Started | Inferred | 负责球员差异化成长路线与长期培养深度。 |
@@ -35,7 +35,7 @@
 | 主循环 UI 框架 | UI / UX | Presentation | MVP | Designed | Explicit | 负责主界面、球员界面、比赛界面的基础导航与信息展示。 |
 | 球员管理 UI | UI / UX | Presentation | MVP | Not Started | Inferred | 负责球员列表、详情、培养入口和状态可视化。 |
 | 比赛表现 UI | UI / UX | Presentation | MVP | Not Started | Inferred | 负责赛前准备、比赛过程、赛后结算等比赛相关界面。 |
-| 建设与经营 UI | UI / UX | Presentation | Alpha | Not Started | Inferred | 负责建设模式、资源管理、设施信息与布局交互。 |
+| 建设与经营 UI | UI / UX | Presentation | Alpha | Not Started | Inferred | 负责完整建设模式、资源管理、设施信息与布局交互；MVP 仅由主循环 UI 提供小镇摘要和最小建设入口。 |
 | 新手引导系统 | UX / Onboarding | Polish | MVP | Designed | Explicit | 负责让玩家快速理解核心循环与基础操作。 |
 | 音频系统 | Audio | Presentation | Beta | Not Started | Explicit | 负责 BGM、音效、动态情绪反馈与沉浸氛围。 |
 | 教程与提示系统 | UX Support | Polish | Alpha | Not Started | Inferred | 负责提示、说明、反馈强化和中长期系统理解支持。 |
@@ -53,9 +53,9 @@
 - 运动员培养系统
   - depends on: 数值系统、时间与赛季推进系统、存档与读档系统
 - 比赛竞技系统
-  - depends on: 数值系统、时间与赛季推进系统、存档与读档系统、运动员培养系统、经济管理系统、球员管理 UI
+  - depends on: 数值系统、时间与赛季推进系统、存档与读档系统、运动员培养系统、联赛与赛事结构系统、小镇建设系统
 - 经济管理系统
-  - depends on: 数值系统、时间与赛季推进系统、存档与读档系统、比赛竞技系统、联赛与赛事结构系统、小镇建设系统、主循环 UI 框架
+  - depends on: 数值系统、时间与赛季推进系统、存档与读档系统、比赛竞技系统、联赛与赛事结构系统、小镇建设系统、运动员培养系统
 - 小镇建设系统
   - depends on: 数值系统、经济管理系统、时间与赛季推进系统、存档与读档系统
 
@@ -81,7 +81,7 @@
 - 比赛表现 UI
   - depends on: 比赛竞技系统、联赛与赛事结构系统
 - 建设与经营 UI
-  - depends on: 小镇建设系统、经济管理系统
+  - depends on: 小镇建设系统、经济管理系统、主循环 UI 框架
 - 音频系统
   - depends on: 比赛竞技系统、小镇建设系统、随机事件系统、主循环 UI 框架
 
@@ -107,10 +107,16 @@
    - 如果时序规则模糊，会直接影响培养、赛事和事件设计。
 
 3. **运动员培养系统**
-   - 是核心幻想之一，也是比赛、技能、球员 UI 和长期成长的依附基础。
+   - 是核心幻想之一，也是比赛、训练 UI、球员 UI 和长期成长的依附基础。
 
 4. **比赛竞技系统**
-   - 是另一条核心循环主轴，联赛结构、音频反馈、赛后结算和长期成就都依赖它。
+   - 是另一条核心循环主轴，联赛结构、赛后经济结算、比赛表现 UI、音频反馈和长期成就都依赖它。
+
+5. **经济管理系统**
+   - 是训练、比赛、建设之间资源取舍的共同结算层；MVP 必须稳定提供经费、运动点数、维护费和赛后/每日结算接口。
+
+6. **小镇建设系统（最小切片）**
+   - 为培养、比赛、经济和主界面提供设施加成与小镇可见触点；MVP 范围必须严格受控，避免完整建设 UI 和深层布局优化提前膨胀。
 
 ## Recommended Design Order
 
@@ -149,19 +155,18 @@
 - 球员管理 UI
 - 比赛表现 UI
 - 新手引导系统
+- 小镇建设系统（最小建设切片）
 
-**Why:** 这些系统共同构成“培养 → 比赛 → 反馈 → 再培养”的最小可验证闭环。没有它们，玩家无法完整体验游戏最核心的成长与竞技节奏。
+**Why:** 这些系统共同构成“培养 → 比赛 → 反馈 → 再培养”的最小可验证闭环，并通过最小建设切片让“足球小镇”支柱在首次体验中可见。没有它们，玩家无法完整体验游戏最核心的成长、竞技与小镇长期投资节奏。
 
 ### Alpha
 
-- 经济管理系统
-- 小镇建设系统
 - 声望与成就系统
 - 技能与特性系统
 - 建设与经营 UI
 - 教程与提示系统
 
-**Why:** 这些系统负责把 MVP 的可玩核心提升为具有持续经营深度、阶段解锁和更明确成长结构的完整框架。
+**Why:** 这些系统负责把 MVP 的可玩核心提升为具有更完整的长期目标、阶段解锁、深度建设界面和帮助解释层的完整框架。经济管理系统与小镇建设系统的最小切片已经进入 MVP；Alpha 只扩展其深度和专用 UI。
 
 ### Beta
 
@@ -181,7 +186,7 @@
 
 - `数值系统` 与 `比赛竞技系统` 的边界必须尽早明确，否则“谁定义结果、谁控制体验”会反复冲突。
 - `时间与赛季推进系统` 需要尽早确定是否统一驱动训练、建设、赛事和事件触发。
-- `小镇建设系统` 在 MVP 阶段应控制范围，避免邻接效应和复杂布局过早吞噬开发资源。
+- `小镇建设系统` 在 MVP 阶段只包含最小建设切片：4 类设施、单格布局、基础邻接、维护费、设施加成查询和主界面小镇触点；完整建设与经营 UI、深层布局优化和扩展设施留到 Alpha。
 - `音频系统` 当前适合后置，但概念层必须保留关键反馈点，避免后续完全脱节。
 - `商业化与 DLC 规划系统` 建议作为支持文档存在，不要过早挤占核心玩法设计资源。
 
@@ -195,7 +200,7 @@
 | 运动员培养系统 | Core | MVP | Approved | `design/gdd/player-development-system.md` |
 | 比赛竞技系统 | Core | MVP | Designed | `design/gdd/match-competition-system.md` |
 | 经济管理系统 | Core | MVP | Designed | `design/gdd/economy-management-system.md` |
-| 小镇建设系统 | Core | Alpha | Designed | `design/gdd/town-building-system.md` |
+| 小镇建设系统 | Core | MVP | Designed | `design/gdd/town-building-system.md` |
 | 声望与成就系统 | Feature | Alpha | Not Started | - |
 | 随机事件系统 | Feature | Beta | Not Started | - |
 | 技能与特性系统 | Feature | Alpha | Not Started | - |
@@ -213,8 +218,8 @@
 ## Progress Summary
 
 - Total systems: 20
-- MVP systems: 11
-- Alpha systems: 5
+- MVP systems: 12
+- Alpha systems: 4
 - Beta systems: 2
 - Full Vision systems: 2
 

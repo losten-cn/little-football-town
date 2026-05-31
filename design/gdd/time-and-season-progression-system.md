@@ -2,7 +2,7 @@
 
 > **Status**: Designed
 > **Author**: 用户 + Claude
-> **Last Updated**: 2026-05-15
+> **Last Updated**: 2026-05-31
 > **Implements Pillar**: 轻度足球经营、像素小镇养成、低压力长期成长
 > **Source**:
 > - `design/gdd/game-concept.md`
@@ -47,6 +47,7 @@
 13. 如果某些内容在 MVP 阶段尚未实现，例如复杂事件链或多赛区联动，本系统仍必须能独立支撑“训练 → 比赛 → 结算 → 下一阶段”的最小推进闭环。
 14. 本系统必须为 UI 提供明确的可显示信息：当前日期/阶段、下一比赛节点、下一结算节点、剩余可安排窗口、当前赛季所处位置。
 15. 当下游系统需要基于时间推进触发效果时，必须接入本系统的统一节点，而不是自行在别处静默推进时间。
+16. 正式比赛节点不可因运动点数不足而造成推进死锁。当 `match_trigger_reached = true` 且当前 AP < 经济系统 `match_ap_cost` 时，本系统先请求经济系统执行一次 `match_day_ap_safety_grant`，把 AP 补足到本场比赛最低开赛成本；该补足只可在正式比赛触发节点执行，不能被训练、建设或手动休息调用。
 
 ### States and Transitions
 
@@ -199,7 +200,9 @@
 - **If 某个行动会刚好把时间推进到比赛节点**: 行动结算完成后必须立即进入 `Match Trigger`，不得再额外开放一个自由行动窗口。
 - **If 某个行动同时跨过比赛节点和阶段结算节点**: 系统必须按统一优先级顺序依次结算，不能跳过其中任一节点；推荐顺序为：比赛节点 → 赛后结算 → 阶段结算。
 - **If 多个关键节点落在同一时间轴位置**: 系统必须使用固定节点优先级处理，且该优先级必须对玩家可解释；不得因实现顺序不同导致不同结果。
+- **If 玩家在 `Match Trigger` 时 AP 不足以支付 `match_ap_cost`**: 本系统请求经济系统执行 `match_day_ap_safety_grant`，将 AP 补足到本场比赛最低成本后继续进入比赛入口。该补足必须写入结算摘要或审计流水，且不得增加到超过 `match_ap_cost` 所需的最低值。
 - **If 玩家在 `Match Trigger` 时取消进入比赛**: 只有在规则允许取消的情况下，系统才能返回 `Planning`；若该比赛属于不可跳过节点，则必须继续停留在比赛入口，直到玩家处理该节点。
+- **If 不可跳过比赛节点因非法阵容无法正常开赛**: 时间系统不得延迟、跳过或反复触发同一比赛节点；比赛系统必须按其兜底规则生成推荐阵容、错位补位或 `forfeit_result_packet`，随后时间系统继续进入 `Post-Match Settlement`。
 - **If 一个赛季的 `total_season_units = 0` 或非法**: 赛季配置视为无效；系统不得开始该赛季，并必须标记为配置错误，而不是生成可立即结束的空赛季。
 - **If `completed_season_units > total_season_units`**: `season_progress_ratio` 按 `1` 处理，并立即转入 `Season Settlement`；同时将该赛季进度标记为需复核的异常数据。
 - **If 玩家在赛季末仍有未处理的普通行动窗口**: 普通窗口必须在赛季结束前失效；系统不得允许玩家绕过赛季结算继续在旧赛季中刷取额外收益。
@@ -285,6 +288,7 @@
 - **GIVEN** 当前阶段具有固定时间预算、预留节点时间和已消耗时间，**WHEN** QA 手工计算 `available_action_windows`，**THEN** 系统返回结果必须与手工结果一致，且结果不得为负数。
 - **GIVEN** 玩家当前剩余时间不足以执行所选行动，**WHEN** QA 尝试开始该行动，**THEN** 系统必须阻止行动开始，并明确提示该行动会超出当前阶段剩余时间。
 - **GIVEN** 一次行动会把时间推进到预定比赛节点，**WHEN** QA 完成该行动结算，**THEN** 系统必须立即进入 `Match Trigger`，不得再额外开放自由行动窗口。
+- **GIVEN** `Match Trigger` 到达时玩家 AP 低于 `match_ap_cost`，**WHEN** QA 检查进入比赛入口前的资源状态，**THEN** 时间系统必须请求经济系统补足本场最低开赛 AP，并继续进入比赛入口；不得停留在无可执行操作且比赛又不可开始的死锁状态。
 - **GIVEN** `current_timeline_position` 与 `scheduled_match_position` 已知，**WHEN** QA 手工计算 `match_trigger_reached`，**THEN** 系统返回结果必须与手工判断一致，并在结果为 `true` 时进入比赛入口流程。
 - **GIVEN** `current_stage_progress` 与 `stage_progress_target` 已知，**WHEN** QA 手工计算 `stage_settlement_trigger_reached`，**THEN** 系统返回结果必须与手工判断一致，并在结果为 `true` 时进入阶段结算流程。
 - **GIVEN** 一个赛季的 `completed_season_units` 与 `total_season_units` 已知，**WHEN** QA 手工计算 `season_progress_ratio`，**THEN** 系统返回值必须与手工结果一致；当结果达到 `1` 时，系统必须进入 `Season Settlement`。

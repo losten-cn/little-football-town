@@ -1,8 +1,8 @@
 # 足球小镇：小镇建设系统
 
-> **Status**: In Design
+> **Status**: Designed
 > **Author**: 用户 + Claude
-> **Last Updated**: 2026-05-16
+> **Last Updated**: 2026-05-31
 > **Implements Pillar**: 像素小镇养成、轻度足球经营
 > **Source**:
 > - `design/gdd/game-concept.md`
@@ -32,7 +32,7 @@
 
 **规则 1 — 建设系统控制权**: 小镇建设系统是所有设施建造、升级、布局和加成的权威来源。其他系统可以消费设施加成（如培养系统使用训练效率倍率），但不得直接修改设施状态、等级或布局。
 
-**规则 2 — MVP 设施集合**: MVP 阶段提供 4 种核心设施：
+**规则 2 — MVP 设施集合**: MVP 阶段提供最小建设切片，包含 4 种核心设施、建造/升级/拆除状态、维护费、基础邻接和下游只读加成查询。完整建设与经营 UI、扩展设施、深层布局优化和设施皮肤留到 Alpha。MVP 阶段提供 4 种核心设施：
 
 | 设施 | 功能定位 | 基础效果 |
 |---|---|---|
@@ -60,6 +60,9 @@
 **规则 6 — 加成生效时机**: 设施加成在设施建成（完工节点到达）后立即生效。升级在完工后立即应用新等级的加成。拆除后加成立即移除。加成变化不影响已经结算完成的历史结果。
 
 **规则 7 — MVP 范围控制**:
+- 实现 4 类设施的建造、升级、拆除、维护费、存档恢复和只读加成查询；主循环 UI 只展示小镇摘要与最小建设入口
+- 实现被 MVP 下游消费的输出：`facility_training_multiplier`、`facility_ap_bonus`、`facility_total_maintenance`、`home_advantage_bonus + adj_stadium_home_bonus`、`stadium_revenue_multiplier`
+- `potential_floor_boost`、`adj_youth_potential_boost`、`injury_recovery_reduction`、`training_injury_prob_multiplier` 在 MVP 中保留为公式和数据字段，但不作为 MVP 下游硬消费合同；招募质量、伤病概率、伤病恢复系统在 Alpha 接入后再把这些输出升级为硬依赖
 - 不实现设施之间的组合加成（如"训练场+医疗室+青训营三件套"额外奖励）
 - 不实现设施皮肤/外观选择
 - 不实现设施出租/共享/多球队共用
@@ -91,9 +94,9 @@
 | **经济管理系统** (Hard 上游·消费方) | 资源充足性确认、实际经费扣除、每日维护费扣除 | 建造/升级经费消耗请求、每日维护费基准（`facility_maintenance_cost` = 各设施维护费之和） | 建造/升级发起时（Budget Preview + 确认扣除）；每日结算时（维护费） |
 | **时间与赛季推进系统** (Hard 上游) | 完工节点信号、建设占用时段确认 | 建造/升级时间消耗请求（`construction_time`） | 建造/升级发起时（时间系统登记工期）；工期到达时（时间系统触发完工） |
 | **存档与读档系统** (Hard 上游) | 存档/读档指令 | 设施列表（类型、位置、等级、当前状态）、建造/升级剩余工期、已确认完工结果 | 稳定节点保存时全量写入；读档时全量恢复 |
-| **运动员培养系统** (Hard 下游·消费方) | — | `training_efficiency_multiplier`（训练场提供，接入 `training_actual_gain` 计算）、`youth_training_bonus`（青训营提供，年轻球员额外成长乘区） | 每次训练结算时，培养系统读取当前设施加成 |
+| **运动员培养系统** (Hard 下游·消费方) | 球员年龄（用于年轻球员训练倍率判定） | `facility_training_multiplier`（训练场、青训营自身年轻球员加成、训练场↔青训营邻接加成的组合倍率） | 每次训练结算时，培养系统读取当前设施加成；招募潜力下限输出在 Alpha 接入 |
 | **比赛竞技系统** (Hard 下游·消费方) | — | `home_advantage_bonus`（球场提供，加入 `self_team_rating` 修正）、`stadium_revenue_multiplier`（球场提供，乘入赛后经费计算） | 赛前评分计算时；赛后奖励结算时 |
-| **主循环 UI 框架** (Hard 下游·展示方) | — | 设施列表（类型、位置、等级、状态）、建造/升级进度、邻接关系、加成摘要 | 主界面渲染小镇视图时；建设界面打开时 |
+| **主循环 UI 框架** (Hard 下游·展示方) | — | 设施列表（类型、位置、等级、状态）、建造/升级进度、邻接关系、加成摘要 | MVP 主界面渲染小镇摘要与最小建设入口；完整建设界面由 Alpha 的建设与经营 UI 承接 |
 | **建设与经营 UI** (Hard 下游·展示方·Alpha) | — | 网格状态（每格为空/设施类型/等级）、可建造/可升级/可拆除判断、成本预览 | Alpha 阶段接入；MVP 阶段建设交互内嵌于主循环 UI |
 
 > **邻接双向性**: 训练场 ↔ 医疗室、训练场 ↔ 青训营、训练场 ↔ 球场的三种邻接关系中，双方各自获得不同的邻接加成（见规则 5）。这些加成在设施完工或拆除时立刻重新计算并通知下游系统。
@@ -667,7 +670,7 @@ GDD 初版可持续性验证假设"每日有比赛"，该假设与实际比赛�
 - **If 玩家在设施正在建造/升级期间尝试拆除同一设施**: 拆除按钮灰化，提示"设施正在施工中，无法拆除"。必须等待 Construction/Upgrading → Active 状态转移完成后才可拆除。
 - **If 建造或升级的完工节点与比赛日或赛季结算同时到达**: 时间系统按固定优先级顺序处理：赛后结算 > 建造完工 > 每日结算 > 阶段结算。建造完工不因与其他节点重合而被跳过或重复触发。
 - **If 设施加成在训练或比赛中途改变（如相邻设施刚完工）**: 已开始的训练或比赛使用发起时的加成快照，不受中途完工影响。加成仅在下次行动发起时才以新值生效。
-- **If 邻接加成汇总后超出上游系统边界**: `facility_ap_bonus` 经 `clamp(0, 3)` 确保不突破经济系统上限；`home_advantage_bonus + adj_stadium_home_bonus` 经 `clamp(0, 5)` 确保不突破声明范围。`home_advantage_bonus` 通过 `team_match_strength` 进入比赛系统评级→概率转换链，不直接受 `flat_modifier_sum_budget`（per-player 属性修正约束）限制。若未来 Tuning Knobs 调高系数且 clamp 范围同步放宽导致综合优势过大，由数值系统评估是否新增上限。
+- **If 邻接加成汇总后超出上游系统边界**: `facility_ap_bonus` 经 `clamp(0, 3)` 确保不突破经济系统上限；`home_advantage_bonus + adj_stadium_home_bonus` 的最大 MVP 输出为 15 点（球场 Lv.5 + 训练场 Lv.5 邻接），作为队伍级 `facility_rating_bonus` 注入比赛系统 `team_match_strength`。该队伍级主场评分加成不直接受 `flat_modifier_sum_budget`（per-player 属性修正约束）限制；若未来 Tuning Knobs 调高系数导致综合优势过大，由数值系统评估是否新增上限。
 - **If 玩家拆除设施导致邻接加成链断裂**: 被拆设施自身加成立即移除；与它邻接的其他设施重新计算邻接加成（可能因失去邻接伙伴而降低）。重算在拆除瞬间完成，不等待下一个结算节点。
 - **If 玩家拆除一座 Lv.5 设施后在新位置重建**: 新建设施从 Lv.1 开始，已投入的升级成本不返还，新位置可能形成不同的邻接关系。系统不追踪"设施迁移历史"。
 - **If 每日维护费扣除时经费余额不足**: 维护费按 `resource_settlement` 规则结算，经费 `clamp` 到 0（不可为负）。若触发经费归零，经济系统进入 Warning State，所有消耗经费的行动被锁定。系统不因维护费欠缴而自动降低设施等级或拆除设施。
@@ -687,15 +690,15 @@ GDD 初版可持续性验证假设"每日有比赛"，该假设与实际比赛�
 | `design/gdd/time-and-season-progression-system.md` | Hard | 建设占用时段登记、完工节点触发、稳定节点保存时机 | 建造/升级发起时登记工期；工期到达时触发完工信号 |
 | `design/gdd/save-and-load-system.md` | Hard | 设施列表、等级、布局、建造/升级剩余工期、已确认完工结果的持久化与恢复 | 稳定节点全量保存；读档时全量恢复 |
 | `design/gdd/game-concept.md` | Hard | "像素小镇养成"支柱定义、MVP 范围约束、建设在核心循环中的定位 | 建设系统的体验目标和范围边界 |
-| `design/gdd/systems-index.md` | Hard | 系统层级（Core）、优先级（Alpha）、依赖关系 | 系统定位和设计顺序 |
+| `design/gdd/systems-index.md` | Hard | 系统层级（Core）、优先级（MVP 最小建设切片；Alpha 扩展完整建设 UI 与深度建设）、依赖关系 | 系统定位、MVP 边界和设计顺序 |
 
 ### Downstream Dependencies
 
 | System | Type | What this system provides | Key interface |
 |---|---|---|---|
-| `design/gdd/player-development-system.md` | Hard | 组合后的 `facility_training_multiplier`（= `training_efficiency_multiplier × youth_training_bonus × adj_tr_youth_multiplier`），作为 `training_actual_gain` 第 4 因子接入 | 培养系统每次训练结算时读取 `facility_training_multiplier` |
+| `design/gdd/player-development-system.md` | Hard | 组合后的 `facility_training_multiplier`（= `training_efficiency_multiplier × youth_training_bonus × adj_tr_youth_multiplier`），作为 `training_actual_gain` 第 4 因子接入 | 培养系统每次训练结算时读取 `facility_training_multiplier`；`potential_floor_boost` 与 `adj_youth_potential_boost` 在 Alpha 招募系统接入前不是 MVP 硬消费合同 |
 | `design/gdd/match-competition-system.md` | Hard | `home_advantage_bonus` + `adj_stadium_home_bonus`（作为 `facility_rating_bonus` 注入 `team_match_strength`）、`stadium_revenue_multiplier`（接入 `post_match_funds` 第 4 因子） | 赛前评分计算时通过 `team_match_strength` 接收主场加成；设施修正后的有效队伍评分可超过 100，并由胜率 clamp 兜底；赛后经费计算时通过 `post_match_funds` 公式消费收入倍率 |
-| `design/gdd/main-loop-ui-framework.md` | Hard | 设施列表（类型、位置、等级、状态）、建造/升级进度、邻接关系图、加成摘要 | 主界面渲染小镇视图；建设界面交互入口 |
+| `design/gdd/main-loop-ui-framework.md` | Hard | 设施列表（类型、位置、等级、状态）、建造/升级进度、邻接关系图、加成摘要 | MVP 主界面渲染小镇摘要、设施状态与最小建设入口；Alpha 的建设与经营 UI 承接完整网格交互 |
 | 声望与成就系统 | Soft (Alpha) | 设施建造/升级里程碑（如"建成第一座 Lv.5 设施"） | Alpha 阶段接入成就条件 |
 | 建设与经营 UI | Hard (Alpha) | 网格状态、可建造/可升级/可拆除判断、成本预览 | Alpha 阶段独立建设界面；MVP 内嵌于主循环 UI |
 | 随机事件系统 | Soft (Beta) | 设施相关事件入口（如"暴风雨损坏训练场"） | Beta 阶段接入 |

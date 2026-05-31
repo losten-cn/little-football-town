@@ -56,13 +56,20 @@ Pipeline: Pre-Production vertical slice — scope locked, user approved prototyp
 
 ## Next Recommended Step
 
-Manually play `res://prototypes/training-match-loop-vertical-slice/vertical_slice_main.tscn` and report whether the full Training Day → Match Day → Post-Match Return loop completes without guidance. Automated smoke passed via `D:/Program Files/godot/Godot_v4.6.2-stable_win64_console.exe --headless --path "E:/code/little-football-town" "res://prototypes/training-match-loop-vertical-slice/vertical_slice_smoke.tscn"`.
+Re-run `/review-all-gdds` to verify the 2026-05-31 blocker fixes, then decide whether to address remaining warnings as separate scoped tasks.
 
 <!-- STATUS -->
-Epic: Pre-Production
-Feature: Vertical Slice
-Task: Initial “训练日 → 比赛日 → 赛后回流” vertical slice implemented; awaiting Godot smoke run and manual playtest
+Epic: Systems Design
+Feature: GDD Cross-Review Blocker Fixes
+Task: Blockers patched across MVP boundary, town-building consumers, match-day AP, and illegal-lineup fallback; awaiting `/review-all-gdds`
 <!-- /STATUS -->
+
+## Session Extract — GDD blocker repair 2026-05-31
+- Source report: `design/gdd/gdd-cross-review-2026-05-31.md` — verdict was FAIL pending blocker fixes.
+- Files changed: `design/gdd/systems-index.md`, `design/gdd/town-building-system.md`, `design/gdd/player-development-system.md`, `design/gdd/match-competition-system.md`, `design/gdd/economy-management-system.md`, `design/gdd/main-loop-ui-framework.md`, `design/gdd/time-and-season-progression-system.md`, `design/gdd/league-competition-structure-system.md`, `design/gdd/onboarding-system.md`.
+- Fixes completed: MVP now includes a tightly scoped town-building slice; complete building UI/deep layout remains Alpha; core dependency direction no longer depends on Presentation UI; town-building MVP outputs are limited to consumed contracts; match-day AP deadlock is resolved via `match_day_ap_safety_grant`; illegal lineup fallback resolves through recommended lineup, out-of-position fill, or `forfeit_result_packet`.
+- Notes: No code or tests were run; this was a design-document consistency pass. Remaining review warnings should be split into follow-up tasks rather than bundled into this blocker repair.
+- Next recommended: Re-run `/review-all-gdds`; if PASS or PASS WITH CONCERNS, continue with scoped warning cleanup or Technical Setup planning.
 
 ## Session Extract — /dev-story 2026-05-25
 - Story: `production/epics/balance-system/story-001-balance-config-validation.md` — Story 001: 定义 BalanceConfig 数据资源与启动校验
@@ -757,3 +764,11 @@ Task: Initial “训练日 → 比赛日 → 赛后回流” vertical slice impl
 - Verification: `TRAINING_ROI_TEST_PASS`
 - Notes: Added authoritative `ap_to_funds_weight` ownership to EconomyConfig/EconomyManager, updated ROI coverage to read the weight through EconomyManager and assert ordinary-vs-star short/mid-term sample tradeoffs directly, then synced the story review note and restored the player-development epic status to `Complete`.
 - Next: None — player-development epic review notes are now closed
+
+## Session Extract — /review-all-gdds 2026-05-31
+- Report written: `design/gdd/gdd-cross-review-2026-05-31.md`
+- Scope: Cross-GDD consistency, holistic design review, and multi-system scenario walkthrough across concept, systems index, balance, save/load, time/season, player development, match competition, economy, league, town building, main-loop UI, player-management UI, match-performance UI, and onboarding GDDs.
+- Verdict: FAIL — Systems Design should not advance to Technical Setup until blockers are resolved or explicitly accepted.
+- Blockers: `systems-index.md` dependency/MVP boundary drift; town-building outputs without complete downstream consumers; forced match progression lacks legal-state fallback; MVP economy/town-building scope is unstable; match-day AP deadlock risk.
+- Warnings: Hidden MVP research-point resource, town-building optimization-grid drift from warm-town pillar, youth academy/training-ground snowball risk, maintenance soft-stall risk, league team count vs time pacing mismatch, home advantage double-count/stale cap wording, pre-match attention budget overload, training ROI time-cost ownership gap, UI return-path ambiguity.
+- Next: Decide whether MVP includes a minimal town-building slice, update `systems-index.md`, define match-trigger fallback rules for insufficient AP and illegal lineup, normalize town-building outputs, then re-run `/review-all-gdds`.
