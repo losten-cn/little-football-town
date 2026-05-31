@@ -47,7 +47,7 @@
 13. 如果某些内容在 MVP 阶段尚未实现，例如复杂事件链或多赛区联动，本系统仍必须能独立支撑“训练 → 比赛 → 结算 → 下一阶段”的最小推进闭环。
 14. 本系统必须为 UI 提供明确的可显示信息：当前日期/阶段、下一比赛节点、下一结算节点、剩余可安排窗口、当前赛季所处位置。
 15. 当下游系统需要基于时间推进触发效果时，必须接入本系统的统一节点，而不是自行在别处静默推进时间。
-16. 正式比赛节点不可因运动点数不足而造成推进死锁。当 `match_trigger_reached = true` 且当前 AP < 经济系统 `match_ap_cost` 时，本系统先请求经济系统执行一次 `match_day_ap_safety_grant`，把 AP 补足到本场比赛最低开赛成本；该补足只可在正式比赛触发节点执行，不能被训练、建设或手动休息调用。
+16. 正式比赛节点不可因运动点数不足而造成推进死锁。当 `match_trigger_reached = true` 且当前 AP < 经济系统 `match_ap_cost` 时，本系统先请求经济系统执行一次 `match_day_ap_safety_grant`，把 AP 补足到本场比赛最低开赛成本；该补足只可在正式比赛触发节点执行，不能被训练、建设或手动休息调用。同一 `match_id` 在同一正式比赛节点上最多只能成功发放一次补足；恢复、重进或重复求值不得重复发放。
 
 ### States and Transitions
 
@@ -201,12 +201,14 @@
 - **If 某个行动同时跨过比赛节点和阶段结算节点**: 系统必须按统一优先级顺序依次结算，不能跳过其中任一节点；推荐顺序为：比赛节点 → 赛后结算 → 阶段结算。
 - **If 多个关键节点落在同一时间轴位置**: 系统必须使用固定节点优先级处理，且该优先级必须对玩家可解释；不得因实现顺序不同导致不同结果。
 - **If 玩家在 `Match Trigger` 时 AP 不足以支付 `match_ap_cost`**: 本系统请求经济系统执行 `match_day_ap_safety_grant`，将 AP 补足到本场比赛最低成本后继续进入比赛入口。该补足必须写入结算摘要或审计流水，且不得增加到超过 `match_ap_cost` 所需的最低值。
+- **If 同一 `match_id` 的 `Match Trigger` 在恢复、重复进入或同一稳定节点内被再次求值**: 已成功记录的 `match_day_ap_safety_grant` 不得再次发放；系统必须读取已有 grant 状态并继续原比赛节点处理，而不是重复补足 AP。
 - **If 玩家在 `Match Trigger` 时取消进入比赛**: 只有在规则允许取消的情况下，系统才能返回 `Planning`；若该比赛属于不可跳过节点，则必须继续停留在比赛入口，直到玩家处理该节点。
 - **If 不可跳过比赛节点因非法阵容无法正常开赛**: 时间系统不得延迟、跳过或反复触发同一比赛节点；比赛系统必须按其兜底规则生成推荐阵容、错位补位或 `forfeit_result_packet`，随后时间系统继续进入 `Post-Match Settlement`。
 - **If 一个赛季的 `total_season_units = 0` 或非法**: 赛季配置视为无效；系统不得开始该赛季，并必须标记为配置错误，而不是生成可立即结束的空赛季。
 - **If `completed_season_units > total_season_units`**: `season_progress_ratio` 按 `1` 处理，并立即转入 `Season Settlement`；同时将该赛季进度标记为需复核的异常数据。
 - **If 玩家在赛季末仍有未处理的普通行动窗口**: 普通窗口必须在赛季结束前失效；系统不得允许玩家绕过赛季结算继续在旧赛季中刷取额外收益。
 - **If 赛后结算直接导致阶段目标完成或赛季结束**: 系统必须在 `Post-Match Settlement` 后连续触发对应的 `Stage Settlement` 或 `Season Settlement`，不得要求玩家手动重复推进一次时间。
+- **If 联赛系统配置的一个 `matchweek` 对应多于一轮正式联赛窗口或完全没有正式比赛窗口**: 该赛季配置视为无效；MVP 阶段必须保持 `1 matchweek = 1 轮正式联赛比赛窗口`，否则时间预算、比赛频率与赛季节奏口径不可信。
 - **If 随机事件、建筑完工或周期结算与比赛日冲突**: 本系统必须使用统一节点优先级，并保证同一事件不会在不同入口被重复结算。
 - **If 存档读取时当前状态停在关键节点中途**: 系统必须恢复到最近一个可验证的节点状态，例如 `Planning`、`Match Trigger`、`Post-Match Settlement` 或 `Season Settlement`，不得恢复到既已消耗时间又未挂接结算的半完成状态。
 - **If 玩家在 Offseason 未完成必要准备就尝试开新赛季**: 系统必须先检查赛季开始条件；若条件未满足，应阻止进入 `SeasonStart` 并明确说明缺少的前置项。
@@ -289,6 +291,8 @@
 - **GIVEN** 玩家当前剩余时间不足以执行所选行动，**WHEN** QA 尝试开始该行动，**THEN** 系统必须阻止行动开始，并明确提示该行动会超出当前阶段剩余时间。
 - **GIVEN** 一次行动会把时间推进到预定比赛节点，**WHEN** QA 完成该行动结算，**THEN** 系统必须立即进入 `Match Trigger`，不得再额外开放自由行动窗口。
 - **GIVEN** `Match Trigger` 到达时玩家 AP 低于 `match_ap_cost`，**WHEN** QA 检查进入比赛入口前的资源状态，**THEN** 时间系统必须请求经济系统补足本场最低开赛 AP，并继续进入比赛入口；不得停留在无可执行操作且比赛又不可开始的死锁状态。
+- **GIVEN** 同一 `match_id` 的 `Match Trigger` 在恢复、重进或重复求值后再次到达，且该比赛已成功执行过 `match_day_ap_safety_grant`，**WHEN** QA 检查 AP 与审计流水，**THEN** 时间系统不得再次请求发放补足；同一比赛只允许一次有效 grant。
+- **GIVEN** MVP 联赛赛程与时间系统共同定义一个标准赛季，**WHEN** QA 检查时间单位与联赛轮次映射，**THEN** `1 matchweek` 必须恰好对应 `1` 轮正式联赛比赛窗口；若不满足，该配置不得视为合法 MVP 节奏配置。
 - **GIVEN** `current_timeline_position` 与 `scheduled_match_position` 已知，**WHEN** QA 手工计算 `match_trigger_reached`，**THEN** 系统返回结果必须与手工判断一致，并在结果为 `true` 时进入比赛入口流程。
 - **GIVEN** `current_stage_progress` 与 `stage_progress_target` 已知，**WHEN** QA 手工计算 `stage_settlement_trigger_reached`，**THEN** 系统返回结果必须与手工判断一致，并在结果为 `true` 时进入阶段结算流程。
 - **GIVEN** 一个赛季的 `completed_season_units` 与 `total_season_units` 已知，**WHEN** QA 手工计算 `season_progress_ratio`，**THEN** 系统返回值必须与手工结果一致；当结果达到 `1` 时，系统必须进入 `Season Settlement`。

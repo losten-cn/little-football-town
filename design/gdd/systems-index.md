@@ -25,11 +25,11 @@
 | 运动员培养系统 | Progression / Character | Core | MVP | Approved | Explicit | 负责球员招募、训练、成长、技能、状态与长期养成反馈。 |
 | 比赛竞技系统 | Gameplay / Match | Core | MVP | Designed | Explicit | 负责阵型、战术、比赛演算、胜负结果与赛后反馈。 |
 | 经济管理系统 | Economy | Core | MVP | Designed | Explicit | 负责经费、研究点数、运动点数的获取、消耗与经营压力；MVP 展示经费和运动点数，研究点数后台累积。 |
-| 小镇建设系统 | World / Management | Core | MVP | Designed | Explicit | MVP 提供最小城镇建设切片：4 类设施、建造/升级/维护、设施加成查询与主界面小镇触点；Alpha 扩展完整建设与经营 UI。 |
+| 小镇建设系统 | World / Management | Core | MVP | Designed | Explicit | MVP 提供最小城镇建设切片：4 类设施、建造/升级/维护、单格布局、基础邻接、设施加成查询与主界面小镇触点；Alpha 扩展完整建设与经营 UI。 |
 | 声望与成就系统 | Meta Progression | Feature | Alpha | Not Started | Explicit | 负责阶段性解锁、等级成长、长期收集与重玩动力。 |
 | 随机事件系统 | Content / Event | Feature | Beta | Not Started | Explicit | 负责制造变化、提供剧情化决策点并增强世界活力。 |
 | 技能与特性系统 | Character Depth | Feature | Alpha | Not Started | Inferred | 负责球员差异化成长路线与长期培养深度。 |
-| 联赛与赛事结构系统 | Progression / Competition | Feature | MVP | Designed | Inferred | 负责赛季编排、联赛层级、晋级结构和终局赛事目标。 |
+| 联赛与赛事结构系统 | Progression / Competition | Feature | MVP | Designed | Inferred | 负责赛季编排、联赛层级、晋级结构和终局赛事目标；MVP 联赛规模限定为 8–12 队。 |
 | 多周目与挑战模式系统 | Replayability | Feature | Full Vision | Not Started | Explicit | 负责通关后的继承、挑战规则和长期重玩价值。 |
 | 商业化与 DLC 规划系统 | Product / Meta | Polish | Full Vision | Not Started | Explicit | 负责买断制、DLC 节奏和发售后扩展规划，主要服务产品层。 |
 | 主循环 UI 框架 | UI / UX | Presentation | MVP | Designed | Explicit | 负责主界面、球员界面、比赛界面的基础导航与信息展示。 |
