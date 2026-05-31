@@ -57,7 +57,7 @@ func bind_time_manager(time_manager: Node) -> void:
 func start_formal_match(match_context: Dictionary[String, Variant], time_manager: Node = null) -> bool:
 	if time_manager != null:
 		bind_time_manager(time_manager)
-	var requested_match_context: Dictionary[String, Variant] = match_context.duplicate(true)
+	var requested_match_context: Dictionary[String, Variant] = _to_string_variant_dictionary(match_context)
 	var match_id: String = String(requested_match_context.get("match_id", ""))
 	if not match_id.is_empty() and _confirmed_results_by_match_id.has(match_id):
 		_pending_match_context = requested_match_context
@@ -71,7 +71,7 @@ func start_formal_match(match_context: Dictionary[String, Variant], time_manager
 		_planned_total_event_count = 0
 		_planned_first_half_event_count = 0
 		_formal_state_history.clear()
-		_result_packet = (_confirmed_results_by_match_id.get(match_id, {}) as Dictionary[String, Variant]).duplicate(true)
+		_result_packet = _to_string_variant_dictionary(_confirmed_results_by_match_id.get(match_id, {}))
 		_state = State.IDLE
 		_set_match_in_progress(false)
 		_transition_to(State.SETTLEMENT_HANDOFF)
@@ -241,7 +241,8 @@ func is_lineup_legal(lineup_slots: Array[Dictionary]) -> bool:
 	if lineup_slots.size() != 11:
 		return false
 	var goalkeeper_count: int = 0
-	for lineup_slot: Dictionary[String, Variant] in lineup_slots:
+	for lineup_slot_variant: Variant in lineup_slots:
+		var lineup_slot: Dictionary = lineup_slot_variant as Dictionary
 		if not lineup_slot.has("player"):
 			return false
 		var player_variant: Variant = lineup_slot.get("player", null)
@@ -259,7 +260,8 @@ func is_lineup_legal(lineup_slots: Array[Dictionary]) -> bool:
 func compute_team_match_strength(lineup_slots: Array[Dictionary], chemistry_factor: float, facility_rating_bonus: float) -> float:
 	var weighted_sum: float = 0.0
 	var weight_sum: float = 0.0
-	for lineup_slot: Dictionary[String, Variant] in lineup_slots:
+	for lineup_slot_variant: Variant in lineup_slots:
+		var lineup_slot: Dictionary = lineup_slot_variant as Dictionary
 		var player: Player = lineup_slot.get("player", null) as Player
 		if player == null:
 			continue
@@ -386,8 +388,8 @@ func serialize_state() -> Dictionary[String, Variant]:
 
 ## Restores match state from serialized data while forbidding live-half recovery.
 func deserialize_state(data: Dictionary[String, Variant]) -> void:
-	_pending_match_context = (data.get("pending_match_context", {}) as Dictionary[String, Variant]).duplicate(true)
-	_result_packet = (data.get("result_packet", {}) as Dictionary[String, Variant]).duplicate(true)
+	_pending_match_context = _to_string_variant_dictionary(data.get("pending_match_context", {}))
+	_result_packet = _to_string_variant_dictionary(data.get("result_packet", {}))
 	_formal_state_history = (data.get("formal_state_history", []) as Array[String]).duplicate()
 	_first_half_snapshot = {}
 	_second_half_plan = {
@@ -403,7 +405,7 @@ func deserialize_state(data: Dictionary[String, Variant]) -> void:
 	var serialized_confirmed_results: Dictionary = data.get("confirmed_results_by_match_id", {}) as Dictionary
 	for confirmed_match_id_variant: Variant in serialized_confirmed_results.keys():
 		var confirmed_match_id: String = String(confirmed_match_id_variant)
-		_confirmed_results_by_match_id[confirmed_match_id] = (serialized_confirmed_results[confirmed_match_id_variant] as Dictionary).duplicate(true)
+		_confirmed_results_by_match_id[confirmed_match_id] = _to_string_variant_dictionary(serialized_confirmed_results[confirmed_match_id_variant])
 	var requested_state: State = int(data.get("state", State.IDLE)) as State
 	if requested_state == State.FIRST_HALF or requested_state == State.HALFTIME_ADJUSTMENT or requested_state == State.SECOND_HALF:
 		requested_state = State.ENTRY
@@ -446,22 +448,41 @@ func _transition_to(next_state: State) -> void:
 		event_bus.call("emit", "match_completed", _result_packet.duplicate(true))
 
 
+func _to_string_variant_dictionary(value: Variant) -> Dictionary[String, Variant]:
+	var typed_dictionary: Dictionary[String, Variant] = {}
+	if value is Dictionary:
+		var source: Dictionary = value as Dictionary
+		for key: Variant in source.keys():
+			typed_dictionary[String(key)] = source[key]
+	return typed_dictionary
+
+
+func _to_dictionary_array(value: Variant) -> Array[Dictionary]:
+	var dictionaries: Array[Dictionary] = []
+	if value is Array:
+		for entry: Variant in value:
+			if entry is Dictionary:
+				dictionaries.append((entry as Dictionary).duplicate(true))
+	return dictionaries
+
+
 func _finalize_result_packet() -> void:
 	var match_id: String = String(_pending_match_context.get("match_id", ""))
 	var result: String = String(_pending_match_context.get("result", "draw"))
 	var score: Dictionary[String, Variant] = _build_score_summary(result)
+	var second_half_tactics: Dictionary[String, Variant] = _to_string_variant_dictionary(_second_half_plan.get("tactics", {}))
 	var actual_win_probability: float = compute_strength_adjusted_win_probability(
 		float(_pending_match_context.get("home_strength", 60.0)),
 		float(_pending_match_context.get("away_strength", 60.0)),
 		float(_pending_match_context.get("home_advantage_mod", 0.0)),
-		float(_second_half_plan.get("tactics", {}).get("tactical_match_mod", 0.0)),
+		float(second_half_tactics.get("tactical_match_mod", 0.0)),
 		float(_pending_match_context.get("condition_mod", 0.0)),
 		float(_pending_match_context.get("event_mod", 0.0))
 	)
 	var match_seed: int = int(_pending_match_context.get("match_seed", _pending_match_context.get("event_seed", 0)))
 	if _first_half_events.is_empty():
 		_capture_first_half_snapshot()
-	var second_half_tactical_mod: float = float(_second_half_plan.get("tactics", {}).get("tactical_match_mod", 0.0))
+	var second_half_tactical_mod: float = float(second_half_tactics.get("tactical_match_mod", 0.0))
 	var second_half_probability: float = _compute_match_win_probability(second_half_tactical_mod)
 	if _planned_total_event_count <= 0:
 		_planned_total_event_count = _estimate_key_event_count(actual_win_probability)
@@ -471,7 +492,8 @@ func _finalize_result_packet() -> void:
 	_second_half_events = _build_half_events(second_half_probability, _planned_total_event_count, _planned_first_half_event_count, second_half_event_count, 2)
 	var events: Array[Dictionary] = _first_half_events.duplicate(true)
 	events.append_array(_second_half_events.duplicate(true))
-	for event_entry: Dictionary[String, Variant] in events:
+	for entry_variant: Variant in events:
+		var event_entry: Dictionary = entry_variant as Dictionary
 		_emit_match_event(event_entry)
 	var player_appearances: Array[Dictionary] = _build_player_appearances()
 	var win_reasons: Array[String] = _build_win_reasons(events)
@@ -514,7 +536,8 @@ func _build_key_event_summary(events: Array[Dictionary]) -> Dictionary[String, V
 	var category_counts: Dictionary[String, Variant] = {}
 	for category: String in KEY_EVENT_CATEGORIES:
 		category_counts[category] = 0
-	for event_entry: Dictionary[String, Variant] in events:
+	for entry_variant: Variant in events:
+		var event_entry: Dictionary = entry_variant as Dictionary
 		var category: String = String(event_entry.get("category", ""))
 		if category_counts.has(category):
 			category_counts[category] = int(category_counts[category]) + 1
@@ -528,14 +551,14 @@ func _build_key_event_summary(events: Array[Dictionary]) -> Dictionary[String, V
 func _build_player_appearances() -> Array[Dictionary]:
 	var source_players: Array[Dictionary] = []
 	if _pending_match_context.has("player_appearances"):
-		for player_entry_variant: Variant in _pending_match_context.get("player_appearances", []):
-			source_players.append((player_entry_variant as Dictionary).duplicate(true))
+		source_players = _to_dictionary_array(_pending_match_context.get("player_appearances", []))
 	else:
 		source_players = [
 			{"player_id": 1, "minutes": 90, "performance_score": 7.0, "team_side": "home"},
 		]
 	var appearances: Array[Dictionary] = []
-	for player_entry: Dictionary[String, Variant] in source_players:
+	for entry_variant: Variant in source_players:
+		var player_entry: Dictionary = entry_variant as Dictionary
 		var minutes: int = maxi(0, int(player_entry.get("minutes", 0)))
 		if minutes <= 0:
 			continue
@@ -559,7 +582,8 @@ func _build_condition_changes(player_appearances: Array[Dictionary]) -> Array[Di
 		condition_minutes_divisor = match_config.condition_minutes_divisor
 		condition_floor = match_config.condition_floor
 	var changes: Array[Dictionary] = []
-	for player_entry: Dictionary[String, Variant] in player_appearances:
+	for entry_variant: Variant in player_appearances:
+		var player_entry: Dictionary = entry_variant as Dictionary
 		var old_condition: float = 1.0
 		var minutes: int = int(player_entry.get("minutes", 0))
 		var new_condition: float = clampf(1.0 - (float(minutes) / condition_minutes_divisor), condition_floor, 1.0)
@@ -581,7 +605,8 @@ func _build_morale_changes(player_appearances: Array[Dictionary], result: String
 		morale_loss_delta = match_config.morale_loss_delta
 		morale_draw_delta = match_config.morale_draw_delta
 	var changes: Array[Dictionary] = []
-	for player_entry: Dictionary[String, Variant] in player_appearances:
+	for entry_variant: Variant in player_appearances:
+		var player_entry: Dictionary = entry_variant as Dictionary
 		var team_side: String = String(player_entry.get("team_side", "home"))
 		var morale_delta: float = morale_draw_delta
 		if result == "home_win":
@@ -609,7 +634,8 @@ func _build_win_reasons(events: Array[Dictionary]) -> Array[String]:
 		reasons.append("错位球员表现不足")
 	if _events_include_category(events, "stamina_decline"):
 		reasons.append("体能不足影响下半场")
-	if not (_second_half_plan.get("tactics", {}) as Dictionary[String, Variant]).is_empty() or _events_include_category(events, "tactical_adaptation"):
+	var second_half_tactics: Dictionary[String, Variant] = _to_string_variant_dictionary(_second_half_plan.get("tactics", {}))
+	if not second_half_tactics.is_empty() or _events_include_category(events, "tactical_adaptation"):
 		reasons.append("战术克制生效")
 	if bool(_pending_match_context.get("is_reversal", false)):
 		reasons.append("关键事件逆转")
@@ -630,7 +656,8 @@ func _build_post_match_tags(win_reasons: Array[String], player_appearances: Arra
 	for reason: String in win_reasons:
 		if not tags.has(reason):
 			tags.append(reason)
-	for player_entry: Dictionary[String, Variant] in player_appearances:
+	for entry_variant: Variant in player_appearances:
+		var player_entry: Dictionary = entry_variant as Dictionary
 		var growth_tag: String = String(player_entry.get("post_match_growth_tag", "无"))
 		if not tags.has(growth_tag):
 			tags.append(growth_tag)
@@ -656,7 +683,8 @@ func _emit_match_event(event_entry: Dictionary) -> void:
 
 
 func _events_include_category(events: Array[Dictionary], category: String) -> bool:
-	for event_entry: Dictionary[String, Variant] in events:
+	for entry_variant: Variant in events:
+		var event_entry: Dictionary = entry_variant as Dictionary
 		if String(event_entry.get("category", "")) == category:
 			return true
 	return false

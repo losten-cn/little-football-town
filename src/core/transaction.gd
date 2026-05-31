@@ -36,6 +36,15 @@ func to_dict() -> Dictionary[String, Variant]:
 
 
 ## Rebuilds a runtime transaction from serialized data.
+static func _to_typed_dictionary(value: Variant) -> Dictionary[String, Variant]:
+	var typed_dictionary: Dictionary[String, Variant] = {}
+	if value is Dictionary:
+		var source: Dictionary = value as Dictionary
+		for key: Variant in source.keys():
+			typed_dictionary[String(key)] = source[key]
+	return typed_dictionary
+
+
 static func from_dict(data: Dictionary[String, Variant]) -> Transaction:
 	var transaction := Transaction.new()
 	transaction.id = int(data.get("id", 0))
@@ -46,6 +55,5 @@ static func from_dict(data: Dictionary[String, Variant]) -> Transaction:
 	transaction.reason = String(data.get("reason", ""))
 	transaction.source_system = String(data.get("source_system", ""))
 	transaction.timestamp = int(data.get("timestamp", 0))
-	var serialized_metadata: Dictionary[String, Variant] = data.get("metadata", {}) as Dictionary[String, Variant]
-	transaction.metadata = serialized_metadata.duplicate(true)
+	transaction.metadata = _to_typed_dictionary(data.get("metadata", {}))
 	return transaction
