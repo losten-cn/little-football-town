@@ -191,7 +191,7 @@ func test_player_development_deserialize_matches_players_by_id_when_snapshot_ord
 	roster.add_player(second_player)
 	var player_development: PlayerDevelopment = PlayerDevelopmentScript.new()
 	player_development.set_roster_for_testing(roster)
-	var snapshot_player_state: Dictionary[String, Variant] = player_development._serialize().duplicate(true)
+	var snapshot_player_state: Dictionary[String, Variant] = _to_typed_dictionary(player_development._serialize())
 	var snapshot_players: Array = snapshot_player_state.get("players", [])
 	if snapshot_players.size() >= 2:
 		var swapped_players: Array = [snapshot_players[1], snapshot_players[0]]
@@ -373,8 +373,16 @@ func _to_typed_dictionary(source: Variant) -> Dictionary[String, Variant]:
 	if not (source is Dictionary):
 		return typed_dictionary
 	for key_variant: Variant in source:
-		typed_dictionary[String(key_variant)] = source[key_variant]
+		typed_dictionary[String(key_variant)] = _duplicate_variant_deep(source[key_variant])
 	return typed_dictionary
+
+
+func _duplicate_variant_deep(value: Variant) -> Variant:
+	if value is Dictionary:
+		return (value as Dictionary).duplicate(true)
+	if value is Array:
+		return (value as Array).duplicate(true)
+	return value
 
 
 func _expect(condition: bool, message: String) -> void:
