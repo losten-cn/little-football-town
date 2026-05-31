@@ -137,6 +137,8 @@ func accredit_facility_construction_cost(funds_cost: int, action_points_cost: in
 
 ## Applies a facility-cost request through the accredited economy entry point.
 func accredit_facility_cost(funds_cost: int, action_points_cost: int, facility_id: int = 0) -> Dictionary[String, Variant]:
+	if funds_cost > 0 and _funds < float(funds_cost):
+		return {"success": false, "error": "funds_insufficient"}
 	var transaction: Transaction = Transaction.new()
 	transaction.type = Transaction.TransactionType.EXPENSE
 	transaction.funds_delta = -float(funds_cost)
@@ -150,6 +152,8 @@ func accredit_facility_cost(funds_cost: int, action_points_cost: int, facility_i
 
 ## Applies a training-cost request through the accredited economy entry point.
 func accredit_training_cost(funds_cost: int, action_points_cost: int, player_id: int = 0) -> Dictionary[String, Variant]:
+	if funds_cost > 0 and _funds < float(funds_cost):
+		return {"success": false, "error": "funds_insufficient"}
 	var transaction: Transaction = Transaction.new()
 	transaction.type = Transaction.TransactionType.EXPENSE
 	transaction.funds_delta = -float(funds_cost)
@@ -422,8 +426,6 @@ func _evaluate_affordability(projected_balances: Dictionary[String, float]) -> D
 	if economy_config == null:
 		return {"affordable": false, "reason_codes": ["economy_config_missing"]}
 	var reason_codes: Array[String] = []
-	if projected_balances["funds"] < 0.0:
-		reason_codes.append("funds_insufficient")
 	if projected_balances["action_points"] < economy_config.action_points_floor:
 		reason_codes.append("ap_below_floor")
 	if projected_balances["research_points"] < economy_config.research_points_floor:

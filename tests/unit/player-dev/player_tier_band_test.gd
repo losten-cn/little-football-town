@@ -112,19 +112,19 @@ func test_validate_player_tier_band_allows_out_of_band_players_with_explicit_sou
 func test_compare_training_efficiency_gain_distinguishes_open_room_from_cap_clipping() -> void:
 	# Arrange
 	var player_development: PlayerDevelopment = PlayerDevelopmentScript.new()
-	var lower_efficiency_open_room_player: Player = _build_player("优秀", 0.9, 60, 85)
-	var higher_efficiency_open_room_player: Player = _build_player("优秀", 1.3, 60, 85)
-	var equal_efficiency_player_a: Player = _build_player("优秀", 1.1, 60, 85)
-	var equal_efficiency_player_b: Player = _build_player("优秀", 1.1, 60, 85)
-	var lower_efficiency_cap_player: Player = _build_player("优秀", 0.9, 84, 85)
-	var higher_efficiency_cap_player: Player = _build_player("优秀", 1.3, 84, 85)
+	var lower_efficiency_open_room_player: Player = _build_player("明星", 1.1, 60, 85)
+	var higher_efficiency_open_room_player: Player = _build_player("明星", 1.3, 60, 85)
+	var equal_efficiency_player_a: Player = _build_player("明星", 1.2, 60, 85)
+	var equal_efficiency_player_b: Player = _build_player("明星", 1.2, 60, 85)
+	var lower_efficiency_cap_player: Player = _build_player("明星", 1.1, 84, 85)
+	var higher_efficiency_cap_player: Player = _build_player("明星", 1.3, 84, 85)
 
 	# Act
 	var open_room_result: Dictionary[String, float] = player_development.compare_training_efficiency_gain(
 		lower_efficiency_open_room_player,
 		higher_efficiency_open_room_player,
 		"SPD",
-		9.0,
+		12.0,
 		1.0,
 		1.0,
 		1.0,
