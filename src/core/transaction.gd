@@ -36,12 +36,20 @@ func to_dict() -> Dictionary[String, Variant]:
 
 
 ## Rebuilds a runtime transaction from serialized data.
+static func _duplicate_variant_deep(value: Variant) -> Variant:
+	if value is Dictionary:
+		return (value as Dictionary).duplicate(true)
+	if value is Array:
+		return (value as Array).duplicate(true)
+	return value
+
+
 static func _to_typed_dictionary(value: Variant) -> Dictionary[String, Variant]:
 	var typed_dictionary: Dictionary[String, Variant] = {}
 	if value is Dictionary:
 		var source: Dictionary = value as Dictionary
 		for key: Variant in source.keys():
-			typed_dictionary[String(key)] = source[key]
+			typed_dictionary[String(key)] = _duplicate_variant_deep(source[key])
 	return typed_dictionary
 
 

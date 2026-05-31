@@ -273,12 +273,19 @@ func settle_season(season_context: Dictionary[String, Variant]) -> Dictionary[St
 	resolved_context["tier_multiplier"] = tier_multiplier
 	return _settle_period_bonus("season_settlement", resolved_context)
 
+func _duplicate_variant_deep(value: Variant) -> Variant:
+	if value is Dictionary:
+		return (value as Dictionary).duplicate(true)
+	if value is Array:
+		return (value as Array).duplicate(true)
+	return value
+
 func _to_string_variant_dictionary(value: Variant) -> Dictionary[String, Variant]:
 	var typed_dictionary: Dictionary[String, Variant] = {}
 	if value is Dictionary:
 		var source: Dictionary = value as Dictionary
 		for key: Variant in source.keys():
-			typed_dictionary[String(key)] = source[key]
+			typed_dictionary[String(key)] = _duplicate_variant_deep(source[key])
 	return typed_dictionary
 
 func _validate_transaction(transaction: Transaction) -> Dictionary[String, Variant]:

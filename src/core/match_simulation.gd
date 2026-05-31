@@ -448,12 +448,20 @@ func _transition_to(next_state: State) -> void:
 		event_bus.call("emit", "match_completed", _result_packet.duplicate(true))
 
 
+func _duplicate_variant_deep(value: Variant) -> Variant:
+	if value is Dictionary:
+		return (value as Dictionary).duplicate(true)
+	if value is Array:
+		return (value as Array).duplicate(true)
+	return value
+
+
 func _to_string_variant_dictionary(value: Variant) -> Dictionary[String, Variant]:
 	var typed_dictionary: Dictionary[String, Variant] = {}
 	if value is Dictionary:
 		var source: Dictionary = value as Dictionary
 		for key: Variant in source.keys():
-			typed_dictionary[String(key)] = source[key]
+			typed_dictionary[String(key)] = _duplicate_variant_deep(source[key])
 	return typed_dictionary
 
 
