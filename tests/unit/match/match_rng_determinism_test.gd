@@ -59,8 +59,8 @@ func test_same_seed_preserves_halftime_adjusted_second_half_and_win_reasons() ->
 	})
 	var first_output: Dictionary[String, Variant] = _simulate_match_output(context, 31, true)
 	var second_output: Dictionary[String, Variant] = _simulate_match_output(context, 31, true)
-	var first_result_packet: Dictionary[String, Variant] = first_output.get("result_packet", {})
-	var second_result_packet: Dictionary[String, Variant] = second_output.get("result_packet", {})
+	var first_result_packet: Dictionary[String, Variant] = _to_typed_dictionary(first_output.get("result_packet", {}))
+	var second_result_packet: Dictionary[String, Variant] = _to_typed_dictionary(second_output.get("result_packet", {}))
 	_expect(_dictionary_to_text(first_output.get("first_half_snapshot", {})) == _dictionary_to_text(second_output.get("first_half_snapshot", {})), "same seed should preserve first-half output")
 	_expect(_dictionary_to_text(first_result_packet.get("key_event_summary", {})) == _dictionary_to_text(second_result_packet.get("key_event_summary", {})), "same seed should preserve halftime-adjusted second-half evolution")
 	_expect(_array_to_text(first_result_packet.get("win_reasons", [])) == _array_to_text(second_result_packet.get("win_reasons", [])), "same seed should preserve halftime-adjusted win reasons")
@@ -73,7 +73,7 @@ func test_restore_to_entry_rebuilds_rng_for_deterministic_replay() -> void:
 		"event_seed": 27,
 	})
 	var baseline_output: Dictionary[String, Variant] = _simulate_match_output(context, 27, true)
-	var baseline_result_packet: Dictionary[String, Variant] = baseline_output.get("result_packet", {})
+	var baseline_result_packet: Dictionary[String, Variant] = _to_typed_dictionary(baseline_output.get("result_packet", {}))
 	var save_manager: Node = SaveManagerScript.new()
 	var time_manager: Node = TimeManagerScript.new()
 	time_manager.name = "TimeManager"
@@ -110,7 +110,7 @@ func test_restore_to_entry_rebuilds_rng_for_deterministic_replay() -> void:
 	for _step: int in range(3):
 		restored.advance()
 	var restored_result_packet: Dictionary[String, Variant] = restored.get_result_packet()
-	var baseline_first_half_snapshot: Dictionary[String, Variant] = baseline_output.get("first_half_snapshot", {})
+	var baseline_first_half_snapshot: Dictionary[String, Variant] = _to_typed_dictionary(baseline_output.get("first_half_snapshot", {}))
 	var restored_first_half_snapshot: Dictionary[String, Variant] = restored.get_first_half_snapshot()
 	_expect(_dictionary_to_text(baseline_first_half_snapshot.get("events", [])) == _dictionary_to_text(restored_first_half_snapshot.get("events", [])), "restore to Entry should preserve deterministic first-half replay")
 	_expect(_dictionary_to_text(baseline_result_packet.get("key_event_summary", {})) == _dictionary_to_text(restored_result_packet.get("key_event_summary", {})), "restore to Entry should preserve deterministic event summary")
@@ -122,7 +122,7 @@ func test_restore_to_entry_rebuilds_rng_for_deterministic_replay() -> void:
 
 
 func _simulate_match_result(match_context: Dictionary[String, Variant], match_seed: int, apply_halftime_changes: bool) -> Dictionary[String, Variant]:
-	return (_simulate_match_output(match_context, match_seed, apply_halftime_changes).get("result_packet", {}) as Dictionary[String, Variant]).duplicate(true)
+	return _to_typed_dictionary(_simulate_match_output(match_context, match_seed, apply_halftime_changes).get("result_packet", {}))
 
 
 func _simulate_match_output(match_context: Dictionary[String, Variant], match_seed: int, apply_halftime_changes: bool) -> Dictionary[String, Variant]:
@@ -210,6 +210,15 @@ func _dictionary_to_text(value: Variant) -> String:
 
 func _array_to_text(value: Variant) -> String:
 	return JSON.stringify(value)
+
+
+func _to_typed_dictionary(source: Variant) -> Dictionary[String, Variant]:
+	var typed_dictionary: Dictionary[String, Variant] = {}
+	if source is Dictionary:
+		var source_dictionary: Dictionary = source as Dictionary
+		for key: Variant in source_dictionary.keys():
+			typed_dictionary[String(key)] = source_dictionary[key]
+	return typed_dictionary
 
 
 func _expect(condition: bool, message: String) -> void:

@@ -69,7 +69,8 @@ func test_settlement_batch_processes_in_fixed_serial_priority() -> void:
 	var transaction_log: Array[Transaction] = manager.get_transaction_log()
 
 	# Assert
-	for result: Dictionary[String, Variant] in batch_results:
+	for result_variant: Variant in batch_results:
+		var result: Dictionary = result_variant as Dictionary
 		_expect(result.get("success", false) as bool, "each settlement in the same-frame batch should succeed")
 	_expect(transaction_log.size() == 4, "settlement batch should append one committed transaction per settlement type")
 	_expect(_transaction_reasons(transaction_log) == [
@@ -160,7 +161,8 @@ func test_representative_season_ledger_reconciles_with_caps_and_rejections() -> 
 	var transaction_log: Array[Transaction] = manager.get_transaction_log()
 
 	# Assert
-	for result: Dictionary[String, Variant] in season_step_results:
+	for result_variant: Variant in season_step_results:
+		var result: Dictionary = result_variant as Dictionary
 		_expect(result.get("success", false) as bool, "each representative season settlement step should succeed")
 	_expect(not (rejected_result.get("success", false) as bool), "rejected season cost request should fail without mutating ledger state")
 	_expect(String(rejected_result.get("error", "")) == "ap_below_floor", "rejected season cost request should fail against the latest AP floor")

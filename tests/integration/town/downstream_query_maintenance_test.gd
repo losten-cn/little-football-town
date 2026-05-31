@@ -79,19 +79,20 @@ func test_query_methods_are_read_only() -> void:
 	root.call_deferred("add_child", town_building)
 	await process_frame
 	var build_ids: Array[int] = []
-	for build_result: Dictionary[String, Variant] in [
+	for build_result_variant: Variant in [
 		town_building.build_facility(Facility.FacilityType.TRAINING_GROUND, 2, 2),
 		town_building.build_facility(Facility.FacilityType.MEDICAL_ROOM, 2, 1),
 		town_building.build_facility(Facility.FacilityType.YOUTH_ACADEMY, 3, 2),
 		town_building.build_facility(Facility.FacilityType.STADIUM, 1, 2),
 	]:
+		var build_result: Dictionary = build_result_variant as Dictionary
 		_expect(build_result["success"] as bool, "all facilities should build for read-only query test")
 		build_ids.append(build_result["facility_id"] as int)
 	for facility_id: int in build_ids:
 		_complete_current_progress(event_bus, town_building, facility_id)
 	var training_upgrade_result: Dictionary[String, Variant] = town_building.upgrade_facility(build_ids[0])
 	_expect(training_upgrade_result["success"] as bool, "training ground should enter upgrading state for read-only snapshot test")
-	var before_serialized: Dictionary[String, Variant] = town_building.serialize().duplicate(true)
+	var before_serialized: Dictionary[String, Variant] = _to_typed_dictionary(town_building.serialize())
 	var before_balances: Dictionary[String, float] = economy_manager.get_balance_snapshot().duplicate()
 	for _iteration: int in range(3):
 		town_building.compute_training_efficiency_multiplier()
@@ -113,7 +114,7 @@ func test_query_methods_are_read_only() -> void:
 	_expect(_float_dictionary_equals(before_balances, after_balances), "public query methods should not mutate economy balances")
 	var demolish_result: Dictionary[String, Variant] = town_building.demolish_facility(build_ids[1])
 	_expect(demolish_result["success"] as bool, "demolition should succeed before post-demolition read-only check")
-	var after_demolition_serialized: Dictionary[String, Variant] = town_building.serialize().duplicate(true)
+	var after_demolition_serialized: Dictionary[String, Variant] = _to_typed_dictionary(town_building.serialize())
 	for _iteration: int in range(2):
 		town_building.compute_facility_ap_bonus()
 		town_building.compute_facility_total_maintenance()
@@ -150,6 +151,21 @@ func _float_dictionary_equals(left: Dictionary[String, float], right: Dictionary
 
 func _dictionaries_equal(left: Dictionary[String, Variant], right: Dictionary[String, Variant]) -> bool:
 	return JSON.stringify(left) == JSON.stringify(right)
+
+func _to_typed_dictionary(source: Variant) -> Dictionary[String, Variant]:
+	var typed_dictionary: Dictionary[String, Variant] = {}
+	if source is Dictionary:
+		var source_dictionary: Dictionary = source as Dictionary
+		for key: Variant in source_dictionary.keys():
+			typed_dictionary[String(key)] = _duplicate_variant_deep(source_dictionary[key])
+	return typed_dictionary
+
+func _duplicate_variant_deep(value: Variant) -> Variant:
+	if value is Dictionary:
+		return (value as Dictionary).duplicate(true)
+	if value is Array:
+		return (value as Array).duplicate(true)
+	return value
 
 func _make_transaction(funds_delta: float, ap_delta: float, rp_delta: float):
 	var transaction = preload("res://src/core/transaction.gd").new()

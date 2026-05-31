@@ -87,7 +87,7 @@ func test_deserialize_restores_construction_state_exactly() -> void:
 	_complete_current_progress(event_bus, source_town, youth_result["facility_id"] as int)
 	var youth_upgrade_result: Dictionary[String, Variant] = source_town.upgrade_facility(youth_result["facility_id"] as int)
 	_expect(youth_upgrade_result["success"] as bool, "youth academy should enter upgrading state for deserialize setup")
-	var payload: Dictionary[String, Variant] = source_town.serialize().duplicate(true)
+	var payload: Dictionary[String, Variant] = _to_typed_dictionary(source_town.serialize())
 	var restored_config: Resource = TownConfigScript.new()
 	var restored_economy := SpyEconomyManager.new()
 	var restored_town: TownBuilding = TownBuildingScript.new(restored_config, restored_economy)
@@ -132,7 +132,7 @@ func test_restored_progress_completes_on_expected_tick_once() -> void:
 	source_event_bus.call("emit", "time_phase_changed", {})
 	var remaining_at_save: int = source_town.get_facility(build_result["facility_id"] as int).get_remaining_construction_units()
 	_expect(remaining_at_save == 2, "test setup should leave exactly two construction ticks remaining at save time")
-	var payload: Dictionary[String, Variant] = source_town.serialize().duplicate(true)
+	var payload: Dictionary[String, Variant] = _to_typed_dictionary(source_town.serialize())
 	root.remove_child(source_town)
 	source_town.free()
 	source_economy.free()
@@ -187,7 +187,7 @@ func test_restored_progress_handles_single_tick_and_multiple_projects() -> void:
 	var stadium_remaining_at_save: int = source_town.get_facility(stadium_result["facility_id"] as int).get_remaining_construction_units()
 	_expect(training_remaining_at_save == 1, "training ground should have exactly one tick remaining at save time")
 	_expect(stadium_remaining_at_save == 5, "stadium should preserve an independent remaining timer at save time")
-	var payload: Dictionary[String, Variant] = source_town.serialize().duplicate(true)
+	var payload: Dictionary[String, Variant] = _to_typed_dictionary(source_town.serialize())
 	root.remove_child(source_town)
 	source_town.free()
 	source_economy.free()
@@ -220,7 +220,7 @@ func test_restored_progress_handles_single_tick_and_multiple_projects() -> void:
 
 func _find_serialized_facility(payload: Dictionary[String, Variant], facility_id: int) -> Dictionary[String, Variant]:
 	for facility_data: Variant in payload.get("facilities", []) as Array:
-		var typed_facility: Dictionary[String, Variant] = facility_data as Dictionary[String, Variant]
+		var typed_facility: Dictionary[String, Variant] = _to_typed_dictionary(facility_data)
 		if int(typed_facility.get("id", 0)) == facility_id:
 			return typed_facility
 	return {}
@@ -242,6 +242,21 @@ func _make_transaction(funds_delta: float, ap_delta: float, rp_delta: float):
 	transaction.ap_delta = ap_delta
 	transaction.rp_delta = rp_delta
 	return transaction
+
+func _to_typed_dictionary(source: Variant) -> Dictionary[String, Variant]:
+	var typed_dictionary: Dictionary[String, Variant] = {}
+	if source is Dictionary:
+		var source_dictionary: Dictionary = source as Dictionary
+		for key: Variant in source_dictionary.keys():
+			typed_dictionary[String(key)] = _duplicate_variant_deep(source_dictionary[key])
+	return typed_dictionary
+
+func _duplicate_variant_deep(value: Variant) -> Variant:
+	if value is Dictionary:
+		return (value as Dictionary).duplicate(true)
+	if value is Array:
+		return (value as Array).duplicate(true)
+	return value
 
 func _expect(condition: bool, message: String) -> void:
 	if not condition:

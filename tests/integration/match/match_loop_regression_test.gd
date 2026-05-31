@@ -80,7 +80,8 @@ func test_representative_mvp_session_completes_full_loop() -> void:
 	var event_summary_events: Array = (low_event_session["result_packet"].get("key_event_summary", {}) as Dictionary).get("events", []) as Array
 	_expect(_captured_match_event_payloads.size() == event_summary_events.size(), "event stream size should match result packet event list")
 	if not _captured_match_event_payloads.is_empty() and not event_summary_events.is_empty():
-		_expect(int(_captured_match_event_payloads[0].get("match_minute", -1)) == int((event_summary_events[0] as Dictionary[String, Variant]).get("minute", -2)), "event stream should preserve event minute ordering")
+		var first_event_summary: Dictionary = event_summary_events[0] as Dictionary
+		_expect(int(_captured_match_event_payloads[0].get("match_minute", -1)) == int(first_event_summary.get("minute", -2)), "event stream should preserve event minute ordering")
 	_simulation_free(low_event_session["simulation"] as MatchSimulation)
 	_node_free(low_event_session["time_manager"] as Node)
 
@@ -123,7 +124,7 @@ func test_match_result_handoff_supports_downstream_feedback_and_stadium_revenue_
 func test_full_match_simulation_stays_under_100ms_and_allows_draw_results() -> void:
 	var durations_usec: Array[int] = []
 	var draw_verified: bool = false
-	for sample: Dictionary[String, Variant] in [
+	for sample_variant: Variant in [
 		_build_match_context({
 			"match_id": "perf-draw",
 			"result": "draw",
@@ -145,6 +146,7 @@ func test_full_match_simulation_stays_under_100ms_and_allows_draw_results() -> v
 			"is_reversal": true,
 		}),
 	]:
+		var sample: Dictionary[String, Variant] = _to_typed_dictionary(sample_variant)
 		var started_at_usec: int = Time.get_ticks_usec()
 		var session: Dictionary[String, Variant] = _run_match_session(sample, true)
 		var elapsed_usec: int = Time.get_ticks_usec() - started_at_usec
@@ -292,6 +294,15 @@ func _node_free(node: Node) -> void:
 
 func _dictionary_to_text(value: Variant) -> String:
 	return JSON.stringify(value)
+
+
+func _to_typed_dictionary(source: Variant) -> Dictionary[String, Variant]:
+	var typed_dictionary: Dictionary[String, Variant] = {}
+	if source is Dictionary:
+		var source_dictionary: Dictionary = source as Dictionary
+		for key: Variant in source_dictionary.keys():
+			typed_dictionary[String(key)] = source_dictionary[key]
+	return typed_dictionary
 
 
 func _expect(condition: bool, message: String) -> void:
