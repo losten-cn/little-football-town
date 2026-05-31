@@ -36,7 +36,7 @@ func _exit_tree() -> void:
 func _refresh() -> void:
 	if _session == null:
 		return
-	var team_view: Dictionary[String, Variant] = _session.get_team_view_model()
+	var team_view: Dictionary = _session.get_team_view_model()
 	_summary_label.text = "选择一名球员并安排一次训练。剩余行动窗口：%d，经费：%d，AP：%d" % [
 		int(team_view.get("available_action_windows", 0)),
 		int(team_view.get("funds", 0)),
@@ -44,7 +44,7 @@ func _refresh() -> void:
 	]
 	_player_list.clear()
 	for player_summary_variant: Variant in team_view.get("players", []):
-		var player_summary: Dictionary[String, Variant] = player_summary_variant
+		var player_summary: Dictionary = player_summary_variant as Dictionary
 		var label: String = "%s｜%s｜TEC %d｜STA %d｜效率 %.2f" % [
 			String(player_summary.get("name", "")),
 			String(player_summary.get("position", "")),
@@ -56,7 +56,7 @@ func _refresh() -> void:
 		_player_list.set_item_metadata(_player_list.item_count - 1, int(player_summary.get("id", 0)))
 	_project_list.clear()
 	for project_variant: Variant in team_view.get("training_projects", []):
-		var project: Dictionary = project_variant
+		var project: Dictionary = project_variant as Dictionary
 		var project_label: String = "%s｜主属性 %s｜经费 %d｜AP %d" % [
 			String(project.get("label", "")),
 			String(project.get("primary_attribute", "")),
@@ -65,7 +65,7 @@ func _refresh() -> void:
 		]
 		_project_list.add_item(project_label)
 		_project_list.set_item_metadata(_project_list.item_count - 1, String(project.get("project_id", "")))
-	var last_training_result: Dictionary[String, Variant] = team_view.get("last_training_result", {})
+	var last_training_result: Dictionary = team_view.get("last_training_result", {}) as Dictionary
 	if last_training_result.is_empty():
 		_result_label.text = "[b]训练反馈[/b]\n还没有进行训练。"
 	else:

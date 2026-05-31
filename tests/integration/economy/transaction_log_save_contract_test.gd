@@ -9,6 +9,7 @@ var _failures: Array[String] = []
 
 func _initialize() -> void:
 	test_transaction_log_retains_latest_200_entries_in_order()
+	test_transaction_from_dict_deep_copies_nested_metadata()
 	test_economy_serialize_deserialize_roundtrip_restores_state()
 	test_economy_deserialize_partial_old_save_payload_uses_default_next_tx_id()
 	test_economy_registers_with_save_manager_and_restores_through_pipeline()
@@ -43,6 +44,22 @@ func test_transaction_log_retains_latest_200_entries_in_order() -> void:
 	_dispose_manager(manager)
 	_dispose_manager(exact_limit_manager)
 	_dispose_manager(empty_manager)
+
+func test_transaction_from_dict_deep_copies_nested_metadata() -> void:
+	var nested_payload: Dictionary = {"status": "original"}
+	var nested_tags: Array = ["first"]
+	var serialized_transaction: Dictionary[String, Variant] = _make_test_transaction(12.0, "nested_metadata_restore", 0.0, 0.0, {
+		"nested_payload": nested_payload,
+		"nested_tags": nested_tags,
+	}).to_dict()
+	var restored_transaction: Transaction = Transaction.from_dict(serialized_transaction)
+	var serialized_metadata: Dictionary = serialized_transaction["metadata"] as Dictionary
+	(serialized_metadata["nested_payload"] as Dictionary)["status"] = "mutated"
+	(serialized_metadata["nested_tags"] as Array).append("mutated")
+	var restored_payload: Dictionary = restored_transaction.metadata["nested_payload"] as Dictionary
+	var restored_tags: Array = restored_transaction.metadata["nested_tags"] as Array
+	_expect(String(restored_payload.get("status", "")) == "original", "Transaction.from_dict should deep-copy nested metadata dictionaries")
+	_expect(restored_tags.size() == 1 and String(restored_tags[0]) == "first", "Transaction.from_dict should deep-copy nested metadata arrays")
 
 func test_economy_serialize_deserialize_roundtrip_restores_state() -> void:
 	var source_manager: EconomyManager = _make_manager()

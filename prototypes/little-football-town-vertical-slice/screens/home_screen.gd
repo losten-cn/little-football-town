@@ -35,14 +35,14 @@ func _exit_tree() -> void:
 func _refresh() -> void:
 	if _session == null:
 		return
-	var summary: Dictionary[String, Variant] = _session.get_state_summary()
+	var summary: Dictionary = _session.get_state_summary()
 	_phase_label.text = "当前阶段：%s" % String(summary.get("phase", "Planning"))
 	_date_label.text = "日期：%s" % String(summary.get("date_display", "Week 1 / Day 1"))
 	_match_label.text = "下一场：%s" % String(summary.get("next_match_display", "待定"))
 	_resource_label.text = "经费 %d / AP %d" % [int(summary.get("funds", 0)), int(summary.get("action_points", 0))]
 	var can_open_match_center: bool = bool(summary.get("can_open_match_center", false))
 	_match_button.disabled = not can_open_match_center
-	var latest_match_result: Dictionary[String, Variant] = summary.get("latest_match_result", {})
+	var latest_match_result: Dictionary = summary.get("latest_match_result", {}) as Dictionary
 	if latest_match_result.is_empty():
 		if can_open_match_center:
 			_summary_label.text = "[b]下一步[/b]：已完成训练，时间已推进到周末比赛。比赛中心按钮现已开放，点击进入比赛中心开始本周比赛。"

@@ -25,6 +25,7 @@ func test_fatigue_adjusted_training_efficiency_clamps_product_to_formula_bounds(
 	# Arrange
 	var player_development: PlayerDevelopment = PlayerDevelopmentScript.new()
 	var within_range_player: Player = PlayerScript.new()
+	within_range_player.tier = "明星"
 	within_range_player.training_efficiency = 1.2
 	within_range_player.condition_multiplier = 1.0
 	within_range_player.morale_multiplier = 1.1
@@ -33,6 +34,7 @@ func test_fatigue_adjusted_training_efficiency_clamps_product_to_formula_bounds(
 	lower_bound_player.condition_multiplier = 0.4
 	lower_bound_player.morale_multiplier = 0.6
 	var upper_bound_player: Player = PlayerScript.new()
+	upper_bound_player.tier = "传奇胚子"
 	upper_bound_player.training_efficiency = 1.5
 	upper_bound_player.condition_multiplier = 1.2
 	upper_bound_player.morale_multiplier = 1.1
@@ -54,6 +56,7 @@ func test_normalize_training_efficiency_clamps_abnormal_values_and_marks_review_
 	var low_player: Player = PlayerScript.new()
 	low_player.training_efficiency = 0.4
 	var high_player: Player = PlayerScript.new()
+	high_player.tier = "传奇胚子"
 	high_player.training_efficiency = 1.9
 	var boundary_player: Player = PlayerScript.new()
 	boundary_player.training_efficiency = 0.8
@@ -68,7 +71,7 @@ func test_normalize_training_efficiency_clamps_abnormal_values_and_marks_review_
 	_expect(is_equal_approx(low_result_first, 0.8), "low training_efficiency should normalize to 0.8")
 	_expect(is_equal_approx(low_result_second, 0.8), "repeat normalization should preserve the normalized low bound")
 	_expect(low_player.review_flags.size() == 1, "repeat normalization should not duplicate the low-efficiency review flag")
-	_expect(is_equal_approx(high_result, 1.5), "high training_efficiency should normalize to 1.5")
+	_expect(is_equal_approx(high_result, 1.5), "legend prospect high training_efficiency should normalize to its configured 1.5 ceiling")
 	_expect(high_player.review_flags.size() == 1, "high abnormal value should create one review flag")
 	_expect(is_equal_approx(boundary_result, 0.8), "boundary training_efficiency should remain unchanged")
 	_expect(boundary_player.review_flags.is_empty(), "boundary training_efficiency should not create a review flag")
@@ -78,18 +81,22 @@ func test_low_condition_or_morale_reduces_effective_training_efficiency_without_
 	# Arrange
 	var player_development: PlayerDevelopment = PlayerDevelopmentScript.new()
 	var baseline_player: Player = PlayerScript.new()
+	baseline_player.tier = "明星"
 	baseline_player.training_efficiency = 1.2
 	baseline_player.condition_multiplier = 1.0
 	baseline_player.morale_multiplier = 1.0
 	var low_condition_player: Player = PlayerScript.new()
+	low_condition_player.tier = "明星"
 	low_condition_player.training_efficiency = 1.2
 	low_condition_player.condition_multiplier = 0.7
 	low_condition_player.morale_multiplier = 1.0
 	var low_morale_player: Player = PlayerScript.new()
+	low_morale_player.tier = "明星"
 	low_morale_player.training_efficiency = 1.2
 	low_morale_player.condition_multiplier = 1.0
 	low_morale_player.morale_multiplier = 0.75
 	var double_low_player: Player = PlayerScript.new()
+	double_low_player.tier = "明星"
 	double_low_player.training_efficiency = 1.2
 	double_low_player.condition_multiplier = 0.2
 	double_low_player.morale_multiplier = 0.2

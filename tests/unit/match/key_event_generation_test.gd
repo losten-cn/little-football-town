@@ -32,7 +32,8 @@ func test_key_event_generation_reaches_all_categories_with_complete_fields() -> 
 	var simulation: MatchSimulation = MatchSimulationScript.new()
 	var events: Array[Dictionary] = simulation.generate_key_events(0.95)
 	var seen_categories: Dictionary[String, bool] = {}
-	for event: Dictionary[String, Variant] in events:
+	for event_variant: Variant in events:
+		var event: Dictionary = event_variant as Dictionary
 		var category: String = String(event.get("category", ""))
 		var minute: int = int(event.get("minute", 0))
 		var half: int = int(event.get("half", 0))
@@ -55,7 +56,8 @@ func test_low_event_match_still_returns_three_readable_events_with_slow_pace_exp
 	var events: Array[Dictionary] = simulation.generate_key_events(0.05)
 	var has_slow_pace_tag: bool = false
 	_expect(events.size() >= 3, "low-event match should still return at least three readable events")
-	for event: Dictionary[String, Variant] in events:
+	for event_variant: Variant in events:
+		var event: Dictionary = event_variant as Dictionary
 		var narrative_tags: Array = event.get("narrative_tags", []) as Array
 		if narrative_tags.has("slow_pace"):
 			has_slow_pace_tag = true

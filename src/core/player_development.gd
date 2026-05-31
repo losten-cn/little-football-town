@@ -299,7 +299,8 @@ func apply_match_result_player_state(match_result_packet: Dictionary[String, Var
 
 ## Returns normalized player training efficiency and marks abnormal values for review.
 func normalize_training_efficiency(player: Player) -> float:
-	var normalized_value: float = clampf(player.training_efficiency, 0.8, 1.5)
+	var efficiency_range: Vector2 = _get_tier_training_efficiency_range(player.tier)
+	var normalized_value: float = clampf(player.training_efficiency, efficiency_range.x, efficiency_range.y)
 	if not is_equal_approx(normalized_value, player.training_efficiency):
 		player.training_efficiency = normalized_value
 		if not player.review_flags.has("training_efficiency_out_of_range"):

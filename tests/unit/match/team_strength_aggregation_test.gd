@@ -34,7 +34,8 @@ func test_team_match_strength_uses_weighted_rating_chemistry_and_facility_bonus(
 	var chemistry_factor: float = 1.10
 	var facility_rating_bonus: float = 6.0
 	var weighted_sum: float = 0.0
-	for lineup_slot: Dictionary[String, Variant] in lineup_slots:
+	for lineup_slot_variant: Variant in lineup_slots:
+		var lineup_slot: Dictionary = lineup_slot_variant as Dictionary
 		weighted_sum += simulation.compute_player_positional_rating(lineup_slot["player"] as Player, String(lineup_slot["assigned_position"]))
 	var expected_strength: float = (weighted_sum / float(lineup_slots.size())) * chemistry_factor + facility_rating_bonus
 	var actual_strength: float = simulation.compute_team_match_strength(lineup_slots, chemistry_factor, facility_rating_bonus)
@@ -57,7 +58,8 @@ func test_recommended_pre_match_setup_is_legal_without_manual_adjustment() -> vo
 	var lineup_slots: Array[Dictionary] = setup.get("lineup_slots", []) as Array[Dictionary]
 	_expect(lineup_slots.size() == 11, "recommended setup should produce an 11-player lineup")
 	_expect(simulation.is_lineup_legal(lineup_slots), "recommended setup should be legal without manual adjustment")
-	_expect(String((setup.get("tactics", {}) as Dictionary[String, Variant]).get("label", "")) == "balanced", "recommended setup should expose the default recommended tactic")
+	var tactics: Dictionary = setup.get("tactics", {}) as Dictionary
+	_expect(String(tactics.get("label", "")) == "balanced", "recommended setup should expose the default recommended tactic")
 	_expect(is_equal_approx(float(setup.get("chemistry_factor", 0.0)), 1.0), "recommended setup should use the default chemistry factor")
 
 

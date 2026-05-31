@@ -69,7 +69,8 @@ func test_settlement_batch_processes_in_fixed_serial_priority() -> void:
 	var transaction_log: Array[Transaction] = manager.get_transaction_log()
 
 	# Assert
-	for result: Dictionary[String, Variant] in batch_results:
+	for result_variant: Variant in batch_results:
+		var result: Dictionary = result_variant as Dictionary
 		_expect(result.get("success", false) as bool, "each settlement in the same-frame batch should succeed")
 	_expect(transaction_log.size() == 4, "settlement batch should append one committed transaction per settlement type")
 	_expect(_transaction_reasons(transaction_log) == [
@@ -95,6 +96,7 @@ func test_same_frame_cost_requests_validate_against_latest_balances() -> void:
 	_captured_balance_changes.clear()
 	_captured_warnings.clear()
 	var manager: EconomyManager = _make_manager(120.0)
+	_expect(manager.execute_transaction(_make_resource_transaction(50.0, 0.0, 0.0, "test_funds_setup"))["success"] as bool, "same-frame cost setup should seed funds before AP floor coverage")
 	var before_snapshot: Dictionary[String, float] = manager.get_balance_snapshot()
 
 	# Act
@@ -109,11 +111,11 @@ func test_same_frame_cost_requests_validate_against_latest_balances() -> void:
 	_expect(facility_result["success"] as bool, "second same-frame cost request should succeed while resources remain sufficient")
 	_expect(not (rejected_training_result.get("success", false) as bool), "later same-frame cost request should fail once the updated AP balance hits the floor")
 	_expect(String(rejected_training_result.get("error", "")) == "ap_below_floor", "rejected same-frame cost request should fail with the latest-balance floor error")
-	_expect(transaction_log.size() == 2, "rejected same-frame cost request must not append a committed transaction")
-	_expect(_transaction_reasons(transaction_log) == ["training_cost", "facility_cost"], "successful same-frame cost requests should commit in submission order")
+	_expect(transaction_log.size() == 3, "rejected same-frame cost request must not append a committed transaction")
+	_expect(_transaction_reasons(transaction_log) == ["test_funds_setup", "training_cost", "facility_cost"], "successful same-frame cost requests should commit in submission order")
 	_expect(is_equal_approx(float(after_snapshot["funds"]), float(before_snapshot["funds"]) - 20.0), "only successful same-frame cost requests should reduce funds")
 	_expect(is_equal_approx(float(after_snapshot["action_points"]), float(before_snapshot["action_points"]) - 1.0), "failed same-frame cost request must not leave partial AP deltas")
-	_expect(_captured_balance_changes.size() == 2, "only successful same-frame cost requests should emit balance-change events")
+	_expect(_captured_balance_changes.size() == 3, "setup plus successful same-frame cost requests should emit balance-change events")
 	_dispose_manager(manager)
 
 
@@ -160,7 +162,8 @@ func test_representative_season_ledger_reconciles_with_caps_and_rejections() -> 
 	var transaction_log: Array[Transaction] = manager.get_transaction_log()
 
 	# Assert
-	for result: Dictionary[String, Variant] in season_step_results:
+	for result_variant: Variant in season_step_results:
+		var result: Dictionary = result_variant as Dictionary
 		_expect(result.get("success", false) as bool, "each representative season settlement step should succeed")
 	_expect(not (rejected_result.get("success", false) as bool), "rejected season cost request should fail without mutating ledger state")
 	_expect(String(rejected_result.get("error", "")) == "ap_below_floor", "rejected season cost request should fail against the latest AP floor")

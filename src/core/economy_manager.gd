@@ -137,6 +137,8 @@ func accredit_facility_construction_cost(funds_cost: int, action_points_cost: in
 
 ## Applies a facility-cost request through the accredited economy entry point.
 func accredit_facility_cost(funds_cost: int, action_points_cost: int, facility_id: int = 0) -> Dictionary[String, Variant]:
+	if funds_cost > 0 and _funds < float(funds_cost):
+		return {"success": false, "error": "funds_insufficient"}
 	var transaction: Transaction = Transaction.new()
 	transaction.type = Transaction.TransactionType.EXPENSE
 	transaction.funds_delta = -float(funds_cost)
@@ -150,6 +152,8 @@ func accredit_facility_cost(funds_cost: int, action_points_cost: int, facility_i
 
 ## Applies a training-cost request through the accredited economy entry point.
 func accredit_training_cost(funds_cost: int, action_points_cost: int, player_id: int = 0) -> Dictionary[String, Variant]:
+	if funds_cost > 0 and _funds < float(funds_cost):
+		return {"success": false, "error": "funds_insufficient"}
 	var transaction: Transaction = Transaction.new()
 	transaction.type = Transaction.TransactionType.EXPENSE
 	transaction.funds_delta = -float(funds_cost)
@@ -266,12 +270,27 @@ func settle_season(season_context: Dictionary[String, Variant]) -> Dictionary[St
 	var final_rank: int = int(season_context.get("final_rank", 1))
 	var tier_multiplier: float = _resolve_league_tier_multiplier({"league_tier": current_tier}, economy_config)
 	var ranking_multiplier: float = _resolve_season_ranking_multiplier(final_rank, economy_config)
-	var resolved_context: Dictionary[String, Variant] = season_context.duplicate(true)
+	var resolved_context: Dictionary[String, Variant] = _to_string_variant_dictionary(season_context)
 	resolved_context["funds_reward"] = economy_config.base_season_bonus * ranking_multiplier * tier_multiplier
 	resolved_context["research_points_reward"] = economy_config.base_season_research * tier_multiplier
 	resolved_context["ranking_multiplier"] = ranking_multiplier
 	resolved_context["tier_multiplier"] = tier_multiplier
 	return _settle_period_bonus("season_settlement", resolved_context)
+
+func _duplicate_variant_deep(value: Variant) -> Variant:
+	if value is Dictionary:
+		return (value as Dictionary).duplicate(true)
+	if value is Array:
+		return (value as Array).duplicate(true)
+	return value
+
+func _to_string_variant_dictionary(value: Variant) -> Dictionary[String, Variant]:
+	var typed_dictionary: Dictionary[String, Variant] = {}
+	if value is Dictionary:
+		var source: Dictionary = value as Dictionary
+		for key: Variant in source.keys():
+			typed_dictionary[String(key)] = _duplicate_variant_deep(source[key])
+	return typed_dictionary
 
 func _validate_transaction(transaction: Transaction) -> Dictionary[String, Variant]:
 	var projected_balances: Dictionary[String, float] = _calculate_projected_balances(-transaction.funds_delta, -transaction.ap_delta, -transaction.rp_delta)
@@ -287,7 +306,7 @@ func _execute_authorized_transaction(transaction: Transaction) -> Dictionary[Str
 	var authorization_token: int = _next_authorization_token
 	_next_authorization_token += 1
 	_authorized_transaction_tokens[authorization_token] = true
-	var authorized_metadata: Dictionary[String, Variant] = transaction.metadata.duplicate(true)
+	var authorized_metadata: Dictionary[String, Variant] = _to_string_variant_dictionary(transaction.metadata)
 	authorized_metadata[AUTHORIZATION_TOKEN_KEY] = authorization_token
 	transaction.metadata = authorized_metadata
 	var result: Dictionary[String, Variant] = execute_transaction(transaction)
@@ -325,7 +344,7 @@ func deserialize(data: Dictionary[String, Variant]) -> void:
 	_next_transaction_id = int(data.get("next_tx_id", 1))
 	_transaction_log.clear()
 	for transaction_data: Variant in data.get("transactions", []) as Array:
-		_transaction_log.append(Transaction.from_dict(transaction_data as Dictionary[String, Variant]) as Transaction)
+		_transaction_log.append(Transaction.from_dict(_to_string_variant_dictionary(transaction_data)) as Transaction)
 	if _transaction_log.size() > MAX_TRANSACTION_LOG_ENTRIES:
 		_transaction_log = _transaction_log.slice(_transaction_log.size() - MAX_TRANSACTION_LOG_ENTRIES, _transaction_log.size())
 
@@ -346,7 +365,7 @@ func _settle_period_bonus(reason: String, settlement_context: Dictionary[String,
 	transaction.rp_delta = float(applied_research_reward)
 	transaction.reason = reason
 	transaction.source_system = "time"
-	transaction.metadata = settlement_context.duplicate(true)
+	transaction.metadata = _to_string_variant_dictionary(settlement_context)
 	transaction.metadata["discarded_overflow"] = discarded_overflow
 	var result: Dictionary[String, Variant] = _execute_authorized_transaction(transaction)
 	if not (result.get("success", false) as bool):
@@ -407,8 +426,6 @@ func _evaluate_affordability(projected_balances: Dictionary[String, float]) -> D
 	if economy_config == null:
 		return {"affordable": false, "reason_codes": ["economy_config_missing"]}
 	var reason_codes: Array[String] = []
-	if projected_balances["funds"] < 0.0:
-		reason_codes.append("funds_insufficient")
 	if projected_balances["action_points"] < economy_config.action_points_floor:
 		reason_codes.append("ap_below_floor")
 	if projected_balances["research_points"] < economy_config.research_points_floor:

@@ -72,12 +72,13 @@ func test_illegal_target_levels_are_rejected() -> void:
 	var town_config = TownConfigScript.new()
 	var town_building = TownBuildingScript.new(town_config)
 	for illegal_level: int in [0, 6, -1]:
-		for result: Dictionary[String, Variant] in [
+		for result_variant: Variant in [
 			town_building.compute_construction_funds_cost(Facility.FacilityType.TRAINING_GROUND, illegal_level),
 			town_building.compute_upgrade_funds_cost(Facility.FacilityType.TRAINING_GROUND, illegal_level),
 			town_building.compute_construction_time_cost(Facility.FacilityType.TRAINING_GROUND, illegal_level),
 			town_building.compute_upgrade_time_cost(Facility.FacilityType.TRAINING_GROUND, illegal_level),
 		]:
+			var result: Dictionary = result_variant as Dictionary
 			_expect(not (result["success"] as bool), "illegal level %s should fail" % str(illegal_level))
 			_expect(result["error"] as String == "invalid_target_level", "illegal level %s should report invalid_target_level" % str(illegal_level))
 			_expect(result["value"] == null, "illegal level %s should not return executable value" % str(illegal_level))

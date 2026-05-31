@@ -94,7 +94,8 @@ func test_match_simulation_probability_consumers_follow_balance_config_bounds() 
 	var estimated_event_count: int = match_simulation.call("_estimate_key_event_count", actual_probability)
 	var half_events: Array[Dictionary] = match_simulation.call("_build_half_events", actual_probability, estimated_event_count, 0, estimated_event_count, 1)
 	var home_event_count: int = 0
-	for event_entry: Dictionary[String, Variant] in half_events:
+	for event_entry_variant: Variant in half_events:
+		var event_entry: Dictionary = event_entry_variant as Dictionary
 		if String(event_entry.get("side", "")) == "home":
 			home_event_count += 1
 
