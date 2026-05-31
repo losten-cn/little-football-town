@@ -60,7 +60,7 @@ func get_state_summary() -> Dictionary[String, Variant]:
 		"match_started": _match_started,
 		"match_result_confirmed": _match_result_confirmed,
 		"players": roster_summary,
-		"training_projects": _training_projects.duplicate(true),
+		"training_projects": _to_dictionary_array(_training_projects),
 		"last_training_result": _last_training_result.duplicate(true),
 		"latest_match_result": _latest_match_result.duplicate(true),
 	}
@@ -70,8 +70,8 @@ func get_state_summary() -> Dictionary[String, Variant]:
 func get_team_view_model() -> Dictionary[String, Variant]:
 	var state_summary: Dictionary[String, Variant] = get_state_summary()
 	return {
-		"players": state_summary.get("players", []).duplicate(true),
-		"training_projects": _training_projects.duplicate(true),
+		"players": (state_summary.get("players", []) as Array).duplicate(true),
+		"training_projects": _to_dictionary_array(_training_projects),
 		"last_training_result": _last_training_result.duplicate(true),
 		"available_action_windows": state_summary.get("available_action_windows", 0),
 		"funds": state_summary.get("funds", 0),
@@ -204,10 +204,11 @@ func _bootstrap_runtime() -> void:
 
 
 func _find_training_project(project_id: String) -> Dictionary[String, Variant]:
-	for training_project: Dictionary[String, Variant] in _training_projects:
+	for training_project_variant: Variant in _training_projects:
+		var training_project: Dictionary[String, Variant] = _to_string_variant_dictionary(training_project_variant)
 		if String(training_project.get("project_id", "")) == project_id:
 			return training_project.duplicate(true)
-	return {}
+	return _to_string_variant_dictionary({})
 
 
 func _advance_to_match_day_if_ready() -> Dictionary[String, Variant]:
@@ -224,6 +225,7 @@ func _advance_to_match_day_if_ready() -> Dictionary[String, Variant]:
 func _finalize_match_loop() -> void:
 	if _latest_match_result.is_empty():
 		_latest_match_result = _match_simulation.get_result_packet()
+		_latest_match_result = _to_string_variant_dictionary(_latest_match_result)
 	var match_player_result: Dictionary[String, Variant] = _player_development.apply_match_result_player_state(_latest_match_result)
 	var settlement_context: Dictionary[String, Variant] = VerticalSliceScenarioScript.create_post_match_settlement_context()
 	var settlement_result: Dictionary[String, Variant] = _economy_manager.settle_post_match(_latest_match_result, settlement_context)
@@ -254,7 +256,7 @@ func _build_player_summary(player: Variant) -> Dictionary[String, Variant]:
 
 
 func _build_match_summary_text(result_packet: Dictionary[String, Variant]) -> String:
-	var score: Dictionary[String, Variant] = result_packet.get("score", {})
+	var score: Dictionary[String, Variant] = _to_string_variant_dictionary(result_packet.get("score", {}))
 	var home_score: int = int(score.get("home", 0))
 	var away_score: int = int(score.get("away", 0))
 	var reasons: Array = result_packet.get("win_reasons", [])
@@ -262,6 +264,24 @@ func _build_match_summary_text(result_packet: Dictionary[String, Variant]) -> St
 	if not reasons.is_empty():
 		reason_text = String(reasons[0])
 	return "本场以 %d:%d 结束，关键原因：%s" % [home_score, away_score, reason_text]
+
+
+func _to_string_variant_dictionary(value: Variant) -> Dictionary[String, Variant]:
+	var typed_dictionary: Dictionary[String, Variant] = {}
+	if value is Dictionary:
+		var source: Dictionary = value as Dictionary
+		for key: Variant in source.keys():
+			typed_dictionary[String(key)] = source[key]
+	return typed_dictionary
+
+
+func _to_dictionary_array(value: Variant) -> Array[Dictionary]:
+	var dictionaries: Array[Dictionary] = []
+	if value is Array:
+		for entry: Variant in value:
+			if entry is Dictionary:
+				dictionaries.append((entry as Dictionary).duplicate(true))
+	return dictionaries
 
 
 func _emit_state_changed() -> void:
