@@ -71,6 +71,16 @@ func _setup_ui() -> void:
 
 	_root_box = VBoxContainer.new()
 	_root_box.name = "PlayerMgmtRoot"
+	_root_box.anchor_left = 0.0
+	_root_box.anchor_top = 0.0
+	_root_box.anchor_right = 1.0
+	_root_box.anchor_bottom = 1.0
+	_root_box.offset_left = 0.0
+	_root_box.offset_top = 0.0
+	_root_box.offset_right = 0.0
+	_root_box.offset_bottom = 0.0
+	_root_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_root_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_root_box.add_theme_constant_override("separation", 12)
 	add_child(_root_box)
 
@@ -107,7 +117,7 @@ func _setup_ui() -> void:
 
 	_return_home_button = Button.new()
 	_return_home_button.name = "ReturnHomeButton"
-	_return_home_button.text = "返回主页"
+	_return_home_button.text = _localized_text("PLAYER_RETURN_HOME", "返回主页")
 	_return_home_button.focus_mode = Control.FOCUS_ALL
 	_return_home_button.pressed.connect(_on_return_home_pressed)
 	_root_box.add_child(_return_home_button)
@@ -167,12 +177,12 @@ func _refresh() -> void:
 
 
 func _mount_roster() -> void:
-	_title_label.text = "球员列表"
+	_title_label.text = _localized_text("PLAYER_ROSTER_TITLE", "球员列表")
 	_roster_list.visible = true
 	var players: Array[Dictionary] = _get_players_sorted_by_rating()
 	if players.is_empty():
 		var empty_label: Label = Label.new()
-		empty_label.text = "无匹配球员"
+		empty_label.text = _localized_text("PLAYER_ROSTER_EMPTY", "暂无可显示球员")
 		_roster_list.add_child(empty_label)
 		return
 	for player: Dictionary in players:
@@ -185,7 +195,7 @@ func _mount_roster() -> void:
 
 
 func _mount_player_detail() -> void:
-	_title_label.text = "球员详情"
+	_title_label.text = _localized_text("PLAYER_DETAIL_TITLE", "球员详情")
 	_detail_summary.visible = true
 	_detail_summary.text = _format_player_detail(_resolve_selected_player())
 	_training_confirm_button.visible = true
@@ -195,13 +205,13 @@ func _mount_player_detail() -> void:
 
 
 func _mount_training() -> void:
-	_title_label.text = "训练"
+	_title_label.text = _localized_text("PLAYER_TRAINING_TITLE", "训练")
 	_detail_summary.visible = true
 	_detail_summary.text = _format_player_detail(_resolve_selected_player())
 	_training_option_list.visible = true
 	_training_confirm_button.name = "TrainingConfirmButton"
 	_training_confirm_button.visible = true
-	_training_confirm_button.text = "确认训练"
+	_training_confirm_button.text = _localized_text("PLAYER_TRAINING_CONFIRM", "确认训练")
 	_training_confirm_button.disabled = not _training_entry_available() or _selected_training_id.is_empty()
 	_training_result_summary.visible = true
 	_training_result_summary.text = _format_training_result()
@@ -213,7 +223,7 @@ func _mount_training_options() -> void:
 	var options: Array[Dictionary] = _get_training_options()
 	if options.is_empty():
 		var empty_label: Label = Label.new()
-		empty_label.text = "暂无训练项目"
+		empty_label.text = _localized_text("PLAYER_TRAINING_EMPTY", "暂无训练项目")
 		_training_option_list.add_child(empty_label)
 		return
 	for option: Dictionary in options:
@@ -319,14 +329,14 @@ func _training_entry_available() -> bool:
 
 func _training_entry_text() -> String:
 	if _training_entry_available():
-		return "进入训练"
-	return str(_training_payload.get("disable_reason", _training_payload.get("training_disable_reason", "训练暂不可用")))
+		return _localized_text("PLAYER_TRAINING_ENTRY", "进入训练")
+	return str(_training_payload.get("disable_reason", _training_payload.get("training_disable_reason", _localized_text("PLAYER_TRAINING_DISABLED", "训练暂不可用"))))
 
 
 func _format_roster_row(player: Dictionary) -> String:
 	var typed_player: Dictionary[String, Variant] = _to_string_variant_dictionary(player)
-	return "%s | %s | 评分 %s | %s | %s | %s" % [
-		str(typed_player.get("name", "未知球员")),
+	return _localized_text("PLAYER_ROSTER_ROW_FORMAT", "%s｜%s｜评分 %s｜%s｜%s｜%s") % [
+		str(typed_player.get("name", _localized_text("PLAYER_UNKNOWN", "未知球员"))),
 		str(typed_player.get("position", typed_player.get("primary_position", "?"))),
 		str(typed_player.get("rating", typed_player.get("positional_overall_rating", "?"))),
 		str(typed_player.get("development_tier", typed_player.get("tier", "-"))),
@@ -337,9 +347,9 @@ func _format_roster_row(player: Dictionary) -> String:
 
 func _format_player_detail(player: Dictionary[String, Variant]) -> String:
 	if player.is_empty():
-		return "未选择球员"
-	return "身份：%s / %s / %s\n属性：%s\n成长：%s\n状态：%s\n行动：%s" % [
-		str(player.get("name", "未知球员")),
+		return _localized_text("PLAYER_DETAIL_NONE", "未选择球员")
+	return _localized_text("PLAYER_DETAIL_FORMAT", "身份：%s｜%s｜%s\n技术特点：%s\n近期成长：%s\n当前状态：%s\n推荐行动：%s") % [
+		str(player.get("name", _localized_text("PLAYER_UNKNOWN", "未知球员"))),
 		str(player.get("position", player.get("primary_position", "?"))),
 		str(player.get("development_tier", player.get("tier", "-"))),
 		_resolve_attribute_summary(player),
@@ -351,17 +361,17 @@ func _format_player_detail(player: Dictionary[String, Variant]) -> String:
 
 func _format_training_option(option: Dictionary) -> String:
 	var marker: String = "* " if str(option.get("training_id", option.get("id", ""))) == _selected_training_id else ""
-	return "%s%s — %s" % [
+	return _localized_text("PLAYER_TRAINING_OPTION_FORMAT", "%s%s — %s") % [
 		marker,
-		str(option.get("name", option.get("training_name", "训练项目"))),
-		str(option.get("summary", option.get("expected_gain_summary", "预计收益稍后显示"))),
+		str(option.get("name", option.get("training_name", _localized_text("PLAYER_TRAINING_OPTION", "训练项目")))),
+		str(option.get("summary", option.get("expected_gain_summary", _localized_text("PLAYER_TRAINING_EXPECTED_GAIN", "预计提升本次重点能力")))),
 	]
 
 
 func _format_training_result() -> String:
 	if _last_training_result.is_empty():
-		return "完成训练后会在这里显示结果"
-	return str(_last_training_result.get("summary", _last_training_result.get("result_summary", "训练已完成")))
+		return _localized_text("PLAYER_TRAINING_RESULT_PENDING", "完成训练后会在这里显示结果")
+	return str(_last_training_result.get("summary", _last_training_result.get("result_summary", _localized_text("PLAYER_TRAINING_DONE", "训练已完成，近期状态已更新"))))
 
 
 func _resolve_attribute_summary(player: Dictionary[String, Variant]) -> String:
@@ -378,7 +388,7 @@ func _resolve_growth_summary(player: Dictionary[String, Variant]) -> String:
 	var recent_growth: String = str(player.get("recent_growth", ""))
 	if not recent_growth.is_empty():
 		return recent_growth
-	return "最近暂无训练记录"
+	return _localized_text("PLAYER_GROWTH_NONE", "暂无近期成长记录")
 
 
 func _resolve_status_summary(player: Dictionary[String, Variant]) -> String:
@@ -391,12 +401,12 @@ func _resolve_status_summary(player: Dictionary[String, Variant]) -> String:
 	var status: String = str(player.get("status", ""))
 	if not status.is_empty():
 		return status
-	return "暂无状态变化"
+	return _localized_text("PLAYER_STATUS_GOOD", "状态：良好")
 
 
 func _build_attribute_summary_from_dictionary(value: Variant) -> String:
 	if not (value is Dictionary):
-		return "五维数据整理中"
+		return _localized_text("PLAYER_ATTRIBUTES_PENDING", "暂无详细属性")
 	var attributes: Dictionary = value as Dictionary
 	var labels: Dictionary[String, String] = {
 		"SPD": "速度",
@@ -416,12 +426,17 @@ func _build_attribute_summary_from_dictionary(value: Variant) -> String:
 		else:
 			parts.append("%s %s" % [labels[key], str(attribute_value)])
 	if parts.is_empty():
-		return "五维数据整理中"
+		return _localized_text("PLAYER_ATTRIBUTES_PENDING", "暂无详细属性")
 	return "｜".join(parts)
 
 
 func _compare_players_by_rating_desc(left: Dictionary, right: Dictionary) -> bool:
 	return float(left.get("rating", left.get("positional_overall_rating", 0.0))) > float(right.get("rating", right.get("positional_overall_rating", 0.0)))
+
+
+func _localized_text(key: String, fallback: String) -> String:
+	var localized := tr(key)
+	return fallback if localized == key else localized
 
 
 func _clear_children(parent: Node) -> void:

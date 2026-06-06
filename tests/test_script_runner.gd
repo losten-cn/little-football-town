@@ -1,4 +1,6 @@
 extends SceneTree
+## Node-only headless launcher for tests that extend Node.
+## Tests that extend SceneTree are full tree scripts and must run directly with --script.
 
 const ARG_PREFIX: String = "--test-script="
 const TESTS_PREFIX: String = "res://tests/"
@@ -22,7 +24,7 @@ func _initialize() -> void:
 
 	var test_instance: Variant = (script_resource as Script).new()
 	if not (test_instance is Node):
-		push_error("Test script must extend Node: %s" % test_script_path)
+		push_error("Node test runner can only launch scripts that extend Node: %s. If this test extends SceneTree, run it directly with: godot --headless --path <project> --script %s" % [test_script_path, test_script_path])
 		call_deferred("_quit_with_code", STARTUP_FAILURE_EXIT_CODE)
 		return
 

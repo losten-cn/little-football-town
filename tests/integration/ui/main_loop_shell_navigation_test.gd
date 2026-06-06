@@ -101,7 +101,7 @@ func test_main_loop_shell_match_entry_uses_authoritative_disable_reason() -> voi
 	_shell.call("return_home")
 	_press_shell_button("PrimaryAction")
 	_expect(_shell.call("get_current_route") == "home", "disabled match CTA should stay on home")
-	_expect(_find_shell_label_text("DisableReason") == "阵容不合法", "disabled match CTA should show authoritative disable reason")
+	_expect(_find_shell_label_text("DisableReason").contains("至少需要 7 名球员"), "disabled match CTA should show player-facing lineup requirement")
 
 
 func _setup_hud() -> void:

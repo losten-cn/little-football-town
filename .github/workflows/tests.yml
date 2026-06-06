@@ -39,18 +39,39 @@ jobs:
           set -uo pipefail
           mkdir -p test-logs
           fail_count=0
+          node_count=0
+          scenetree_count=0
 
           while IFS= read -r test_file; do
             test_res_path="res://${test_file#./}"
             log_file="test-logs/$(basename "${test_file%.gd}").log"
-            echo "Running ${test_res_path}"
-            if ! godot-bin/Godot_v4.6.3-stable_linux.x86_64 --headless --path "$GITHUB_WORKSPACE" \
-              --script res://tests/test_script_runner.gd -- \
-              --test-script="$test_res_path" 2>&1 | tee "$log_file"; then
-              fail_count=$((fail_count + 1))
-            fi
+            base_class="$(grep -m1 -E '^[[:space:]]*extends[[:space:]]+' "$test_file" | awk '{print $2}')"
+            echo "Running ${test_res_path} (${base_class:-missing-extends})"
+
+            case "$base_class" in
+              Node)
+                node_count=$((node_count + 1))
+                if ! godot-bin/Godot_v4.6.3-stable_linux.x86_64 --headless --path "$GITHUB_WORKSPACE" \
+                  --script res://tests/test_script_runner.gd -- \
+                  --test-script="$test_res_path" 2>&1 | tee "$log_file"; then
+                  fail_count=$((fail_count + 1))
+                fi
+                ;;
+              SceneTree)
+                scenetree_count=$((scenetree_count + 1))
+                if ! godot-bin/Godot_v4.6.3-stable_linux.x86_64 --headless --path "$GITHUB_WORKSPACE" \
+                  --script "$test_res_path" 2>&1 | tee "$log_file"; then
+                  fail_count=$((fail_count + 1))
+                fi
+                ;;
+              *)
+                echo "Unsupported test base class for ${test_res_path}: ${base_class:-missing extends}" | tee "$log_file"
+                fail_count=$((fail_count + 1))
+                ;;
+            esac
           done < <(find ./tests/unit ./tests/integration -type f -name '*_test.gd' | sort)
 
+          echo "STANDARD_AUTOMATED_TEST_BASELINE_SUMMARY node=${node_count} scenetree=${scenetree_count} failed=${fail_count} total=$((node_count + scenetree_count))"
           if [ "$fail_count" -ne 0 ]; then
             echo "${fail_count} automated test(s) failed."
             exit 1

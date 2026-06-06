@@ -136,6 +136,8 @@ func _setup_container() -> void:
 
 	_content_box = VBoxContainer.new()
 	_content_box.name = "ContentBox"
+	_content_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_content_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_content_box.add_theme_constant_override("separation", 16)
 	_content_margin.add_child(_content_box)
 
@@ -297,6 +299,8 @@ func _ensure_player_panel() -> void:
 		return
 	_player_panel = PlayerMgmtPanelScript.new() as Control
 	_player_panel.name = "PlayerMgmtPanel"
+	_player_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_player_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_content_box.add_child(_player_panel)
 
 
@@ -305,6 +309,8 @@ func _ensure_match_panel() -> void:
 		return
 	_match_panel = MatchPerfPanelScript.new() as Control
 	_match_panel.name = "MatchPerfPanel"
+	_match_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_match_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_content_box.add_child(_match_panel)
 
 
@@ -361,7 +367,7 @@ func _find_descendant_by_name(root: Node, node_name: String) -> Node:
 
 func _build_home_summary_text() -> String:
 	var date_display: String = str(_last_time_payload.get("date_display", _localized_text("HOME_TIME_NOT_READY", "时间准备中")))
-	var phase: String = str(_last_time_payload.get("phase", _localized_text("HOME_PHASE_PLANNING", "Planning")))
+	var phase: String = _home_phase_display(str(_last_time_payload.get("phase", "PLANNING")))
 	var next_match: String = _resolve_next_match_summary()
 	var action_windows: String = str(_last_time_payload.get("available_action_windows", "0"))
 	var team_overview: String = str(_last_system_payload.get("team_overview", _localized_text("HOME_TEAM_EMPTY", "球队信息正在整理")))
@@ -369,9 +375,13 @@ func _build_home_summary_text() -> String:
 	if _last_player_action_payload.has("summary"):
 		recent_summary = str(_last_player_action_payload.get("summary", recent_summary))
 	var recommended_action: String = _recommended_home_action_summary()
+	var resource_summary: String = _home_resource_summary(action_windows)
+	var town_anchor: String = _home_town_anchor_summary()
 	var recent_and_match: String = _localized_text("HOME_RECENT_AND_MATCH_FORMAT", "最近：%s\n下一场：%s") % [recent_summary, next_match]
-	return "%s\n%s\n\n%s\n%s\n%s" % [
+	return "%s\n%s\n%s\n%s\n\n%s\n%s\n%s" % [
 		_localized_text("HOME_STATUS_FORMAT", "当前：%s / %s") % [date_display, phase],
+		resource_summary,
+		town_anchor,
 		recommended_action,
 		_localized_text("HOME_CLUB_OVERVIEW_FORMAT", "俱乐部概览：%s") % team_overview,
 		_localized_text("HOME_ACTION_WINDOWS_FORMAT", "行动窗口：%s 可用") % action_windows,
@@ -379,16 +389,43 @@ func _build_home_summary_text() -> String:
 	]
 
 
+func _home_phase_display(phase: String) -> String:
+	match phase:
+		"PLANNING":
+			return _localized_text("HOME_PHASE_PLANNING", "日常经营")
+		"MATCH_TRIGGER":
+			return _localized_text("HOME_PHASE_MATCH_TRIGGER", "比赛日")
+		"POST_MATCH", "POST_MATCH_SETTLEMENT":
+			return _localized_text("HOME_PHASE_POST_MATCH", "赛后回顾")
+		_:
+			return phase.capitalize()
+
+
+func _home_resource_summary(action_windows: String) -> String:
+	var funds_text: String = str(_last_system_payload.get("funds", _localized_text("HOME_RESOURCE_UNKNOWN", "整理中")))
+	var ap_text: String = str(_last_system_payload.get("ap", _last_system_payload.get("action_points", _localized_text("HOME_RESOURCE_UNKNOWN", "整理中"))))
+	return _localized_text("HOME_RESOURCE_FORMAT", "资源：经费 %s｜运动点数 %s｜行动 %s") % [funds_text, ap_text, action_windows]
+
+
+func _home_town_anchor_summary() -> String:
+	var town_summary: String = str(_last_system_payload.get("town_anchor_summary", _last_system_payload.get("town_summary", "")))
+	if not town_summary.is_empty():
+		return _localized_text("HOME_TOWN_ANCHOR_FORMAT", "小镇球场：%s") % town_summary
+	return _localized_text("HOME_TOWN_ANCHOR_DEFAULT", "小镇球场：训练场很热闹，大家都在为下一轮做准备。")
+
+
 func _resolve_next_match_summary() -> String:
 	if bool(_last_time_payload.get("schedule_loading", false)):
 		return _localized_text("HOME_SCHEDULE_PREPARING", "赛程正在准备")
 	if bool(_last_time_payload.get("schedule_missing", false)):
 		return _localized_text("HOME_SCHEDULE_PENDING", "赛程待公布")
-	var opponent_name: String = str(_last_time_payload.get("opponent_name", ""))
+	var opponent_name: String = _player_facing_opponent_name(str(_last_time_payload.get("opponent_name", "")))
 	var next_match_display: String = str(_last_time_payload.get("next_match_display", ""))
 	if bool(_last_time_payload.get("match_trigger_reached", false)) and bool(_last_time_payload.get("match_center_available", true)):
 		return _localized_text("HOME_MATCH_READY", "比赛已可开始") if opponent_name.is_empty() else _localized_text("HOME_MATCH_READY_VS", "可进入比赛：%s") % opponent_name
 	if not next_match_display.is_empty():
+		if next_match_display.contains("Opponent"):
+			return _localized_text("HOME_NEXT_MATCH_PENDING", "周末比赛待公布")
 		return next_match_display
 	if not opponent_name.is_empty():
 		return _localized_text("HOME_NEXT_MATCH_VS", "%s") % opponent_name
@@ -438,16 +475,30 @@ func _can_enter_match() -> bool:
 
 func _resolve_match_disable_reason() -> String:
 	if not bool(_last_system_payload.get("system_state_allows_match", true)):
-		return str(_last_system_payload.get("system_state_disable_reason", "当前系统状态不允许进入比赛"))
+		return _player_facing_disable_reason(str(_last_system_payload.get("system_state_disable_reason", "当前系统状态不允许进入比赛")))
 	if not bool(_last_system_payload.get("navigation_context_allows_match", true)):
-		return str(_last_system_payload.get("navigation_context_disable_reason", "当前导航上下文不允许进入比赛"))
+		return _player_facing_disable_reason(str(_last_system_payload.get("navigation_context_disable_reason", "当前导航上下文不允许进入比赛")))
 	if bool(_last_time_payload.get("schedule_missing", false)):
-		return "赛程尚未公布"
+		return _localized_text("MATCH_DISABLED_SCHEDULE_MISSING", "赛程尚未公布")
 	if not bool(_last_time_payload.get("match_trigger_reached", false)):
-		return "还未到比赛时间"
+		return _localized_text("MATCH_DISABLED_TIME", "还未到比赛时间")
 	if not bool(_last_time_payload.get("match_center_available", true)):
-		return "比赛中心暂不可用"
-	return "当前不可进入比赛"
+		return _localized_text("MATCH_DISABLED_CENTER", "比赛中心暂不可用")
+	return _localized_text("MATCH_DISABLED_DEFAULT", "当前不可进入比赛")
+
+
+func _player_facing_disable_reason(reason: String) -> String:
+	if reason.is_empty():
+		return _localized_text("MATCH_DISABLED_DEFAULT", "当前不可进入比赛")
+	if reason == "阵容不合法" or reason.contains("阵容不合法"):
+		return _localized_text("MATCH_DISABLED_LINEUP_INCOMPLETE", "阵容不完整——至少需要 7 名球员和 1 名守门员")
+	return reason
+
+
+func _player_facing_opponent_name(opponent_name: String) -> String:
+	if opponent_name.is_empty() or opponent_name.begins_with("Opponent"):
+		return _localized_text("MATCH_OPPONENT_PENDING", "本轮对手待公布")
+	return opponent_name
 
 
 func _show_disable_reason(reason: String) -> void:

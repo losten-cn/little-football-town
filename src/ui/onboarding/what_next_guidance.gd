@@ -96,7 +96,7 @@ func _setup_ui() -> void:
 
 	_dismiss_button = Button.new()
 	_dismiss_button.name = "WhatNextDismissButton"
-	_dismiss_button.text = "知道了"
+	_dismiss_button.text = _localized_text("WHAT_NEXT_DISMISS", "知道了")
 	_dismiss_button.focus_mode = Control.FOCUS_ALL
 	_dismiss_button.pressed.connect(_on_dismiss_pressed)
 	_box.add_child(_dismiss_button)
@@ -175,34 +175,34 @@ func _refresh() -> void:
 func _copy_for_step() -> String:
 	match _current_step:
 		STEP_HOME:
-			return "先看看球员"
+			return _localized_text("WHAT_NEXT_HOME", "先看看球员")
 		STEP_ROSTER:
-			return "选一名球员"
+			return _localized_text("WHAT_NEXT_ROSTER", "选一名球员")
 		STEP_TRAINING:
-			return "完成一次训练"
+			return _localized_text("WHAT_NEXT_TRAINING", "完成一次训练")
 		STEP_PRE_MATCH:
 			if _can_enter_match():
-				return "开始这场比赛"
-			return "等到比赛开启"
+				return _localized_text("WHAT_NEXT_MATCH_READY", "开始这场比赛")
+			return _localized_text("WHAT_NEXT_MATCH_WAIT", "等到比赛开启")
 		STEP_RESULT:
-			return "读结果并返回"
+			return _localized_text("WHAT_NEXT_RESULT", "读结果并返回")
 	return ""
 
 
 func _target_for_step() -> String:
 	if not _anchor_available:
-		return "提示：当前页面没有高亮目标，请按上方提示继续。"
+		return _localized_text("WHAT_NEXT_TEXT_ONLY", "提示：当前页面没有高亮目标，请按文字继续。")
 	match _current_step:
 		STEP_HOME:
-			return "目标：查看球员"
+			return _localized_text("WHAT_NEXT_TARGET_HOME", "打开“球员”查看球队")
 		STEP_ROSTER:
-			return "目标：球员列表中的任意球员"
+			return _localized_text("WHAT_NEXT_TARGET_ROSTER", "选择一名球员查看详情")
 		STEP_TRAINING:
-			return "目标：确认训练"
+			return _localized_text("WHAT_NEXT_TARGET_TRAINING", "确认这次训练")
 		STEP_PRE_MATCH:
-			return "目标：开始比赛"
+			return _localized_text("WHAT_NEXT_TARGET_MATCH", "准备好了就开始比赛")
 		STEP_RESULT:
-			return "目标：确认结果并返回"
+			return _localized_text("WHAT_NEXT_TARGET_RESULT", "看完结果后返回主界面")
 	return ""
 
 
@@ -213,6 +213,11 @@ func _can_enter_match() -> bool:
 func _on_dismiss_pressed() -> void:
 	_dismissed = true
 	_refresh()
+
+
+func _localized_text(key: String, fallback: String) -> String:
+	var localized := tr(key)
+	return fallback if localized == key else localized
 
 
 func _to_string_variant_dictionary(value: Variant) -> Dictionary[String, Variant]:
