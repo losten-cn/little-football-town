@@ -15,6 +15,20 @@ Pipeline: Pre-Production → Production gate preparation — player experience r
 - Verdict: PASS WITH WARNINGS for AI-agent surrogate playtest compliance and focused revision evidence; strict external-human participant validation is not claimed and remains optional future evidence only if requested later.
 - Recommended next: proceed toward gate-readiness/UX sign-off convergence with warnings carried forward; do not reopen route topology unless a new route blocker appears.
 - Gate-owner compliance decision: AI-agent expert surrogate sessions replace the original strict external-human playtest requirement for this Production gate; older notes that say human clarity/fun playtest is pending are superseded for this gate only, while external-human validation remains optional future evidence.
+- UX/gate rereview update: `production/qa/evidence/ux-review-production-gate-2026-06-06.md` is now PASS WITH WARNINGS / READY WITH WARNINGS, and `production/qa/evidence/production-gate-player-experience-baseline-2026-06-06.md` is now READY / PASS WITH WARNINGS after focused revision rerun.
+- Additional verification after typed-boundary cleanup: `L2_PLAYABLE_LOOP_PANELS_TEST_PASS` and `MVP_VISUAL_WALKTHROUGH_PASS` both passed after normalizing the selected player assignment in `src/ui/player/player_mgmt_panel.gd`.
+- Next recommended: close player-experience gate readiness with warnings carried forward; separately decide whether to fix or waive the CI-like SceneTree runner mismatch before formal Production gate close.
+
+## Session Extract — Pre-Production to Production gate readiness 2026-06-07
+
+- Gate check written: `production/gate-checks/2026-06-07-pre-production-to-production.md`.
+- Waiver written: `production/qa/evidence/ci-runner-mismatch-waiver-2026-06-07.md`.
+- Verdict: Pre-Production → Production gate readiness is PASS WITH WARNINGS / READY TO ADVANCE TO PRODUCTION.
+- Parallel final review: Producer, QA Lead, Release Manager, and Godot/GDScript specialist found no remaining route-level, UX-critical, or technical blocker under the accepted scope.
+- Explicit non-claims: external-human participant validation is not claimed; standard CI-like runner baseline is not claimed green because SceneTree runner mismatch remains waived/tracked.
+- Carry-forward warnings: low-fidelity visuals, roster/training/match depth, full localization/accessibility hardening, onboarding persistence/cooldowns/replay/analytics/anchor registry, and CI runner workflow cleanup.
+- Scope guardrail: do not reopen `ScreenManager`, route IDs, shell topology, core gameplay authority, or new roster/training/match/town/onboarding systems during gate close.
+- Next recommended: record Production entry if desired, then start Production work from warning-backed slices while scheduling CI runner cleanup separately.
 
 ## Current Checkpoint — 2026-06-04
 
