@@ -2,18 +2,19 @@
 
 Task: Production gate player experience focused revision verified
 Date: 2026-06-07
-Pipeline: Pre-Production → Production gate preparation — player experience route and focused display-layer revision pass with warnings; formal external-human compliance remains separated if gate owner requires it
+Pipeline: Pre-Production → Production gate preparation — player experience route and focused display-layer revision pass with warnings; AI-agent surrogate playtest is accepted as this gate's playtest compliance substitute while external-human validation remains optional future evidence
 
 ## Session Extract — Production gate focused display revision 2026-06-07
 
-- Evidence updated: `production/qa/evidence/mvp-human-playtest-production-gate-2026-06-06.md` now records the focused revision verification in addition to the 3 automated/expert surrogate sessions.
+- Evidence updated: `production/qa/evidence/mvp-human-playtest-production-gate-2026-06-06.md` now records the focused revision verification and treats the 3 AI-agent expert surrogate sessions as this gate's accepted playtest compliance substitute.
 - Files changed: `src/ui/hud/main_loop_shell.gd`, `src/ui/player/player_mgmt_panel.gd`, `src/ui/match/match_perf_panel.gd`, and the evidence file.
 - Scope: Display-layer-only convergence using topology order — L1 Home information/warm-town presentation, L2 Player/Training decision clarity, and L2 Match readability/agency perception.
 - Guardrails kept: no route ID changes, no `ScreenManager` changes, no core gameplay authority changes, and no new tactical/training systems.
 - Verification passed: `MAIN_LOOP_SHELL_NAVIGATION_TEST_PASS`, `L2_PLAYABLE_LOOP_PANELS_TEST_PASS`, `WHAT_NEXT_GUIDANCE_TEST_PASS`, and `MVP_VISUAL_WALKTHROUGH_PASS`.
 - Screenshot spot-check passed for Home, Player Detail, Match Pre, and Match Result; revised copy is visible and no blocking layout/route issue was observed.
-- Verdict: PASS WITH WARNINGS for automated/expert surrogate and focused revision evidence; strict 3-external-human participant compliance remains separated and requires formal retest only if the gate owner requires it.
+- Verdict: PASS WITH WARNINGS for AI-agent surrogate playtest compliance and focused revision evidence; strict external-human participant validation is not claimed and remains optional future evidence only if requested later.
 - Recommended next: proceed toward gate-readiness/UX sign-off convergence with warnings carried forward; do not reopen route topology unless a new route blocker appears.
+- Gate-owner compliance decision: AI-agent expert surrogate sessions replace the original strict external-human playtest requirement for this Production gate; older notes that say human clarity/fun playtest is pending are superseded for this gate only, while external-human validation remains optional future evidence.
 
 ## Current Checkpoint — 2026-06-04
 
@@ -32,7 +33,7 @@ Pipeline: Pre-Production → Production gate preparation — player experience r
 - Sign-off: TD-ARCHITECTURE self-review completed as APPROVED WITH CONDITIONS; LP-FEASIBILITY skipped per Lean mode; `architecture.md` Document Status updated to Version 2.3 / 2026-06-06.
 - L4 readiness update: `production/qa/evidence/ui-readiness-sprint-1.md` is now READY WITH WARNINGS for S1-5/S1-6, based on story-level evidence and MVP playtest handoff.
 - Automated visual walkthrough completed: `MVP_VISUAL_WALKTHROUGH_PASS` using `tests/integration/ui/mvp_visual_walkthrough_runner.gd`; screenshots reviewed from `C:/Users/kylin/AppData/Roaming/Godot/app_userdata/Football Town/mvp_visual_walkthrough`.
-- Playtest result evidence updated: `production/qa/evidence/mvp-playtest-result-2026-06-06.md` is PASS WITH WARNINGS for automated route-and-screenshot coverage; human clarity/fun playtest remains pending and is not replaced by automation.
+- Playtest result evidence updated: `production/qa/evidence/mvp-playtest-result-2026-06-06.md` is PASS WITH WARNINGS for automated route-and-screenshot coverage; original human clarity/fun playtest pending note is superseded for this gate by the 2026-06-07 gate-owner decision accepting AI-agent expert surrogate sessions as the playtest compliance substitute.
 - Skill re-run evidence written: `production/qa/evidence/mvp-visual-walkthrough-2026-06-06.md` records the `/visual-walkthrough mvp` rerun, the exact command, screenshot review table, zero blockers, and carried warnings.
 - Next: move to L5 gate/readiness if route-level automation is sufficient for this milestone; otherwise run a human-observed clarity/fun playtest before L5. If blockers appear, fix only the smallest route-breaking slice.
 

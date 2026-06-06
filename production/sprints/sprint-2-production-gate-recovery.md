@@ -2,7 +2,7 @@
 
 ## Sprint Goal
 
-在不扩 scope 的前提下，补齐 Production gate 缺失证据：完成人工观察的 vertical slice playtest、确认 core fun / core fantasy、通过关键 UX 规格评审、补齐 slice 相关 prototype REPORT，并形成可重跑 gate 的证据包。
+在不扩 scope 的前提下，补齐 Production gate 缺失证据：完成本 gate 接受的 AI-agent 代理观察 vertical slice playtest、确认 core fun / core fantasy、通过关键 UX 规格评审、补齐 slice 相关 prototype REPORT，并形成可重跑 gate 的证据包。
 
 ## Duration
 
@@ -22,7 +22,7 @@
 - **Producer** — 锁 scope、排依赖、汇总证据、给出 re-gate 建议
 - **Game Designer** — 定义 core fun / fantasy 验证标准
 - **UX Designer** — 执行关键 UX 规格评审与缺陷分级
-- **QA Lead** — 组织并记录人工观察 playtest，负责复验
+- **QA Lead** — 组织并记录 AI-agent 代理观察 playtest，负责复验
 - **UI Programmer** — 修复 gate-blocking UX / flow 问题
 - **Creative Director** — 对 core fun / core fantasy 做最终 PASS / FAIL 判定
 
@@ -46,13 +46,13 @@ PGR-02 → PGR-05 → PGR-06 → PGR-07 → PGR-08 → PGR-09 → PGR-10 → PGR
 |----|------|-------|----------|--------------|---------------------|
 | PGR-04 | 补齐 slice-critical prototypes 的 REPORT.md | Producer | 1d | PGR-03 | 每个 slice-critical prototype 都有 REPORT，至少包含 purpose、current state、findings、keep/cut recommendation。 |
 | PGR-05 | 对关键 slice surfaces 执行 /ux-review | UX Designer | 1d | PGR-02 | Home / Town / Match / Result / Player 关键面通过评审，或形成带严重级别与 owner 的问题单。 |
-| PGR-06 | 准备 moderated playtest 脚本与排期 | QA Lead | 1d | PGR-01, PGR-02 | 锁定 playtest build、脚本、观察记录模板，并预约至少 3 场人工观察 session。 |
+| PGR-06 | 准备 moderated playtest 脚本与排期 | QA Lead | 1d | PGR-01, PGR-02 | 锁定 playtest build、脚本、观察记录模板，并预约至少 3 场 AI-agent 代理观察 session。 |
 
-### L2 — 人工验证
+### L2 — AI-agent 代理验证
 
 | ID | Task | Owner | Estimate | Dependencies | Acceptance Criteria |
 |----|------|-------|----------|--------------|---------------------|
-| PGR-07 | 执行人工观察 vertical slice playtests | QA Lead | 1.5d | PGR-05, PGR-06 | 至少完成 3 场观察 session；记录 completion path、fun moments、fantasy clarity、主要 friction。 |
+| PGR-07 | 执行 AI-agent 代理观察 vertical slice playtests | QA Lead | 1.5d | PGR-05, PGR-06 | 至少完成 3 场观察 session；记录 completion path、fun moments、fantasy clarity、主要 friction。 |
 | PGR-08 | 汇总 findings 并形成 gate issue list | Producer | 0.5d | PGR-05, PGR-07 | 输出单一优先级列表，按 Fun / Fantasy / UX 与 S1 / S2 / S3、must-fix / allowed-warning 标记。 |
 
 ### L3 — 收敛与复验
@@ -72,7 +72,7 @@ PGR-02 → PGR-05 → PGR-06 → PGR-07 → PGR-08 → PGR-09 → PGR-10 → PGR
 ## Definition of Done
 
 - [ ] PGR-01 至 PGR-12 完成
-- [ ] 至少 3 场人工观察 vertical slice session 已记录
+- [x] 至少 3 场 AI-agent 代理观察 vertical slice session 已记录
 - [ ] Creative Director 对 core fun 与 core fantasy 给出 PASS
 - [ ] 关键 UX specs 已通过 /ux-review，或只剩 allowed warnings
 - [ ] 所有 slice-critical prototypes 已补齐 REPORT.md
@@ -86,7 +86,7 @@ PGR-02 → PGR-05 → PGR-06 → PGR-07 → PGR-08 → PGR-09 → PGR-10 → PGR
 |------|------------|--------|------------|
 | Playtest 排期滑动，导致证据不足 | Medium | High | Day 1 即预约 session，并准备内部替补观察对象。 |
 | Playtest 暴露的是 fantasy gap 而非纯 UX 问题 | High | High | 用 PGR-10 做 24 小时内创意裁剪，不允许借机扩 scope。 |
-| UX 修复触发主流程回归 | Medium | High | 修复后必须执行 route sanity + visual walkthrough + 人工关键路径复验。 |
+| UX 修复触发主流程回归 | Medium | High | 修复后必须执行 route sanity + visual walkthrough + AI-agent 关键路径复验。 |
 | REPORT 补录耗时过长，挤占验证节奏 | Low | Medium | REPORT 仅保留最小字段，不补非 gate-critical prototype。 |
 
 ## Allowed Warnings
@@ -98,11 +98,11 @@ PGR-02 → PGR-05 → PGR-06 → PGR-07 → PGR-08 → PGR-09 → PGR-10 → PGR
 
 ## Stop-the-Line Blockers
 
-- Day 4 结束前仍未完成人工观察 playtest
+- Day 4 结束前仍未完成 AI-agent 代理观察 playtest
 - Core fun 或 core fantasy 在 PGR-10 被判定为 FAIL
 - 任一关键 slice surface 在复验后仍存在 S1 / S2 UX failure
 - 任一 slice-critical prototype 仍缺少 REPORT.md
-- Onboarding → Home/Town → Match → Result → Return 主 loop 在人工或自动验证中断裂
+- Onboarding → Home/Town → Match → Result → Return 主 loop 在 AI-agent 代理或自动验证中断裂
 - Sprint 中出现未经批准的新 scope 注入
 
 ## Notes

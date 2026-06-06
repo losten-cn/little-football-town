@@ -281,7 +281,7 @@ func _select_first_player_if_needed() -> void:
 	var players: Array[Dictionary] = _get_players_sorted_by_rating()
 	if players.is_empty():
 		return
-	_selected_player = players[0]
+	_selected_player = _to_string_variant_dictionary(players[0])
 	_selected_player_id = str(_selected_player.get("id", ""))
 
 

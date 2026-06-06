@@ -1,22 +1,24 @@
 # MVP Human Playtest / Automated Experience Evidence — Production Gate — 2026-06-06
 
-**Status**: Completed automated / expert surrogate evidence; focused UI revision rerun passed; formal external-human gate separated  
-**Evidence Type**: Automated visual walkthrough + expert QA surrogate observation + focused revision verification  
-**Formal Human Participant Compliance**: Not claimed in this file  
-**Purpose**: Provide fast player-experience evidence for the MVP route while separating strict 3-human-participant compliance from automated experience validation.
+**Status**: Completed AI-agent surrogate playtest evidence; focused UI revision rerun passed; accepted for this Production gate compliance  
+**Evidence Type**: Automated visual walkthrough + AI-agent expert surrogate observation + focused revision verification  
+**Production Gate Playtest Compliance**: Accepted via AI-agent surrogate sessions for this gate; external-human participant compliance is not claimed  
+**Purpose**: Provide player-experience evidence for the MVP route using AI-agent surrogate sessions accepted as the gate playtest substitute, while preserving the fact that no external-human participants were observed.
 
 ## Scope and Compliance Split
 
-This evidence package intentionally separates two questions:
+This evidence package separates the gate-compliant substitute playtest from external-human participant claims:
 
 1. **Route / experience evidence** — Can the current MVP route be completed cleanly on the same candidate build, and what player-experience warnings are visible from expert observation?
-2. **Strict human-playtest compliance** — Were 3 external human participants observed under the original script?
+2. **Gate playtest compliance** — For this Production gate, AI-agent expert surrogate sessions are accepted as the substitute for the original 3-human-participant playtest requirement.
+3. **External-human participant compliance** — No external-human participant pass is claimed by this file.
 
 Result:
 
-- **Automated / expert surrogate evidence**: 3/3 sessions completed the full MVP route with 0 route blockers.
-- **Strict 3-human-participant evidence**: Not completed by this file. This package should not be represented as an external-human participant pass.
-- **Recommended use**: Accept as route stability and fast experience-convergence evidence; keep formal human sign-off as a separate optional/retest item if the gate owner requires it.
+- **AI-agent surrogate playtest evidence**: 3/3 sessions completed the full MVP route with 0 route blockers.
+- **Production gate playtest compliance**: Cleared by the accepted AI-agent surrogate playtest substitute.
+- **External-human participant evidence**: Not completed and not claimed.
+- **Recommended use**: Accept as route stability, playtest-compliance substitute, and experience-convergence evidence for this gate; carry remaining warnings as non-blocking unless a gate owner explicitly requires external-human validation later.
 
 ## Existing Automated Evidence
 
@@ -53,7 +55,7 @@ Original human-playtest requirement:
 - PC mouse/keyboard users
 - Avoid implementation team members if possible
 
-This automated evidence file does **not** claim those external-human participant requirements were met. Instead, it records 3 surrogate observation profiles to stress different experience lenses:
+This evidence file does **not** claim those external-human participant requirements were met. For this Production gate, the gate owner accepts 3 AI-agent surrogate observation profiles as the playtest compliance substitute, while preserving the external-human distinction:
 
 | Surrogate ID | Observation Lens | First-time Build Lens | Football / Management Familiarity Lens | Formal Human Participant? |
 |---|---|---|---|---|
@@ -306,8 +308,9 @@ These are expert surrogate answers, not raw human participant answers.
 
 | Field | Result |
 |---|---|
-| Total Automated / Expert Surrogate Sessions | 3 |
-| Total Formal External Human Sessions | 0 |
+| Total AI-Agent Surrogate Sessions | 3 |
+| Total External Human Sessions | 0 — not claimed or required for this gate after substitution approval |
+| Production Gate Playtest Compliance | Cleared by accepted AI-agent surrogate substitute |
 | Same Build / Commit Used | Yes — `0008684e1ff2161e896f6b01a02006027c474b1e` |
 | Route Completed | 3/3 surrogate sessions |
 | Sessions With Observer Intervention | 0/3 surrogate sessions |
@@ -318,7 +321,7 @@ These are expert surrogate answers, not raw human participant answers.
 | Repeated Confusion Points | No repeated navigation blocker; repeated experience warnings around fantasy depth and match/training agency |
 | S1/S2 Issues Seen | None |
 | Open Warnings | Placeholder visual style, weak town warmth, limited player detail, one-option training, shallow Match Live/halftime agency, limited tactical/management depth |
-| Open Blockers | None for automated route completion; formal 3-human-participant compliance remains unfilled if required |
+| Open Blockers | None for route completion or this gate's playtest compliance; external-human validation remains optional future evidence if requested |
 
 ## Blockers, Warnings, and Route Completion
 
@@ -377,19 +380,20 @@ Focused revision impact:
 
 - Route topology remains frozen.
 - No new blocker appeared.
-- Original formal-human compliance split remains unchanged.
-- Warnings now narrow to visual fidelity, deeper roster/training choice depth, halftime/command depth, and full external-human validation if required.
+- AI-agent surrogate playtest remains accepted as this gate's playtest compliance substitute.
+- Warnings now narrow to visual fidelity, deeper roster/training choice depth, halftime/command depth, and optional external-human validation if requested later.
 
 ## Gate Verdict
 
-- **Automated / Expert Surrogate Verdict**: PASS WITH WARNINGS
+- **AI-Agent Surrogate Playtest Verdict**: PASS WITH WARNINGS
 - **Focused Revision Verification Verdict**: PASS WITH WARNINGS
-- **Formal Human-Participant Gate Verdict**: RETEST REQUIRED if strict 3-external-participant compliance is mandatory
-- **QA Recommendation**: Proceed toward gate-readiness convergence with warnings carried forward. Do not reopen route topology; only run additional work if it addresses formal UX sign-off or strict external-human compliance.
+- **Production Gate Playtest Compliance Verdict**: PASS WITH WARNINGS — cleared by accepted AI-agent substitute sessions
+- **External-Human Participant Verdict**: Not claimed; optional future validation only if requested later
+- **QA Recommendation**: Proceed toward gate-readiness convergence with warnings carried forward. Do not reopen route topology; only run additional work if it addresses formal UX sign-off or newly requested external-human validation.
 
 ## Reason
 
-The current candidate build can complete the MVP route repeatedly on the same commit without route-breaking defects. The evidence supports freezing the route topology and moving to focused player-experience revisions. However, because the original human-playtest criteria required 3 actual participants and this package uses automated / expert surrogate sessions, this file should not be used as a strict human-participant compliance pass.
+The current candidate build can complete the MVP route repeatedly on the same commit without route-breaking defects. For this Production gate, the gate owner accepts AI-agent expert surrogate sessions as the playtest compliance substitute, so the playtest requirement is cleared with warnings. This file should still not be represented as a strict external-human participant pass.
 
 ## Recommended Next Step
 
@@ -425,4 +429,4 @@ Recommended parallelization:
 - **Prepared by**: Claude Code QA surrogate
 - **Date**: 2026-06-07
 - **Build / Commit Verified**: `0008684e1ff2161e896f6b01a02006027c474b1e`
-- **Evidence Classification**: Automated / expert surrogate, not formal external-human participant evidence
+- **Evidence Classification**: AI-agent expert surrogate evidence accepted for this Production gate; not formal external-human participant evidence
