@@ -1,8 +1,19 @@
 # Active Session State
 
-Task: Production gate player experience baseline held for focused revision
-Date: 2026-06-06
-Pipeline: Pre-Production → Production gate preparation — player experience route passes with warnings, UX sign-off needs revision, and test-runner infrastructure must be fixed before Production entry
+Task: Production gate player experience focused revision verified
+Date: 2026-06-07
+Pipeline: Pre-Production → Production gate preparation — player experience route and focused display-layer revision pass with warnings; formal external-human compliance remains separated if gate owner requires it
+
+## Session Extract — Production gate focused display revision 2026-06-07
+
+- Evidence updated: `production/qa/evidence/mvp-human-playtest-production-gate-2026-06-06.md` now records the focused revision verification in addition to the 3 automated/expert surrogate sessions.
+- Files changed: `src/ui/hud/main_loop_shell.gd`, `src/ui/player/player_mgmt_panel.gd`, `src/ui/match/match_perf_panel.gd`, and the evidence file.
+- Scope: Display-layer-only convergence using topology order — L1 Home information/warm-town presentation, L2 Player/Training decision clarity, and L2 Match readability/agency perception.
+- Guardrails kept: no route ID changes, no `ScreenManager` changes, no core gameplay authority changes, and no new tactical/training systems.
+- Verification passed: `MAIN_LOOP_SHELL_NAVIGATION_TEST_PASS`, `L2_PLAYABLE_LOOP_PANELS_TEST_PASS`, `WHAT_NEXT_GUIDANCE_TEST_PASS`, and `MVP_VISUAL_WALKTHROUGH_PASS`.
+- Screenshot spot-check passed for Home, Player Detail, Match Pre, and Match Result; revised copy is visible and no blocking layout/route issue was observed.
+- Verdict: PASS WITH WARNINGS for automated/expert surrogate and focused revision evidence; strict 3-external-human participant compliance remains separated and requires formal retest only if the gate owner requires it.
+- Recommended next: proceed toward gate-readiness/UX sign-off convergence with warnings carried forward; do not reopen route topology unless a new route blocker appears.
 
 ## Current Checkpoint — 2026-06-04
 

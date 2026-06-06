@@ -265,37 +265,63 @@ func _match_disable_reason() -> String:
 
 
 func _format_pre_match_summary() -> String:
-	return _localized_text("MATCH_PRE_SUMMARY_FORMAT", "联赛第%s轮\n%s %s\n排名对比：%s\n阵容状态：%s\n当前战术：%s") % [
+	return _localized_text(
+		"MATCH_PRE_SUMMARY_READABILITY_FORMAT",
+		"联赛第%s轮\n%s %s\n赛前判断：%s\n阵容状态：%s\n当前战术：%s\n下一步：%s"
+	) % [
 		str(_time_payload.get("round", _time_payload.get("current_round", _localized_text("MATCH_ROUND_PENDING", "本轮")))),
 		_player_facing_venue(str(_time_payload.get("home_away", _time_payload.get("venue", "")))),
 		_player_facing_opponent_name(str(_time_payload.get("opponent_name", ""))),
-		str(_time_payload.get("ranking_summary", _localized_text("MATCH_RANKING_PENDING", "排名稍后公布"))),
+		_pre_match_focus_text(),
 		_player_facing_lineup_summary(str(_time_payload.get("lineup_summary", ""))),
 		str(_time_payload.get("tactical_summary", _localized_text("MATCH_TACTIC_DEFAULT", "均衡"))),
+		_pre_match_next_step_text(),
 	]
 
 
 func _format_live_summary() -> String:
-	return _localized_text("MATCH_LIVE_SUMMARY_FORMAT", "比分：%s\n时间：%s\n阶段：%s") % [
+	return _localized_text(
+		"MATCH_LIVE_SUMMARY_READABILITY_FORMAT",
+		"比分：%s\n时间：%s\n阶段：%s\n局势：%s\n当前操作：%s"
+	) % [
 		str(_time_payload.get("score_display", _result_score_text())),
 		_match_time_text(),
 		_match_phase_text(),
+		_live_outlook_text(),
+		_live_next_step_text(),
 	]
 
 
 func _format_result_summary() -> String:
-	return _localized_text("MATCH_RESULT_SUMMARY_FORMAT", "终场比分：%s\n结果：%s\n关键原因：%s\n球员表现：%s") % [
+	return _localized_text(
+		"MATCH_RESULT_SUMMARY_READABILITY_FORMAT",
+		"终场比分：%s\n结果：%s\n结果解读：%s\n表现摘要：%s"
+	) % [
 		_result_score_text(),
 		_player_facing_result_text(),
-		str(_result_payload.get("reason", _result_payload.get("result_reason", _localized_text("MATCH_RESULT_REASON_DEFAULT", "球队执行了本场计划")))),
-		str(_result_payload.get("player_performance_summary", _localized_text("MATCH_RESULT_PLAYER_DEFAULT", "球员表现摘要将在赛后继续完善"))),
+		_result_reason_text(),
+		_result_player_performance_text(),
 	]
 
 
 func _format_league_impact() -> String:
+	var impact_summary: String = ""
 	if _league_payload.is_empty():
-		return _localized_text("MATCH_LEAGUE_IMPACT_PENDING", "联赛影响：积分榜将在赛后更新")
-	return str(_league_payload.get("summary", _league_payload.get("league_impact_summary", _localized_text("MATCH_LEAGUE_UPDATED", "积分榜已按权威结果更新"))))
+		impact_summary = _localized_text("MATCH_LEAGUE_IMPACT_PENDING", "积分榜将在赛后更新")
+	else:
+		impact_summary = str(
+			_league_payload.get(
+				"summary",
+				_league_payload.get(
+					"league_impact_summary",
+					_localized_text("MATCH_LEAGUE_UPDATED", "积分榜已按权威结果更新")
+				)
+			)
+		)
+	return _localized_text(
+		"MATCH_LEAGUE_IMPACT_GUIDANCE_FORMAT",
+		"联赛影响：%s\n接下来：%s"
+	) % [impact_summary, _result_next_step_text()]
 
 
 func _result_score_text() -> String:
@@ -312,10 +338,15 @@ func _timeline_empty_text() -> String:
 
 
 func _format_timeline_event(payload: Dictionary[String, Variant]) -> String:
-	return _localized_text("MATCH_TIMELINE_EVENT_FORMAT", "%s' %s") % [
-		str(payload.get("minute", payload.get("time", "--"))),
-		str(payload.get("summary", payload.get("event_type", _localized_text("MATCH_EVENT_DEFAULT", "比赛事件")))),
-	]
+	var event_data: Dictionary[String, Variant] = _to_string_variant_dictionary(payload.get("event_data", {}))
+	var minute: String = str(payload.get("minute", payload.get("match_minute", event_data.get("minute", payload.get("time", "--")))))
+	var summary: String = str(payload.get("summary", event_data.get("summary", "")))
+	if summary.is_empty():
+		summary = _player_facing_event_category_text(
+			str(payload.get("event_category", event_data.get("category", payload.get("event_type", "")))),
+			str(event_data.get("side", payload.get("side", "")))
+		)
+	return _localized_text("MATCH_TIMELINE_EVENT_FORMAT", "%s' %s") % [minute, summary]
 
 
 func _match_time_text() -> String:
@@ -329,8 +360,12 @@ func _match_time_text() -> String:
 func _match_phase_text() -> String:
 	var phase: String = str(_time_payload.get("half", _time_payload.get("phase", "")))
 	match phase:
-		"MATCH_TRIGGER":
+		"MATCH_TRIGGER", "FIRST_HALF", "first_half", "1":
 			return _localized_text("MATCH_PHASE_FIRST_HALF", "上半场")
+		"HALFTIME", "halftime", "HALFTIME_ADJUSTMENT":
+			return _localized_text("MATCH_PHASE_HALFTIME", "中场")
+		"SECOND_HALF", "second_half", "2":
+			return _localized_text("MATCH_PHASE_SECOND_HALF", "下半场")
 		"PLANNING":
 			return _localized_text("MATCH_PHASE_PREPARING", "比赛准备")
 		"":
@@ -341,10 +376,15 @@ func _match_phase_text() -> String:
 
 func _player_facing_result_text() -> String:
 	var result: String = str(_result_payload.get("result", ""))
+	var player_team_side: String = _player_team_side()
 	match result:
-		"home_win", "win", "home_victory":
+		"home_win", "home_victory":
+			return _localized_text("MATCH_RESULT_WIN", "赢下这场") if player_team_side == "home" else _localized_text("MATCH_RESULT_LOSS", "今天失利")
+		"away_win", "away_victory":
+			return _localized_text("MATCH_RESULT_WIN", "赢下这场") if player_team_side == "away" else _localized_text("MATCH_RESULT_LOSS", "今天失利")
+		"win":
 			return _localized_text("MATCH_RESULT_WIN", "赢下这场")
-		"away_win", "loss", "away_victory":
+		"loss":
 			return _localized_text("MATCH_RESULT_LOSS", "今天失利")
 		"draw":
 			return _localized_text("MATCH_RESULT_DRAW", "本场战平")
@@ -352,6 +392,148 @@ func _player_facing_result_text() -> String:
 			return _localized_text("MATCH_RESULT_PENDING", "结果整理中")
 		_:
 			return result
+
+
+func _pre_match_focus_text() -> String:
+	var ranking_summary: String = str(_time_payload.get("ranking_summary", ""))
+	if not _can_start_match():
+		return _localized_text("MATCH_PRE_FOCUS_BLOCKED", "这场比赛暂未满足开赛条件，先处理下方提示。")
+	if ranking_summary.is_empty():
+		return _localized_text("MATCH_PRE_FOCUS_DEFAULT", "比赛会按当前阵容与战术自动演算，先确认是否准备就绪。")
+	return _localized_text("MATCH_PRE_FOCUS_RANKING_FORMAT", "这场对位参考：%s。比赛会按当前阵容与战术自动演算。") % ranking_summary
+
+
+func _pre_match_next_step_text() -> String:
+	if not _can_start_match():
+		return _localized_text("MATCH_PRE_NEXT_STEP_BLOCKED_FORMAT", "先处理：%s") % _match_disable_reason()
+	return _localized_text("MATCH_PRE_NEXT_STEP_READY", "确认信息后即可开始比赛")
+
+
+func _live_outlook_text() -> String:
+	if _timeline.is_empty():
+		return _localized_text("MATCH_LIVE_OUTLOOK_WAITING", "先看比赛节奏，关键转折会出现在时间线。")
+	var latest_event: String = _timeline[_timeline.size() - 1]
+	if latest_event.contains("中场"):
+		return _localized_text("MATCH_LIVE_OUTLOOK_HALFTIME", "上半场告一段落，先看比分与关键事件再进入下半场。")
+	if latest_event.contains("进球"):
+		return _localized_text("MATCH_LIVE_OUTLOOK_GOAL", "比分刚变化，这次进球就是当前局势的关键转折。")
+	if latest_event.contains("射门"):
+		return _localized_text("MATCH_LIVE_OUTLOOK_SHOT", "机会已经出现，接下来要看能否继续转化成比分。")
+	if latest_event.contains("防守"):
+		return _localized_text("MATCH_LIVE_OUTLOOK_DEFENSE", "防守回合在撑住局面，比赛仍可能被下一次机会改写。")
+	if latest_event.contains("体能"):
+		return _localized_text("MATCH_LIVE_OUTLOOK_STAMINA", "体能开始影响比赛，后续回合更容易出现转折。")
+	if latest_event.contains("战术") or latest_event.contains("节奏"):
+		return _localized_text("MATCH_LIVE_OUTLOOK_TACTICAL", "比赛节奏出现变化，继续观察它会不会影响比分。")
+	return _localized_text("MATCH_LIVE_OUTLOOK_DEFAULT", "比赛正在推进，下一条关键事件会帮助解释局势。")
+
+
+func _live_next_step_text() -> String:
+	if not _timeline.is_empty() and _timeline[_timeline.size() - 1].contains("中场"):
+		return _localized_text("MATCH_LIVE_NEXT_STEP_HALFTIME", "中场调整功能后续开放；现在先看下半场会不会延续这个走势。")
+	if _timeline.is_empty():
+		return _localized_text("MATCH_LIVE_NEXT_STEP_WAITING", "先继续观看，关键事件会显示在时间线上。")
+	return _localized_text("MATCH_LIVE_NEXT_STEP_DEFAULT", "继续关注时间线；赛后结果会引用这些线索来解释输赢。")
+
+
+func _result_reason_text() -> String:
+	var base_reason: String = str(_result_payload.get("reason", _result_payload.get("result_reason", "")))
+	if base_reason.is_empty():
+		base_reason = _localized_text("MATCH_RESULT_REASON_DEFAULT", "球队执行了本场计划")
+	var supporting_tag: String = _first_supporting_result_tag()
+	if supporting_tag.is_empty() or base_reason.contains(supporting_tag):
+		return base_reason
+	return _localized_text("MATCH_RESULT_REASON_WITH_TAG_FORMAT", "%s；补充线索：%s") % [base_reason, supporting_tag]
+
+
+func _result_player_performance_text() -> String:
+	var summary: String = str(_result_payload.get("player_performance_summary", ""))
+	if not summary.is_empty():
+		return summary
+	var performance_tag: String = _first_performance_result_tag()
+	if not performance_tag.is_empty():
+		return _localized_text("MATCH_RESULT_PLAYER_TAG_FORMAT", "本场额外记录：%s") % performance_tag
+	return _localized_text("MATCH_RESULT_PLAYER_DEFAULT", "球员表现摘要将在赛后继续完善")
+
+
+func _result_next_step_text() -> String:
+	var result: String = str(_result_payload.get("result", ""))
+	var player_team_side: String = _player_team_side()
+	if result == "draw":
+		return _localized_text("MATCH_RESULT_NEXT_STEP_DRAW", "返回主界面后，先看球员状态，再准备下一场。")
+	if result == "loss":
+		return _localized_text("MATCH_RESULT_NEXT_STEP_LOSS", "返回主界面后，先看球员与训练，再准备下一场。")
+	if result == "win":
+		return _localized_text("MATCH_RESULT_NEXT_STEP_WIN", "返回主界面后，延续这场有效做法，继续推进下一周。")
+	if result == "home_win":
+		if player_team_side == "home":
+			return _localized_text("MATCH_RESULT_NEXT_STEP_WIN", "返回主界面后，延续这场有效做法，继续推进下一周。")
+		return _localized_text("MATCH_RESULT_NEXT_STEP_LOSS", "返回主界面后，先看球员与训练，再准备下一场。")
+	if result == "away_win":
+		if player_team_side == "away":
+			return _localized_text("MATCH_RESULT_NEXT_STEP_WIN", "返回主界面后，延续这场有效做法，继续推进下一周。")
+		return _localized_text("MATCH_RESULT_NEXT_STEP_LOSS", "返回主界面后，先看球员与训练，再准备下一场。")
+	return _localized_text("MATCH_RESULT_NEXT_STEP_DEFAULT", "返回主界面后，继续查看赛后变化并准备下一场。")
+
+
+func _first_supporting_result_tag() -> String:
+	var win_reasons: Array[String] = _to_string_array(_result_payload.get("win_reasons", []))
+	for reason: String in win_reasons:
+		if not reason.is_empty():
+			return reason
+	var post_match_tags: Array[String] = _to_string_array(_result_payload.get("post_match_tags", []))
+	for tag: String in post_match_tags:
+		if not tag.is_empty() and tag != "无":
+			return tag
+	return ""
+
+
+func _first_performance_result_tag() -> String:
+	var win_reasons: Array[String] = _to_string_array(_result_payload.get("win_reasons", []))
+	var post_match_tags: Array[String] = _to_string_array(_result_payload.get("post_match_tags", []))
+	for tag: String in post_match_tags:
+		if tag.is_empty() or tag == "无":
+			continue
+		if not win_reasons.has(tag):
+			return tag
+	return ""
+
+
+func _player_team_side() -> String:
+	var venue: String = str(_time_payload.get("home_away", _time_payload.get("venue", ""))).to_lower()
+	if venue == "客场" or venue == "away":
+		return "away"
+	return "home"
+
+
+func _player_facing_event_category_text(event_category: String, side: String) -> String:
+	var side_text: String = _player_facing_event_side_text(side)
+	match event_category:
+		"offensive_push":
+			return _localized_text("MATCH_EVENT_OFFENSIVE_PUSH_FORMAT", "%s持续压上") % side_text
+		"shot_on_goal":
+			return _localized_text("MATCH_EVENT_SHOT_ON_GOAL_FORMAT", "%s形成一次射门") % side_text
+		"goal_scored":
+			return _localized_text("MATCH_EVENT_GOAL_SCORED_FORMAT", "%s取得进球") % side_text
+		"key_defense":
+			return _localized_text("MATCH_EVENT_KEY_DEFENSE_FORMAT", "%s完成关键防守") % side_text
+		"tactical_adaptation":
+			return _localized_text("MATCH_EVENT_TACTICAL_ADAPTATION_FORMAT", "%s调整了比赛节奏") % side_text
+		"stamina_decline":
+			return _localized_text("MATCH_EVENT_STAMINA_DECLINE_FORMAT", "%s体能开始下滑") % side_text
+		_:
+			return _localized_text("MATCH_EVENT_DEFAULT", "比赛事件")
+
+
+func _player_facing_event_side_text(side: String) -> String:
+	if side.is_empty():
+		return _localized_text("MATCH_EVENT_SIDE_GENERIC", "场上")
+	var player_team_side: String = _player_team_side()
+	if side == player_team_side:
+		return _localized_text("MATCH_EVENT_SIDE_OUR", "我方")
+	if side == "home" or side == "away":
+		return _localized_text("MATCH_EVENT_SIDE_OPPONENT", "对手")
+	return side
 
 
 func _player_facing_disable_reason(reason: String) -> String:
@@ -389,6 +571,15 @@ func _player_facing_lineup_summary(lineup_summary: String) -> String:
 func _localized_text(key: String, fallback: String) -> String:
 	var localized := tr(key)
 	return fallback if localized == key else localized
+
+
+func _to_string_array(value: Variant) -> Array[String]:
+	var strings: Array[String] = []
+	if not (value is Array):
+		return strings
+	for entry: Variant in value as Array:
+		strings.append(String(entry))
+	return strings
 
 
 func _clear_children(parent: Node) -> void:

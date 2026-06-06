@@ -211,7 +211,7 @@ func _mount_training() -> void:
 	_training_option_list.visible = true
 	_training_confirm_button.name = "TrainingConfirmButton"
 	_training_confirm_button.visible = true
-	_training_confirm_button.text = _localized_text("PLAYER_TRAINING_CONFIRM", "确认训练")
+	_training_confirm_button.text = _training_confirm_text()
 	_training_confirm_button.disabled = not _training_entry_available() or _selected_training_id.is_empty()
 	_training_result_summary.visible = true
 	_training_result_summary.text = _format_training_result()
@@ -348,13 +348,17 @@ func _format_roster_row(player: Dictionary) -> String:
 func _format_player_detail(player: Dictionary[String, Variant]) -> String:
 	if player.is_empty():
 		return _localized_text("PLAYER_DETAIL_NONE", "未选择球员")
-	return _localized_text("PLAYER_DETAIL_FORMAT", "身份：%s｜%s｜%s\n技术特点：%s\n近期成长：%s\n当前状态：%s\n推荐行动：%s") % [
+	var reference_option: Dictionary[String, Variant] = _resolve_reference_training_option()
+	return _localized_text("PLAYER_DETAIL_FORMAT", "身份：%s｜%s｜%s\n技术特点：%s\n近期成长：%s\n当前状态：%s\n为什么现在练：%s\n训练会影响：%s\n什么时候更值：%s\n推荐行动：%s") % [
 		str(player.get("name", _localized_text("PLAYER_UNKNOWN", "未知球员"))),
 		str(player.get("position", player.get("primary_position", "?"))),
 		str(player.get("development_tier", player.get("tier", "-"))),
 		_resolve_attribute_summary(player),
 		_resolve_growth_summary(player),
 		_resolve_status_summary(player),
+		_resolve_training_why_summary(player),
+		_resolve_training_impact_summary(reference_option),
+		_resolve_training_payoff_summary(player, reference_option),
 		_training_entry_text(),
 	]
 
@@ -402,6 +406,60 @@ func _resolve_status_summary(player: Dictionary[String, Variant]) -> String:
 	if not status.is_empty():
 		return status
 	return _localized_text("PLAYER_STATUS_GOOD", "状态：良好")
+
+
+func _training_confirm_text() -> String:
+	var selected_option: Dictionary[String, Variant] = _resolve_selected_training_option()
+	if selected_option.is_empty():
+		return _localized_text("PLAYER_TRAINING_CONFIRM", "确认训练")
+	return _localized_text("PLAYER_TRAINING_CONFIRM_WITH_OPTION_FORMAT", "确认训练：%s") % str(selected_option.get("name", selected_option.get("training_name", _localized_text("PLAYER_TRAINING_OPTION", "训练项目"))))
+
+
+func _resolve_reference_training_option() -> Dictionary[String, Variant]:
+	var selected_option: Dictionary[String, Variant] = _resolve_selected_training_option()
+	if not selected_option.is_empty():
+		return selected_option
+	var options: Array[Dictionary] = _get_training_options()
+	for option: Dictionary in options:
+		if bool(option.get("available", true)):
+			return _to_string_variant_dictionary(option)
+	return {}
+
+
+func _resolve_selected_training_option() -> Dictionary[String, Variant]:
+	if _selected_training_id.is_empty():
+		return {}
+	for option: Dictionary in _get_training_options():
+		if str(option.get("training_id", option.get("id", ""))) == _selected_training_id:
+			return _to_string_variant_dictionary(option)
+	return {}
+
+
+func _resolve_training_why_summary(player: Dictionary[String, Variant]) -> String:
+	var explicit_summary: String = str(player.get("training_reason", player.get("recommendation_reason", "")))
+	if not explicit_summary.is_empty():
+		return explicit_summary
+	var status_summary: String = _resolve_status_summary(player)
+	var growth_summary: String = _resolve_growth_summary(player)
+	if status_summary.contains("可训练") or growth_summary.contains("+"):
+		return _localized_text("PLAYER_TRAINING_WHY_READY", "他正处在适合加练的窗口，训练收益更容易被看见。")
+	return _localized_text("PLAYER_TRAINING_WHY_DEFAULT", "先给重点球员一次明确安排，能让下一场比赛更有牵挂。")
+
+
+func _resolve_training_impact_summary(option: Dictionary[String, Variant]) -> String:
+	if option.is_empty():
+		return _localized_text("PLAYER_TRAINING_IMPACT_DEFAULT", "会影响本轮训练反馈和下一场赛前判断。")
+	var summary: String = str(option.get("summary", option.get("expected_gain_summary", "")))
+	if not summary.is_empty():
+		return summary
+	return _localized_text("PLAYER_TRAINING_IMPACT_DEFAULT", "会影响本轮训练反馈和下一场赛前判断。")
+
+
+func _resolve_training_payoff_summary(player: Dictionary[String, Variant], option: Dictionary[String, Variant]) -> String:
+	var payoff_summary: String = str(option.get("payoff_summary", option.get("match_payoff_summary", player.get("training_payoff_summary", ""))))
+	if not payoff_summary.is_empty():
+		return payoff_summary
+	return _localized_text("PLAYER_TRAINING_PAYOFF_DEFAULT", "完成后先回主页，下一场比赛和赛后表现会承接这次训练。")
 
 
 func _build_attribute_summary_from_dictionary(value: Variant) -> String:

@@ -257,10 +257,11 @@ func _mount_home() -> void:
 	_primary_button.disabled = false
 	_primary_button.focus_mode = Control.FOCUS_ALL
 	_primary_button.visible = true
-	_secondary_button.text = _localized_text("HOME_SECONDARY_ROSTER", "查看球员")
+	_secondary_button.text = _secondary_home_action_text()
 	_secondary_button.disabled = false
 	_secondary_button.focus_mode = Control.FOCUS_ALL
 	_secondary_button.visible = true
+	_sync_home_disable_reason()
 
 
 func _mount_player_panel(route_id: String) -> void:
@@ -375,16 +376,19 @@ func _build_home_summary_text() -> String:
 	if _last_player_action_payload.has("summary"):
 		recent_summary = str(_last_player_action_payload.get("summary", recent_summary))
 	var recommended_action: String = _recommended_home_action_summary()
+	var action_context: String = _home_action_context_summary()
 	var resource_summary: String = _home_resource_summary(action_windows)
 	var town_anchor: String = _home_town_anchor_summary()
+	var club_mood: String = _home_club_mood_summary()
 	var recent_and_match: String = _localized_text("HOME_RECENT_AND_MATCH_FORMAT", "最近：%s\n下一场：%s") % [recent_summary, next_match]
-	return "%s\n%s\n%s\n%s\n\n%s\n%s\n%s" % [
+	return "%s\n%s\n%s\n%s\n%s\n\n%s\n%s\n%s" % [
 		_localized_text("HOME_STATUS_FORMAT", "当前：%s / %s") % [date_display, phase],
 		resource_summary,
 		town_anchor,
+		club_mood,
+		action_context,
 		recommended_action,
 		_localized_text("HOME_CLUB_OVERVIEW_FORMAT", "俱乐部概览：%s") % team_overview,
-		_localized_text("HOME_ACTION_WINDOWS_FORMAT", "行动窗口：%s 可用") % action_windows,
 		recent_and_match,
 	]
 
@@ -405,6 +409,52 @@ func _home_resource_summary(action_windows: String) -> String:
 	var funds_text: String = str(_last_system_payload.get("funds", _localized_text("HOME_RESOURCE_UNKNOWN", "整理中")))
 	var ap_text: String = str(_last_system_payload.get("ap", _last_system_payload.get("action_points", _localized_text("HOME_RESOURCE_UNKNOWN", "整理中"))))
 	return _localized_text("HOME_RESOURCE_FORMAT", "资源：经费 %s｜运动点数 %s｜行动 %s") % [funds_text, ap_text, action_windows]
+
+
+func _home_club_mood_summary() -> String:
+	var action_windows: int = int(_last_time_payload.get("available_action_windows", 0))
+	if _can_enter_match():
+		return _localized_text("HOME_CLUB_MOOD_MATCH_READY", "更衣室已经热起来了，大家都在等你敲定今天的比赛。")
+	if bool(_last_time_payload.get("match_trigger_reached", false)):
+		return _localized_text("HOME_CLUB_MOOD_MATCH_BLOCKED", "比赛日已经到了，队员和镇上的支持者都在等你把最后细节安排妥当。")
+	if action_windows <= 0:
+		return _localized_text("HOME_CLUB_MOOD_WINDOWS_SPENT", "今天的安排已经排满，俱乐部正安静收尾，等你推进到下一步。")
+	return _localized_text("HOME_CLUB_MOOD_DEFAULT", "训练场边有人聊天、有人收拾器材，这支小球队正一点点变得像个家。")
+
+
+func _home_action_context_summary() -> String:
+	var primary_action: String = _primary_home_action_text()
+	var secondary_action: String = _secondary_home_action_text()
+	var match_disable_reason: String = _home_match_disable_reason_hint()
+	if not match_disable_reason.is_empty():
+		return _localized_text("HOME_ACTION_CONTEXT_MATCH_LOCKED_FORMAT", "现在最直接的安排是先去%s；比赛入口会在%s后开放。也可以先%s。") % [primary_action, match_disable_reason, secondary_action]
+	if _can_enter_match():
+		return _localized_text("HOME_ACTION_CONTEXT_MATCH_READY_FORMAT", "现在最直接的安排是%s；如果你还想再确认一次状态，也可以先%s。") % [primary_action, secondary_action]
+	return _localized_text("HOME_ACTION_CONTEXT_DEFAULT_FORMAT", "现在最直接的安排是%s；如果你想先看看队伍近况，也可以%s。") % [primary_action, secondary_action]
+
+
+func _secondary_home_action_text() -> String:
+	if _can_enter_match():
+		return _localized_text("HOME_SECONDARY_ROSTER_CONFIRM", "先看球员状态")
+	return _localized_text("HOME_SECONDARY_ROSTER", "查看球员")
+
+
+func _home_match_disable_reason_hint() -> String:
+	if not bool(_last_time_payload.get("match_trigger_reached", false)):
+		return ""
+	if _can_enter_match():
+		return ""
+	var reason: String = _resolve_match_disable_reason()
+	if reason.is_empty():
+		return ""
+	return _localized_text("HOME_MATCH_DISABLE_REASON_HINT_FORMAT", "“%s”") % reason
+
+
+func _sync_home_disable_reason() -> void:
+	if not bool(_last_time_payload.get("match_trigger_reached", false)) or _can_enter_match():
+		_clear_disable_reason()
+		return
+	_show_disable_reason(_localized_text("HOME_MATCH_DISABLED_VISIBLE_FORMAT", "比赛暂未开放：%s") % _resolve_match_disable_reason())
 
 
 func _home_town_anchor_summary() -> String:
