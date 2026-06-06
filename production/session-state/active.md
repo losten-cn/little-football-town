@@ -1,8 +1,8 @@
 # Active Session State
 
-Task: MVP topology wave frozen with warnings
-Date: 2026-06-05
-Pipeline: Pre-Production with tracked warnings — prioritize convergence, topology-ordered task splitting, and parallel subagents for independent workstreams
+Task: Production gate player experience baseline held for focused revision
+Date: 2026-06-06
+Pipeline: Pre-Production → Production gate preparation — player experience route passes with warnings, UX sign-off needs revision, and test-runner infrastructure must be fixed before Production entry
 
 ## Current Checkpoint — 2026-06-04
 
@@ -25,6 +25,17 @@ Pipeline: Pre-Production with tracked warnings — prioritize convergence, topol
 - Skill re-run evidence written: `production/qa/evidence/mvp-visual-walkthrough-2026-06-06.md` records the `/visual-walkthrough mvp` rerun, the exact command, screenshot review table, zero blockers, and carried warnings.
 - Next: move to L5 gate/readiness if route-level automation is sufficient for this milestone; otherwise run a human-observed clarity/fun playtest before L5. If blockers appear, fix only the smallest route-breaking slice.
 
+## Session Extract — Production gate player experience baseline 2026-06-06
+
+- Evidence written: `production/qa/evidence/production-gate-player-experience-baseline-2026-06-06.md`.
+- Scope: Production-entry player experience readiness, UX sign-off input, visible MVP route screenshots, and full automated test baseline.
+- Playtest evidence: `production/qa/playtests/playtest-2026-06-06-player-experience.md` remains PASS WITH WARNINGS.
+- Visual walkthrough: `MVP_VISUAL_WALKTHROUGH_PASS` via `tests/integration/ui/mvp_visual_walkthrough_runner.gd`; 12 screenshots reviewed from `C:/Users/kylin/AppData/Roaming/Godot/app_userdata/Football Town/mvp_visual_walkthrough`.
+- Automated baseline: CI-like `tests/test_script_runner.gd` path reports 32 pass / 37 false-negative failures because existing `SceneTree` tests do not instantiate as `Node`; compatible execution passes 69/69 with `COMPATIBLE_AUTOMATED_TEST_BASELINE_PASS`.
+- UX sign-off: NEEDS REVISION. No hard route blocker, but player-visible internal IDs/enums/placeholders, incomplete Home MVP information architecture, Match Pre readability, and weak pixel-town presence block Production UX approval.
+- QA gate opinion: PASS WITH WARNINGS for product behavior evidence, with P1 test-runner/CI infrastructure debt before claiming standard automated baseline green.
+- Decision: HOLD / NEEDS REVISION before formal Production entry; run a focused revision slice for copy hygiene, Home MVP info/town presence, disabled-state specificity, Match Pre/Live readability, and test-runner workflow compatibility.
+- Next: implement the focused revision, then rerun visible MVP walkthrough, compatible full automated baseline, fixed project-standard baseline, and UX sign-off.
 
 ## Session Extract — Systems Design gate QA cleanup 2026-06-06
 
@@ -88,9 +99,9 @@ Pipeline: Pre-Production with tracked warnings — prioritize convergence, topol
 Current MVP topology wave is frozen with warnings after automated visual walkthrough passed. Next, carry warnings forward and start the next production step; only reopen this wave for route-breaking hotfixes.
 
 <!-- STATUS -->
-Epic: MVP Topology Implementation
-Feature: MVP topology frozen with warnings
-Task: Choose next production step
+Epic: Production Gate Preparation
+Feature: Player experience readiness
+Task: Focused revision before Production entry
 <!-- /STATUS -->
 
 ## Session Extract — MVP visual walkthrough freeze 2026-06-05

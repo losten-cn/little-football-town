@@ -107,9 +107,9 @@ vertical_alignment = 1
 
 [node name="NextMatchButton" type="Button" parent="ZoneA"]
 unique_name_in_owner = true
-anchor_left = 1.0
+anchor_left = 0.0
 anchor_right = 1.0
-offset_left = -312.0
+offset_left = 604.0
 offset_top = 8.0
 offset_right = -88.0
 offset_bottom = 40.0
@@ -146,18 +146,21 @@ script = ExtResource("4_zone_c1")
 
 [node name="RosterButton" type="Button" parent="ZoneC1"]
 unique_name_in_owner = true
+anchor_right = 0.5
 offset_left = 16.0
 offset_top = 8.0
-offset_right = 208.0
+offset_right = -8.0
 offset_bottom = 48.0
 toggle_mode = true
 text = "球员"
 
 [node name="MatchButton" type="Button" parent="ZoneC1"]
 unique_name_in_owner = true
-offset_left = 220.0
+anchor_left = 0.5
+anchor_right = 1.0
+offset_left = 8.0
 offset_top = 8.0
-offset_right = 412.0
+offset_right = -16.0
 offset_bottom = 48.0
 toggle_mode = true
 text = "比赛"

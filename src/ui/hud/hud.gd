@@ -271,11 +271,11 @@ func _refresh_visibility() -> void:
 	_match_flow_visible = in_match_flow
 
 	if _zone_a:
-		_zone_a.visible = true
+		_zone_a.visible = not in_match_flow
 	if _zone_c1:
-		_zone_c1.visible = true
+		_zone_c1.visible = not in_match_flow
 	if _overlay_layer:
-		_overlay_layer.visible = true
+		_overlay_layer.visible = not in_match_flow
 	if _zone_b:
 		_zone_b.visible = false
 	if _zone_c2:

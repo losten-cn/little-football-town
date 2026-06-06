@@ -13,6 +13,7 @@ func _ready() -> void:
 	test_main_loop_shell_exposes_frozen_routes_and_mount()
 	test_main_loop_shell_routes_screen_requests_inside_single_stack()
 	test_main_loop_shell_return_events_reset_to_home()
+	test_main_loop_shell_home_uses_actionable_club_summary()
 	test_main_loop_shell_match_entry_uses_authoritative_disable_reason()
 	_teardown_hud()
 	await get_tree().process_frame
@@ -51,6 +52,35 @@ func test_main_loop_shell_return_events_reset_to_home() -> void:
 	_expect(_shell.call("get_current_route") == "home", "match result confirmation should return home")
 	_expect(ScreenManager.get_active_screen_id() == "home", "ScreenManager should reset to home after match result confirmation")
 	_expect(ScreenManager.get_screen_stack_depth() == 1, "return home should not leave a parallel navigation stack")
+
+
+func test_main_loop_shell_home_uses_actionable_club_summary() -> void:
+	EventBus.emit("time_advanced", {
+		"date_display": "Week 1",
+		"phase": "PLANNING",
+		"available_action_windows": 2,
+		"schedule_available": true,
+		"match_trigger_reached": false,
+		"match_center_available": true,
+		"next_match_display": "周末 vs Opponent 1",
+		"opponent_name": "Opponent 1",
+	})
+	EventBus.emit("system_state_changed", {
+		"team_overview": "8 人阵容，1 人可重点训练",
+		"system_state_allows_match": true,
+		"navigation_context_allows_match": true,
+	})
+	_shell.call("return_home")
+	_expect(_find_shell_label_text("RouteTitle") == "俱乐部主页", "home title should be player-facing club home copy")
+	var summary_text: String = _find_shell_label_text("RouteSummary")
+	_expect(summary_text.contains("建议下一步"), "home summary should show an actionable next step")
+	_expect(summary_text.contains("俱乐部概览"), "home summary should show club overview")
+	_expect(not summary_text.contains("待同步"), "home summary should not expose debug sync placeholders")
+	_expect(not summary_text.contains("见顶部栏"), "home summary should not tell players to see the top bar")
+	var primary_button: Button = _find_shell_button("PrimaryAction")
+	_expect(primary_button != null and primary_button.text == "查看球员并训练", "non-match home primary CTA should send player toward roster/training")
+	_press_shell_button("PrimaryAction")
+	_expect(_shell.call("get_current_route") == "roster", "non-match home primary CTA should route to roster")
 
 
 func test_main_loop_shell_match_entry_uses_authoritative_disable_reason() -> void:
