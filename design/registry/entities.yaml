@@ -33,11 +33,11 @@
 #   Deprecated entries:      Grep pattern="status: deprecated"
 #
 # FORMAT: YAML. Consistent indentation is critical for grep reliability.
-#   Sections: entities | items | formulas | constants
+#   Sections: entities | items | contracts | formulas | constants
 #   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
 
 version: 1
-last_updated: ""
+last_updated: 2026-06-03
 
 # ─── ENTITIES ────────────────────────────────────────────────────────────────
 # Named game-world objects: enemies, NPCs, characters, factions, bosses.
@@ -96,6 +96,174 @@ items: []
 #     added: 2026-03-26
 #     revised: ""
 
+
+# ─── CONTRACTS ───────────────────────────────────────────────────────────────
+# Named cross-system payloads, durable state packets, and settlement keys.
+# Register a contract when multiple GDDs rely on its owner, de-duplication
+# semantics, or field boundary. Detailed fields stay in the source GDD.
+#
+# Required fields: name, status, source, referenced_by, category, purpose, added
+# Optional: owner, required_fields, de_dup_key, notes, revised
+
+contracts:
+  - name: match_context
+    status: active
+    source: design/gdd/league-competition-structure-system.md
+    referenced_by:
+      - design/gdd/league-competition-structure-system.md
+      - design/gdd/match-competition-system.md
+      - design/gdd/systems-index.md
+    category: payload
+    owner: LeagueStructure
+    purpose: "赛前由联赛系统提供给比赛系统的上下文包，包含比赛 ID、主客队、主客场、轮次、赛事类型、比赛重要性和对手强度参考值。"
+    notes: "Contract direction is league -> match. Match consumes it but does not own league schedule, ranking, promotion, or season state."
+    added: 2026-06-03
+    revised: ""
+  - name: match_result_packet
+    status: active
+    source: design/gdd/match-competition-system.md
+    referenced_by:
+      - design/gdd/match-competition-system.md
+      - design/gdd/league-competition-structure-system.md
+      - design/gdd/economy-management-system.md
+      - design/gdd/time-and-season-progression-system.md
+      - design/gdd/main-loop-ui-framework.md
+      - design/gdd/match-performance-ui.md
+      - design/gdd/reputation-and-achievement-system.md
+      - design/gdd/systems-index.md
+    category: payload
+    owner: MatchCompetition
+    purpose: "终场后由比赛系统输出的已确认单场结果包，供联赛、经济、时间、UI 和长期认可系统消费。"
+    de_dup_key: match_id
+    notes: "League consumes this packet for points/ranking but must not read match-internal half-state; match must not write league standings directly."
+    added: 2026-06-03
+    revised: ""
+  - name: forfeit_result_packet
+    status: active
+    source: design/gdd/match-competition-system.md
+    referenced_by:
+      - design/gdd/match-competition-system.md
+      - design/gdd/league-competition-structure-system.md
+      - design/gdd/economy-management-system.md
+      - design/gdd/time-and-season-progression-system.md
+      - design/gdd/onboarding-system.md
+      - design/gdd/main-loop-ui-framework.md
+    category: payload
+    owner: MatchCompetition
+    purpose: "非法阵容或无可出场球员兜底时生成的合法比赛结果包，默认弃权比分使联赛、经济和时间结算继续推进。"
+    de_dup_key: match_id
+    notes: "Treated as a valid confirmed match result, not an error packet."
+    added: 2026-06-03
+    revised: ""
+  - name: pre_match_skill_trait_snapshot
+    status: active
+    source: design/gdd/match-competition-system.md
+    referenced_by:
+      - design/gdd/match-competition-system.md
+      - design/gdd/skill-and-trait-system.md
+      - design/gdd/save-and-load-system.md
+      - design/gdd/match-performance-ui.md
+    category: payload
+    owner: MatchCompetition
+    purpose: "比赛开赛前锁定的技能/特性只读快照 wrapper，供比赛演算使用并在赛后解释快照状态。"
+    notes: "Skill/Trait provides the read model; Match owns the pre-match locked wrapper. Save/Load does not treat the snapshot as authoritative after load."
+    added: 2026-06-03
+    revised: ""
+  - name: pending_skill_trait_feedback
+    status: active
+    source: design/gdd/skill-and-trait-system.md
+    referenced_by:
+      - design/gdd/skill-and-trait-system.md
+      - design/gdd/save-and-load-system.md
+      - design/gdd/main-loop-ui-framework.md
+      - design/gdd/player-management-ui.md
+      - design/gdd/match-performance-ui.md
+    category: durable_payload
+    owner: SkillTraitSystem
+    purpose: "技能/特性变化与触发解释的持久化待展示反馈记录。"
+    de_dup_key: feedback_key
+    notes: "Feedback key is global domain identity; first_surface_id only routes first display and must not create a second acknowledgment fact."
+    added: 2026-06-03
+    revised: ""
+  - name: feedback_ack
+    status: active
+    source: design/gdd/skill-and-trait-system.md
+    referenced_by:
+      - design/gdd/skill-and-trait-system.md
+      - design/gdd/save-and-load-system.md
+      - design/gdd/main-loop-ui-framework.md
+      - design/gdd/player-management-ui.md
+    category: durable_payload
+    owner: SkillTraitSystem
+    purpose: "技能/特性反馈确认事实，防止读档、回看或换展示面后重复弹出。"
+    de_dup_key: feedback_key
+    notes: "Ack scope is global feedback_key; ack_surface_id records source surface only."
+    added: 2026-06-03
+    revised: ""
+  - name: event_settlement_key
+    status: active
+    source: design/gdd/random-event-system.md
+    referenced_by:
+      - design/gdd/random-event-system.md
+      - design/gdd/reputation-and-achievement-system.md
+      - design/gdd/save-and-load-system.md
+    category: settlement_key
+    owner: RandomEventManager
+    purpose: "随机事件一次性结果去重键，用于防止重复提交效果请求、重复写历史或重复展示。"
+    notes: "Reputation/Achievement may derive or reference this key when consuming target_scope = reputation facts."
+    added: 2026-06-03
+    revised: ""
+  - name: processed_event_settlement_keys
+    status: active
+    source: design/gdd/random-event-system.md
+    referenced_by:
+      - design/gdd/random-event-system.md
+      - design/gdd/save-and-load-system.md
+    category: durable_state
+    owner: RandomEventManager
+    purpose: "随机事件已处理结算键账本，读档后必须恢复以避免重复结算。"
+    notes: "Set-like contract; implementation may store as array but must enforce uniqueness."
+    added: 2026-06-03
+    revised: ""
+  - name: reputation_settlement_key
+    status: active
+    source: design/gdd/reputation-and-achievement-system.md
+    referenced_by:
+      - design/gdd/reputation-and-achievement-system.md
+      - design/gdd/random-event-system.md
+      - design/gdd/save-and-load-system.md
+      - design/gdd/main-loop-ui-framework.md
+    category: settlement_key
+    owner: ReputationAchievementManager
+    purpose: "声望、成就、解锁和长期认可奖励的一次性去重键。"
+    notes: "For random-event facts, this key must include or reference the source event_settlement_key."
+    added: 2026-06-03
+    revised: ""
+  - name: processed_reputation_settlement_keys
+    status: active
+    source: design/gdd/reputation-and-achievement-system.md
+    referenced_by:
+      - design/gdd/reputation-and-achievement-system.md
+      - design/gdd/save-and-load-system.md
+    category: durable_state
+    owner: ReputationAchievementManager
+    purpose: "声望与成就已处理长期认可键账本，读档后必须恢复以避免重复发奖或重复提示。"
+    notes: "Set-like contract; duplicate input returns idempotent no-op."
+    added: 2026-06-03
+    revised: ""
+  - name: audio_settings_fields
+    status: active
+    source: design/gdd/audio-system.md
+    referenced_by:
+      - design/gdd/audio-system.md
+      - design/gdd/save-and-load-system.md
+      - design/gdd/main-loop-ui-framework.md
+    category: durable_payload
+    owner: AudioSystem
+    purpose: "玩家音频偏好字段集合：audio_master_volume、audio_bgm_volume、audio_sfx_volume、audio_ambience_volume、audio_muted_categories。"
+    notes: "Main Loop UI owns the minimal Settings/Options container; Audio owns field semantics and mix behavior; Save/Load owns persistence mechanics."
+    added: 2026-06-03
+    revised: ""
 
 # ─── FORMULAS ────────────────────────────────────────────────────────────────
 # Named calculations with defined variables and output ranges.
@@ -267,6 +435,7 @@ formulas:
     referenced_by:
       - design/gdd/player-development-system.md
       - design/gdd/town-building-system.md
+      - design/gdd/skill-and-trait-system.md
     variables:
       - raw_growth_input
       - current_attribute
@@ -275,11 +444,12 @@ formulas:
       - fatigue_adjusted_training_efficiency
       - training_focus_match_multiplier
       - facility_training_multiplier
+      - skill_training_multiplier
     output_range: [0, "potential_cap - current_attribute"]
-    expression: "min(potential_cap - current_attribute, attribute_growth(raw_growth_input, current_attribute, potential_cap, decay_factor) * fatigue_adjusted_training_efficiency * training_focus_match_multiplier * facility_training_multiplier)"
-    notes: "共享单次训练实际成长接口，供培养结果展示、比赛前能力预估和后续技能/事件成长结算系统引用。2026-05-16 新增 facility_training_multiplier 第 7 变量（来自小镇建设系统）。"
+    expression: "min(potential_cap - current_attribute, attribute_growth(raw_growth_input, current_attribute, potential_cap, decay_factor) * fatigue_adjusted_training_efficiency * training_focus_match_multiplier * facility_training_multiplier * skill_training_multiplier)"
+    notes: "共享单次训练实际成长接口，供培养结果展示、比赛前能力预估和后续技能/事件成长结算系统引用。2026-05-16 新增 facility_training_multiplier 第 7 变量（来自小镇建设系统）；2026-06-03 新增 skill_training_multiplier 第 8 变量（来自技能与特性系统只读训练倍率，默认 1.0，范围 1.0–1.35）。"
     added: 2026-05-15
-    revised: 2026-05-16
+    revised: 2026-06-03
   - name: player_tier_potential_band
     status: active
     source: design/gdd/player-development-system.md

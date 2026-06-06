@@ -1,7 +1,7 @@
 # Technical Requirement ID Registry
 
 version: 2
-last_updated: "2026-05-25"
+last_updated: "2026-06-03"
 
 requirements:
   # ─── Foundation: game-concept ───
@@ -236,6 +236,20 @@ requirements:
     gdd: design/gdd/save-and-load-system.md
     requirement: "Deserialize order: Time→Town→Player→League→Economy→Match"
     created: 2026-05-17
+    status: active
+
+  - id: TR-save-013
+    system: save
+    gdd: design/gdd/save-and-load-system.md
+    requirement: "Skill/trait durable state persists candidate_progress_record, trait_cooldown_state, pending_skill_trait_feedback, feedback_ack, identity_history, migration_record, evaluated_settlement_keys, and processed_settlement_keys"
+    created: 2026-06-01
+    status: active
+
+  - id: TR-save-014
+    system: save
+    gdd: design/gdd/save-and-load-system.md
+    requirement: "Save/load restores durable settlement outcomes only and never replays half-resolved skill/trait evaluation state"
+    created: 2026-06-01
     status: active
 
   # ─── Foundation: time ───
@@ -479,6 +493,20 @@ requirements:
     created: 2026-05-17
     status: active
 
+  - id: TR-match-016
+    system: match
+    gdd: design/gdd/match-competition-system.md
+    requirement: "Formal match fallback resolves through recommended lineup → out-of-position fill → forfeit_result_packet"
+    created: 2026-06-01
+    status: active
+
+  - id: TR-match-017
+    system: match
+    gdd: design/gdd/match-competition-system.md
+    requirement: "pre_match_skill_trait_snapshot is a locked read-only match input consumed by MatchPerfUI and never recomputed in UI"
+    created: 2026-06-01
+    status: active
+
   # ─── Core: economy ───
   - id: TR-economy-001
     system: economy
@@ -705,6 +733,63 @@ requirements:
     created: 2026-05-17
     status: active
 
+  # ─── Core: skill-and-trait ───
+  - id: TR-skill-001
+    system: skill-and-trait
+    gdd: design/gdd/skill-and-trait-system.md
+    requirement: "技能/特质系统必须使用由 settlement_id、player_id、consumer_scope、rule_id 组成的稳定 settlement_key 去重，避免同一结算被重复消费；rule_version 只能作为持久化 metadata，不得进入 key source。"
+    created: 2026-06-01
+    status: active
+
+  - id: TR-skill-002
+    system: skill-and-trait
+    gdd: design/gdd/skill-and-trait-system.md
+    requirement: "技能解锁判定必须基于 accumulated_skill_points、skill_unlock_threshold、family_slot_available 与 settlement_key_not_processed 的组合条件，并且已拥有技能不可重复解锁。"
+    created: 2026-06-01
+    status: active
+
+  - id: TR-skill-003
+    system: skill-and-trait
+    gdd: design/gdd/skill-and-trait-system.md
+    requirement: "技能升级必须按 level_thresholds 顺序消耗 available_upgrade_progress，直到命中 level_cap 或剩余进度不足以下一阈值。"
+    created: 2026-06-01
+    status: active
+
+  - id: TR-skill-004
+    system: skill-and-trait
+    gdd: design/gdd/skill-and-trait-system.md
+    requirement: "候选技能进度必须持久化 candidate_progress_record，并通过 candidate_progress_ratio 映射 sprouting、forming、near_unlock 等可见阶段。"
+    created: 2026-06-01
+    status: active
+
+  - id: TR-skill-005
+    system: skill-and-trait
+    gdd: design/gdd/skill-and-trait-system.md
+    requirement: "特质冷却必须由 trait_cooldown_state 作为唯一耐久状态来源，避免 UI 或消费方重算冷却真值。"
+    created: 2026-06-01
+    status: active
+
+  - id: TR-skill-006
+    system: skill-and-trait
+    gdd: design/gdd/skill-and-trait-system.md
+    requirement: "比赛前技能/特质快照必须以 pre_match_skill_trait_snapshot 作为只读输入提供给比赛表现与主循环 UI，展示层不得重算技能触发或强度真值。"
+    created: 2026-06-01
+    status: active
+
+  - id: TR-skill-007
+    system: skill-and-trait
+    gdd: design/gdd/skill-and-trait-system.md
+    requirement: "待确认反馈必须以 pending_skill_trait_feedback 与 feedback_ack 分离建模，并在存档中保持可恢复的一致状态。"
+    created: 2026-06-01
+    status: active
+
+  - id: TR-skill-008
+    system: skill-and-trait
+    gdd: design/gdd/skill-and-trait-system.md
+    requirement: "技能/特质系统必须持久化 identity_history、skill_trait_migration_record、evaluated_settlement_keys 与 processed_settlement_keys，以支持回放安全、迁移兼容与身份演化追踪。"
+    created: 2026-06-01
+    status: active
+
   # ─── Feature: league ───
   - id: TR-league-001
     system: league
@@ -868,6 +953,13 @@ requirements:
     created: 2026-05-17
     status: active
 
+  - id: TR-mainui-010
+    system: main-ui
+    gdd: design/gdd/main-loop-ui-framework.md
+    requirement: "Automatic support and post-match feedback surfaces consume authoritative payloads only and never recompute unlock, trigger, or settlement truth"
+    created: 2026-06-01
+    status: active
+
   # ─── Presentation: player-ui ───
   - id: TR-playerui-001
     system: player-ui
@@ -937,6 +1029,13 @@ requirements:
     gdd: design/gdd/player-management-ui.md
     requirement: "Empty roster shows guide text; training/match entries naturally disabled"
     created: 2026-05-17
+    status: active
+
+  - id: TR-playerui-011
+    system: player-ui
+    gdd: design/gdd/player-management-ui.md
+    requirement: "Player Detail consumes candidate visibility stage, blocked reason, feedback ack, and identity history as read-only payload fields"
+    created: 2026-06-01
     status: active
 
   # ─── Presentation: match-ui ───
@@ -1017,6 +1116,49 @@ requirements:
     created: 2026-05-17
     status: active
 
+  # ─── Feature: reputation-and-achievement ───
+  - id: TR-reputation-001
+    system: reputation-and-achievement
+    gdd: design/gdd/reputation-and-achievement-system.md
+    requirement: "声望增长必须按 reputation_gain = floor((base_reputation_source + bonus_reputation_source) × source_weight × stage_multiplier) 结算，并由权威系统统一产出结果。"
+    created: 2026-06-01
+    status: active
+
+  - id: TR-reputation-002
+    system: reputation-and-achievement
+    gdd: design/gdd/reputation-and-achievement-system.md
+    requirement: "声望等级进度必须按当前阈值与下一阈值计算 reputation_progress_ratio，供 UI 直接消费而非本地推导。"
+    created: 2026-06-01
+    status: active
+
+  - id: TR-reputation-003
+    system: reputation-and-achievement
+    gdd: design/gdd/reputation-and-achievement-system.md
+    requirement: "成就完成判定必须满足 achievement_condition_satisfied AND NOT achievement_already_unlocked，且同一成就不可重复解锁。"
+    created: 2026-06-01
+    status: active
+
+  - id: TR-reputation-004
+    system: reputation-and-achievement
+    gdd: design/gdd/reputation-and-achievement-system.md
+    requirement: "声望与成就奖励必须定义明确的结算归属、去重键与消费顺序，避免跨系统重复发奖或重复广播。"
+    created: 2026-06-01
+    status: active
+
+  - id: TR-reputation-005
+    system: reputation-and-achievement
+    gdd: design/gdd/reputation-and-achievement-system.md
+    requirement: "声望等级、进度、已解锁成就与待展示奖励必须作为可存档耐久状态恢复，避免读档后重复触发一次性奖励。"
+    created: 2026-06-01
+    status: active
+
+  - id: TR-reputation-006
+    system: reputation-and-achievement
+    gdd: design/gdd/reputation-and-achievement-system.md
+    requirement: "展示层必须消费权威声望/成就 payload，不得自行推导成就完成、奖励归属或等级提升真值。"
+    created: 2026-06-01
+    status: active
+
   # ─── Polish: onboard ───
   - id: TR-onboard-001
     system: onboard
@@ -1086,4 +1228,204 @@ requirements:
     gdd: design/gdd/onboarding-system.md
     requirement: "All anchor references use stable IDs from UI systems"
     created: 2026-05-17
+    status: active
+
+  # ─── Feature: random-event ───
+  - id: TR-random-001
+    system: random-event
+    gdd: design/gdd/random-event-system.md
+    requirement: "RandomEventManager is the sole owner of pending_random_event_instance, recent_random_event_history, event_cooldown_state, and processed_event_settlement_keys durable truth."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-random-002
+    system: random-event
+    gdd: design/gdd/random-event-system.md
+    requirement: "Random events may trigger only in legal stable windows and must never insert into match simulation, training settlement, save writes, or load restoration."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-random-003
+    system: random-event
+    gdd: design/gdd/random-event-system.md
+    requirement: "Random event effects must be submitted as requests to the authoritative target system; RandomEventManager must not directly mutate resources, players, facilities, match results, reputation, or time state."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-random-004
+    system: random-event
+    gdd: design/gdd/random-event-system.md
+    requirement: "Every one-shot event result must use stable event_settlement_key and processed_event_settlement_keys to prevent duplicate submission, duplicate history writes, duplicate rewards, or duplicate display."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-random-005
+    system: random-event
+    gdd: design/gdd/random-event-system.md
+    requirement: "event_settlement_key = stable_digest(canonical_join([event_instance_id, selected_option_id, target_scope, target_id, rule_version], \"|\"))"
+    created: 2026-06-03
+    status: active
+
+  - id: TR-random-006
+    system: random-event
+    gdd: design/gdd/random-event-system.md
+    requirement: "random_event_offer_view_payload and random_event_history_view_payload are read-only UI payloads; presentation must not redraw event pools, recompute event eligibility, invent options, or generate results."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-random-007
+    system: random-event
+    gdd: design/gdd/random-event-system.md
+    requirement: "Event trigger chance, recent-event suppression, and weighted event selection must be data-driven and bounded by the Random Event GDD formulas."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-random-008
+    system: random-event
+    gdd: design/gdd/random-event-system.md
+    requirement: "Confirmed random event facts may be submitted to ReputationAchievementManager, but unmapped effect_request_type or unknown target_scope must degrade to safe no-op rather than direct unlocks or rewards."
+    created: 2026-06-03
+    status: active
+
+  # ─── Presentation: audio ───
+  - id: TR-audio-001
+    system: audio
+    gdd: design/gdd/audio-system.md
+    requirement: "AudioSystem consumes stable gameplay/UI events only and must never mutate time, resources, players, training, match, town, random event, reputation, achievement, skill, save, or navigation state."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-audio-002
+    system: audio
+    gdd: design/gdd/audio-system.md
+    requirement: "Audio playback eligibility must require event_valid, asset_available, user_volume_weight, cooldown_weight, and focus_allowed; ineligible or missing assets must degrade silently without blocking gameplay."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-audio-003
+    system: audio
+    gdd: design/gdd/audio-system.md
+    requirement: "Audio mixing uses layer_output_volume = master_volume × layer_volume × category_volume × event_intensity × ducking_weight, clamped to 0.00–1.00."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-audio-004
+    system: audio
+    gdd: design/gdd/audio-system.md
+    requirement: "Audio preference fields audio_master_volume, audio_bgm_volume, audio_sfx_volume, audio_ambience_volume, and audio_muted_categories are durable settings only and must not affect gameplay state."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-audio-005
+    system: audio
+    gdd: design/gdd/audio-system.md
+    requirement: "Multiple audio events in the same stable window must be prioritized, merged, delayed, or suppressed so Special Stinger playback does not overlap or obscure core feedback."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-audio-006
+    system: audio
+    gdd: design/gdd/audio-system.md
+    requirement: "Audio feedback for loss, resource shortage, maintenance, or weak random-event results must remain low-pressure and must not use crisis alarms, countdowns, or punitive failure sounds."
+    created: 2026-06-03
+    status: active
+
+  # ─── Presentation: town-management-ui ───
+  - id: TR-townui-001
+    system: town-management-ui
+    gdd: design/gdd/town-management-ui.md
+    requirement: "Town Management UI must run inside the Main Loop UI Town Management container and must not create a separate global navigation stack or bypass Home return rules."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-townui-002
+    system: town-management-ui
+    gdd: design/gdd/town-management-ui.md
+    requirement: "Town Overview must show town grid, funds, AP summary, daily maintenance summary, active construction or upgrade projects, build/upgrade entry points, and facility bonus summary."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-townui-003
+    system: town-management-ui
+    gdd: design/gdd/town-management-ui.md
+    requirement: "Build and upgrade confirmation must use authoritative TownBuilding legality, Economy budget preview, and Time construction duration data; UI must not define facility effects, costs, maintenance formulas, or completion timing."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-townui-004
+    system: town-management-ui
+    gdd: design/gdd/town-management-ui.md
+    requirement: "budget_preview_complete must be true before enabling build or upgrade confirmation: current funds, after funds, cost, build time, and maintenance delta must all be visible."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-townui-005
+    system: town-management-ui
+    gdd: design/gdd/town-management-ui.md
+    requirement: "construction_active_decision_count must remain at or below construction_decision_budget_max for a build or upgrade flow."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-townui-006
+    system: town-management-ui
+    gdd: design/gdd/town-management-ui.md
+    requirement: "Town Management UI must expose stable anchors for onboarding/tutorial: town entry, grid area, facility detail, build button, upgrade button, budget preview, maintenance summary, and bonus summary."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-townui-007
+    system: town-management-ui
+    gdd: design/gdd/town-management-ui.md
+    requirement: "maintenance_pressure_state is UI-only presentation classification and must not be persisted or consumed as authoritative economy or town-building state."
+    created: 2026-06-03
+    status: active
+
+  # ─── Polish: tutorial-and-hint ───
+  - id: TR-tutorial-001
+    system: tutorial-and-hint
+    gdd: design/gdd/tutorial-and-hint-system.md
+    requirement: "Tutorial and Hint system may show explanatory hints only from authoritative read-only payloads and stable UI anchors; it must not define new gameplay rules, tasks, rewards, recommendations, or optimal routes."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-tutorial-002
+    system: tutorial-and-hint
+    gdd: design/gdd/tutorial-and-hint-system.md
+    requirement: "Automatic hint eligibility requires anchor_available, payload_available, onboarding_weight, context_relevance, novelty_weight, user_preference_weight, and cooldown_weight."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-tutorial-003
+    system: tutorial-and-hint
+    gdd: design/gdd/tutorial-and-hint-system.md
+    requirement: "Core feedback from match, training, town, economy, reputation, achievement, or random event flows must take priority over automatic hints; hints must defer, suppress, or display non-focus UI only."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-tutorial-004
+    system: tutorial-and-hint
+    gdd: design/gdd/tutorial-and-hint-system.md
+    requirement: "seen_hint_records, hint_cooldown_state, user hint preferences, and help index unlock state must persist across save/load without repeated hint spam."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-tutorial-005
+    system: tutorial-and-hint
+    gdd: design/gdd/tutorial-and-hint-system.md
+    requirement: "hint_record_key = stable_digest(canonical_join([hint_id, anchor_id, payload_source_id, hint_version], \"|\")) and duplicate key submission must be idempotent no-op."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-tutorial-006
+    system: tutorial-and-hint
+    gdd: design/gdd/tutorial-and-hint-system.md
+    requirement: "Closing, hiding, or ignoring a hint must affect only hint display state and must never cause resource loss, growth loss, delayed unlocks, or gameplay penalties."
+    created: 2026-06-03
+    status: active
+
+  - id: TR-tutorial-007
+    system: tutorial-and-hint
+    gdd: design/gdd/tutorial-and-hint-system.md
+    requirement: "If a required UI anchor or authoritative payload is missing or version-incompatible, the hint must be suppressed or replaced by a generic help entry; the system must not guess rule meaning."
+    created: 2026-06-03
     status: active

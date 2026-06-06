@@ -2,7 +2,7 @@
 
 > **Status**: In Design
 > **Author**: 用户 + Claude
-> **Last Updated**: 2026-05-31
+> **Last Updated**: 2026-06-03
 > **Source Set**:
 > - `design/gdd/game-concept.md`
 > - `E:\code\game\game-design\00-足球小镇-策划总览.md`
@@ -13,7 +13,7 @@
 
 ## Overview
 
-本索引用于把《足球小镇》的玩法概念拆解为可独立设计、实现、评审和排期的系统集合。它既记录“游戏需要哪些系统”，也记录这些系统之间的依赖关系、优先级层次以及推荐的 GDD 编写顺序。当前拆分遵循“Foundation → Core → Feature → Presentation → Polish”的设计顺序，并以 MVP 验证“培养 + 比赛”核心循环是否成立为最高优先目标。
+本索引用于把《足球小镇》的玩法概念拆解为可独立设计、实现、评审和排期的系统集合。它既记录“游戏需要哪些系统”，也记录这些系统之间的依赖关系、优先级层次以及推荐的 GDD 编写顺序。当前拆分遵循“Foundation → Core → Feature → Presentation → Polish”的设计顺序，并以 MVP 验证“培养 + 比赛”核心循环是否成立为最高优先目标。MVP 经济闭环当前以经费与运动点数为玩家可见资源面；研究点数在 MVP 仅验证后台累积与持久化，不构成当前 UI/消费闭环。
 
 ## Systems Enumeration
 
@@ -25,20 +25,20 @@
 | 运动员培养系统 | Progression / Character | Core | MVP | Approved | Explicit | 负责球员招募、训练、成长、技能、状态与长期养成反馈。 |
 | 比赛竞技系统 | Gameplay / Match | Core | MVP | Designed | Explicit | 负责阵型、战术、比赛演算、胜负结果与赛后反馈。 |
 | 经济管理系统 | Economy | Core | MVP | Designed | Explicit | 负责经费、研究点数、运动点数的获取、消耗与经营压力；MVP 展示经费和运动点数，研究点数后台累积。 |
-| 小镇建设系统 | World / Management | Core | MVP | Designed | Explicit | MVP 提供最小城镇建设切片：4 类设施、建造/升级/维护、单格布局、基础邻接、设施加成查询与主界面小镇触点；Alpha 扩展完整建设与经营 UI。 |
-| 声望与成就系统 | Meta Progression | Feature | Alpha | Not Started | Explicit | 负责阶段性解锁、等级成长、长期收集与重玩动力。 |
-| 随机事件系统 | Content / Event | Feature | Beta | Not Started | Explicit | 负责制造变化、提供剧情化决策点并增强世界活力。 |
-| 技能与特性系统 | Character Depth | Feature | Alpha | Not Started | Inferred | 负责球员差异化成长路线与长期培养深度。 |
+| 小镇建设系统 | World / Management | Core | MVP | Designed | Explicit | MVP 提供最小可见支撑切片：4 类设施、建造/升级、轻量维护费、单格可见布局、邻接展示、主界面小镇摘要，以及低强度训练/主场被动加成；Alpha 扩展完整建设 UI、数值邻接、AP/收入建设加成和深层布局优化。 |
+| 声望与成就系统 | Meta Progression | Feature | Alpha | Designed | Explicit | 负责阶段性解锁、等级成长、长期收集与长期认可反馈。 |
+| 随机事件系统 | Content / Event | Feature | Beta | Designed | Explicit | 负责制造变化、提供剧情化决策点并增强世界活力。 |
+| 技能与特性系统 | Character Depth | Feature | Alpha | Approved | Inferred | 负责球员差异化成长路线与长期培养深度。 |
 | 联赛与赛事结构系统 | Progression / Competition | Feature | MVP | Designed | Inferred | 负责赛季编排、联赛层级、晋级结构和终局赛事目标；MVP 联赛规模限定为 8–12 队。 |
 | 多周目与挑战模式系统 | Replayability | Feature | Full Vision | Not Started | Explicit | 负责通关后的继承、挑战规则和长期重玩价值。 |
 | 商业化与 DLC 规划系统 | Product / Meta | Polish | Full Vision | Not Started | Explicit | 负责买断制、DLC 节奏和发售后扩展规划，主要服务产品层。 |
 | 主循环 UI 框架 | UI / UX | Presentation | MVP | Designed | Explicit | 负责主界面、球员界面、比赛界面的基础导航与信息展示。 |
-| 球员管理 UI | UI / UX | Presentation | MVP | Not Started | Inferred | 负责球员列表、详情、培养入口和状态可视化。 |
-| 比赛表现 UI | UI / UX | Presentation | MVP | Not Started | Inferred | 负责赛前准备、比赛过程、赛后结算等比赛相关界面。 |
-| 建设与经营 UI | UI / UX | Presentation | Alpha | Not Started | Inferred | 负责完整建设模式、资源管理、设施信息与布局交互；MVP 仅由主循环 UI 提供小镇摘要和最小建设入口。 |
+| 球员管理 UI | UI / UX | Presentation | MVP | Designed | Inferred | 负责球员列表、详情、培养入口和状态可视化。 |
+| 比赛表现 UI | UI / UX | Presentation | MVP | Designed | Inferred | 负责赛前准备、比赛过程、赛后结算等比赛相关界面。 |
+| 建设与经营 UI | UI / UX | Presentation | Alpha | Designed | Inferred | 负责完整建设模式、资源管理、设施信息与布局交互；MVP 仅由主循环 UI 提供小镇摘要和最小建设入口。 |
 | 新手引导系统 | UX / Onboarding | Polish | MVP | Designed | Explicit | 负责让玩家快速理解核心循环与基础操作。 |
-| 音频系统 | Audio | Presentation | Beta | Not Started | Explicit | 负责 BGM、音效、动态情绪反馈与沉浸氛围。 |
-| 教程与提示系统 | UX Support | Polish | Alpha | Not Started | Inferred | 负责提示、说明、反馈强化和中长期系统理解支持。 |
+| 音频系统 | Audio | Presentation | Beta | Approved | Explicit | 负责 BGM、音效、动态情绪反馈与沉浸氛围。 |
+| 教程与提示系统 | UX Support | Polish | Alpha | Designed | Inferred | 负责提示、说明、反馈强化和中长期系统理解支持。 |
 
 ## Dependency Map
 
@@ -53,7 +53,7 @@
 - 运动员培养系统
   - depends on: 数值系统、时间与赛季推进系统、存档与读档系统
 - 比赛竞技系统
-  - depends on: 数值系统、时间与赛季推进系统、存档与读档系统、运动员培养系统、联赛与赛事结构系统、小镇建设系统
+  - depends on: 数值系统、时间与赛季推进系统、存档与读档系统、运动员培养系统、小镇建设系统；通过 `league -> match_context` 接收联赛提供的对手、主客场、轮次和比赛重要性上下文
 - 经济管理系统
   - depends on: 数值系统、时间与赛季推进系统、存档与读档系统、比赛竞技系统、联赛与赛事结构系统、小镇建设系统、运动员培养系统
 - 小镇建设系统
@@ -62,24 +62,24 @@
 ### Feature
 
 - 声望与成就系统
-  - depends on: 比赛竞技系统、运动员培养系统、小镇建设系统、经济管理系统
+  - depends on: 比赛竞技系统、联赛与赛事结构系统、运动员培养系统、小镇建设系统、经济管理系统、时间与赛季推进系统、存档与读档系统、技能与特性系统
 - 随机事件系统
   - depends on: 时间与赛季推进系统、运动员培养系统、经济管理系统、小镇建设系统
 - 技能与特性系统
-  - depends on: 运动员培养系统、数值系统
+  - depends on: 运动员培养系统、数值系统、比赛竞技系统、存档与读档系统
 - 联赛与赛事结构系统
-  - depends on: 比赛竞技系统、时间与赛季推进系统、经济管理系统
+  - depends on: 时间与赛季推进系统、经济管理系统；通过 `match -> match_result_packet` 消费比赛系统确认的单场结果包
 - 多周目与挑战模式系统
   - depends on: 声望与成就系统、联赛与赛事结构系统、存档与读档系统
 
 ### Presentation
 
 - 主循环 UI 框架
-  - depends on: 运动员培养系统、比赛竞技系统、经济管理系统、时间与赛季推进系统
+  - depends on: 运动员培养系统、比赛竞技系统、经济管理系统、时间与赛季推进系统、联赛与赛事结构系统、存档与读档系统、声望与成就系统、技能与特性系统
 - 球员管理 UI
   - depends on: 运动员培养系统
 - 比赛表现 UI
-  - depends on: 比赛竞技系统、联赛与赛事结构系统
+  - depends on: 比赛竞技系统、联赛与赛事结构系统、主循环 UI 框架、声望与成就系统、技能与特性系统
 - 建设与经营 UI
   - depends on: 小镇建设系统、经济管理系统、主循环 UI 框架
 - 音频系统
@@ -88,9 +88,9 @@
 ### Polish
 
 - 新手引导系统
-  - depends on: 主循环 UI 框架、运动员培养系统、比赛竞技系统、经济管理系统、球员管理 UI、比赛表现 UI
+  - depends on: 主循环 UI 框架、运动员培养系统、比赛竞技系统、经济管理系统、球员管理 UI、比赛表现 UI、声望与成就系统
 - 教程与提示系统
-  - depends on: 主循环 UI 框架、球员管理 UI、建设与经营 UI、比赛表现 UI
+  - depends on: 主循环 UI 框架、球员管理 UI、建设与经营 UI、比赛表现 UI、声望与成就系统
 - 商业化与 DLC 规划系统
   - depends on: 核心系统集完成后形成的完整内容结构
 
@@ -115,8 +115,8 @@
 5. **经济管理系统**
    - 是训练、比赛、建设之间资源取舍的共同结算层；MVP 必须稳定提供经费、运动点数、维护费和赛后/每日结算接口。
 
-6. **小镇建设系统（最小切片）**
-   - 为培养、比赛、经济和主界面提供设施加成与小镇可见触点；MVP 范围必须严格受控，避免完整建设 UI 和深层布局优化提前膨胀。
+6. **小镇建设系统（最小可见支撑切片）**
+   - 为培养、比赛、经济和主界面提供小镇可见触点、轻量维护费、低强度训练倍率和小幅主场身份加成；MVP 范围必须严格受控，避免建设成为与培养/比赛并列竞争的第二主循环。
 
 ## Recommended Design Order
 
@@ -155,9 +155,9 @@
 - 球员管理 UI
 - 比赛表现 UI
 - 新手引导系统
-- 小镇建设系统（最小建设切片）
+- 小镇建设系统（最小可见支撑切片）
 
-**Why:** 这些系统共同构成“培养 → 比赛 → 反馈 → 再培养”的最小可验证闭环，并通过最小建设切片让“足球小镇”支柱在首次体验中可见。没有它们，玩家无法完整体验游戏最核心的成长、竞技与小镇长期投资节奏。
+**Why:** 这些系统共同构成“培养 → 比赛 → 反馈 → 再培养”的最小可验证闭环，并通过最小可见支撑切片让“足球小镇”支柱在首次体验中可见。没有它们，玩家无法完整体验游戏最核心的成长、竞技与小镇身份感。
 
 ### Alpha
 
@@ -186,7 +186,7 @@
 
 - `数值系统` 与 `比赛竞技系统` 的边界必须尽早明确，否则“谁定义结果、谁控制体验”会反复冲突。
 - `时间与赛季推进系统` 需要尽早确定是否统一驱动训练、建设、赛事和事件触发。
-- `小镇建设系统` 在 MVP 阶段只包含最小建设切片：4 类设施、单格布局、基础邻接、维护费、设施加成查询和主界面小镇触点；完整建设与经营 UI、深层布局优化和扩展设施留到 Alpha。
+- `小镇建设系统` 在 MVP 阶段只包含最小可见支撑切片：4 类设施、建造/升级、轻量维护费、单格可见布局、邻接展示、低强度训练倍率、小幅主场身份加成和主界面小镇触点；完整建设与经营 UI、数值邻接、设施 AP 恢复、球场收入倍率、拆迁重排优化和扩展设施留到 Alpha。
 - `音频系统` 当前适合后置，但概念层必须保留关键反馈点，避免后续完全脱节。
 - `商业化与 DLC 规划系统` 建议作为支持文档存在，不要过早挤占核心玩法设计资源。
 
@@ -201,19 +201,19 @@
 | 比赛竞技系统 | Core | MVP | Designed | `design/gdd/match-competition-system.md` |
 | 经济管理系统 | Core | MVP | Designed | `design/gdd/economy-management-system.md` |
 | 小镇建设系统 | Core | MVP | Designed | `design/gdd/town-building-system.md` |
-| 声望与成就系统 | Feature | Alpha | Not Started | - |
-| 随机事件系统 | Feature | Beta | Not Started | - |
-| 技能与特性系统 | Feature | Alpha | Not Started | - |
+| 声望与成就系统 | Feature | Alpha | Designed | `design/gdd/reputation-and-achievement-system.md` |
+| 随机事件系统 | Feature | Beta | Designed | `design/gdd/random-event-system.md` |
+| 技能与特性系统 | Feature | Alpha | Approved | `design/gdd/skill-and-trait-system.md` |
 | 联赛与赛事结构系统 | Feature | MVP | Designed | `design/gdd/league-competition-structure-system.md` |
 | 多周目与挑战模式系统 | Feature | Full Vision | Not Started | - |
 | 商业化与 DLC 规划系统 | Polish | Full Vision | Not Started | - |
 | 主循环 UI 框架 | Presentation | MVP | Designed | `design/gdd/main-loop-ui-framework.md` |
 | 球员管理 UI | Presentation | MVP | Designed | `design/gdd/player-management-ui.md` |
 | 比赛表现 UI | Presentation | MVP | Designed | `design/gdd/match-performance-ui.md` |
-| 建设与经营 UI | Presentation | Alpha | Not Started | - |
+| 建设与经营 UI | Presentation | Alpha | Designed | `design/gdd/town-management-ui.md` |
 | 新手引导系统 | Polish | MVP | Designed | `design/gdd/onboarding-system.md` |
-| 音频系统 | Presentation | Beta | Not Started | - |
-| 教程与提示系统 | Polish | Alpha | Not Started | - |
+| 音频系统 | Presentation | Beta | Approved | `design/gdd/audio-system.md` |
+| 教程与提示系统 | Polish | Alpha | Designed | `design/gdd/tutorial-and-hint-system.md` |
 
 ## Progress Summary
 
@@ -225,11 +225,10 @@
 
 ## Recommended Next GDD
 
-按当前推荐顺序，下一批优先开始设计的系统是：
+按当前推荐顺序，下一批优先推进的系统是：
 
-1. 声望与成就系统
-2. 技能与特性系统
-3. 建设与经营 UI
+1. 多周目与挑战模式系统（Full Vision Replayability 层长期重玩结构）
+2. 商业化与 DLC 规划系统（Full Vision / Polish 产品层扩展规划）
 
-其中**最推荐下一篇 GDD**是：`声望与成就系统`。
-原因是 MVP 核心闭环与经济/小镇支撑系统已完成设计并完成本轮 blocker 修复。下一步应补齐长期目标、里程碑反馈和成就触发语义，为联赛晋级、小镇成长和球员培养提供更清晰的中长期目标框架。
+其中**最推荐下一篇 GDD**是：`多周目与挑战模式系统`。
+原因是当前 Foundation、Core、Feature、Presentation 与 Polish 支撑系统已经完成设计或进入 Approved/Designed 状态；下一步若继续补齐完整愿景，应先定义通关后继承、挑战规则和长期重玩结构，再处理商业化与 DLC 规划。

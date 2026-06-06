@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="LeagueConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/config/league_config.gd" id="1_league_config"]
+
+[resource]
+script = ExtResource("1_league_config")
+league_name = "Town League"
+league_tier = 1
+highest_tier = 1
+lowest_tier = 1
+team_count = 8
+player_team_name = "Player Team"
+opponent_team_names = Array[String](["Opponent 1", "Opponent 2", "Opponent 3", "Opponent 4", "Opponent 5", "Opponent 6", "Opponent 7"])
+double_round_robin = true
+points_win = 3
+points_draw = 1
+points_loss = 0
+promotion_slots = 1
+relegation_slots = 1

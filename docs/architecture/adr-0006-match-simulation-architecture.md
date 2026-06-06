@@ -67,7 +67,7 @@ The match-competition GDD defines 20 core rules, 8 match states, 5 formulas, and
 
 ### Part A: MatchSimulation Class — State Machine
 
-`MatchSimulation` is the engine class that runs one match from Entry to Settlement. It uses a finite state machine with `_process()`-based tick advancement.
+`MatchSimulation` is the engine class that runs one match from Entry to Settlement. It uses a finite state machine advanced by explicit `advance()` calls from match-trigger, player confirmation, halftime input, and settlement handoff events.
 
 ```gdscript
 # src/core/match_simulation.gd

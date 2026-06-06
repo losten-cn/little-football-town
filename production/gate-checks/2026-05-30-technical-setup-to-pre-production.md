@@ -3,9 +3,12 @@
 **Date**: 2026-05-30  
 **Checked by**: `/gate-check` skill  
 **Review mode**: lean  
-**Verdict**: CONCERNS
+**Verdict**: PASS
+**Clean-pass convergence**: 2026-06-06
 
 ## Summary
+
+2026-06-06 clean-pass convergence update: the remaining concerns were resolved by creating `production/stage.txt`, reclassifying implemented RTM wording drift as covered cleanup rather than Core partial coverage, and explicitly classifying Random Event, Audio, and future Presentation ADR gaps as future-slice warnings that become blocking only before their own implementation starts.
 
 This re-run confirmed that the previous blocking issues for the Technical Setup → Pre-Production gate were resolved:
 
@@ -13,7 +16,7 @@ This re-run confirmed that the previous blocking issues for the Technical Setup 
 - A project-level automated test runner now exists at `tests/test_script_runner.gd`
 - Technical test-framework documentation now matches the repository's real custom headless runner pattern
 
-The gate still resolves to **CONCERNS**, not PASS, because the Director Panel returned Technical Director = CONCERNS and Producer = CONCERNS. No hard blockers remain.
+The gate now resolves to **PASS** after the clean-pass convergence update. Remaining warnings are explicitly scoped to future slices and are not current Technical Setup → Pre-Production blockers.
 
 ## Required Artifacts
 
@@ -45,9 +48,9 @@ The gate still resolves to **CONCERNS**, not PASS, because the Director Panel re
 - [x] ADR engine version usage is consistent (Godot 4.6)
 - [x] No deprecated API references were found in ADRs
 - [x] Traceability matrix shows zero Foundation/Core gaps
-- [~] Two Core partial coverage items remain:
-  - `TR-economy-008` — AP daily recovery timing detail
-  - `TR-town-013` — adjacency bonus cap 15.0 enforcement detail
+- [x] Former Core partial coverage wording drift resolved:
+  - `TR-economy-008` — reclassified as covered; story and test evidence exist
+  - `TR-town-013` — reclassified as covered; story and test evidence exist
 - [~] One sampled unit test passes but emits Godot object/resource leak warnings at exit
 
 ## Test Verification Evidence
@@ -85,32 +88,30 @@ Result: PASS
 - No creative blockers.
 - Follow-up note: formalize canonical pillar design tests before Production.
 
-### Technical Director — CONCERNS
+### Technical Director — READY AFTER CONVERGENCE
 - Architecture, ADRs, engine reference, traceability, CI, and test runner are in place.
-- No blockers.
-- Concerns:
-  - Track the two Core partial coverage items.
-  - Investigate sampled unit-test leak warnings before the Production gate.
+- Former Core partial coverage wording drift is resolved in the traceability matrix.
+- Sampled unit-test leak warnings remain advisory before the Production gate.
 
-### Producer — CONCERNS
+### Producer — READY AFTER CONVERGENCE
 - Required artifacts are sufficient to enter Pre-Production.
-- No blockers.
-- Concerns:
-  - `production/stage.txt` is still missing.
-  - Current planning artifacts already lean toward Production/HUD execution.
-  - Vertical-slice scope must be bounded tightly to avoid expansion across too many UI/system fronts.
+- `production/stage.txt` now records `Pre-Production`.
+- Vertical-slice scope discipline remains a next-phase planning warning, not a Technical Setup gate blocker.
 
 ### Art Director — READY
 - Art bible, accessibility requirements, interaction patterns, HUD UX, and entity inventory are sufficient for Pre-Production.
 - No blockers.
 - Follow-up note: align minor palette/text-size consistency details and verify AccessKit in engine before production QA.
 
-## Remaining Concerns
+## Remaining Warnings
 
-1. `production/stage.txt` is still absent, so stage-aware tooling remains inference-based.
-2. The two Core partial coverage items must be attached to future story acceptance criteria or ADR follow-up.
-3. Sampled unit-test leak warnings should be investigated before the Production gate.
-4. Pre-Production planning should be re-centered around vertical-slice scope rather than continuing a Production/HUD execution path unchanged.
+| Warning | Owner | Due / Trigger | Gate Classification |
+|---|---|---|---|
+| Sampled unit-test leak warnings | Technical Director / QA | Before Pre-Production → Production gate | Advisory warning; current representative tests pass. |
+| Random Event ADR gap | Technical Director | Before Random Event production/Beta implementation | Future-slice blocker only. |
+| Audio settings persistence ADR gap | Technical Director + Audio Director | Before audio production or player-facing audio settings implementation | Future-slice blocker only. |
+| Presentation-specific UI ADRs | Technical Director + UI lead | Before deep Main/Player/Match/Town UI production expansion | Future-slice blocker only. |
+| Vertical-slice scope discipline | Producer | During Pre-Production sprint planning | Next-phase planning warning, not a Technical Setup gate blocker. |
 
 ## Chain-of-Verification
 

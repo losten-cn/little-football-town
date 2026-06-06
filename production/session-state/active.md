@@ -1,8 +1,37 @@
 # Active Session State
 
-Task: Vertical slice implementation started for Pre-Production
-Date: 2026-05-30
-Pipeline: Pre-Production vertical slice — scope locked, user approved prototype directory creation and implementation start
+Task: MVP topology wave frozen with warnings
+Date: 2026-06-05
+Pipeline: Pre-Production with tracked warnings — prioritize convergence, topology-ordered task splitting, and parallel subagents for independent workstreams
+
+## Current Checkpoint — 2026-06-04
+
+- `docs/architecture/architecture.md` status header refreshed to Version 2.2 / 2026-06-04 after `/gate-check pre-production` found the old 2026-06-01 FAIL/Pending text stale.
+- Technical Setup → Pre-Production remains acceptable with CONCERNS: no hard blockers, representative headless test passed, control manifest covers ADR-0001 through ADR-0011, and warnings are scoped to future Random Event/Audio ADRs plus `TR-economy-008` / `TR-town-013` follow-up.
+- User preference confirmed: converge quickly, allow warnings, split work by dependency topology, and use subagents in parallel for independent tasks.
+- Recommended topology: L0/L1 are complete; run L2 PlayerMgmtUI and MatchPerfUI in parallel against the frozen `shell_main_content` route/container contract, then run L3 minimum onboarding guidance after both anchors stabilize.
+
+## Session Extract — Architecture convergence 2026-06-06
+
+- Artifact updated: `docs/architecture/architecture.md` now has refreshed System Layer Map, Module Ownership, Data Flow, API Boundaries, ADR Audit, and Required ADRs sections.
+- Phase 1-6 result: Foundation/Core topology is frozen with warnings; ADR-0001 through ADR-0011 remain accepted and cover scene/autoloads, EventBus/TimeManager, SaveManager, ConfigLoader, PlayerDevelopment, MatchCompetition, EconomyManager, TownBuilding, LeagueStructure, cross-system settlement contracts, and reputation/achievement recognition.
+- Key contracts recorded: single-writer authority, stable typed payload boundaries (`Dictionary[String, Variant]`, typed arrays, stable IDs), EventBus/save payloads with no Node/Resource/Object/Callable references, stable settlement-key idempotency, and stable save/load restore order.
+- No new Foundation/Core blocker ADRs are required before coding starts.
+- Warnings carried forward: Random Event ADR before Random Event production; Audio Settings Persistence ADR before audio settings/production audio; Presentation UI ADRs before deep Main/Player/Match UI production; `TR-economy-008` / `TR-town-013` traceability wording drift for the next `/architecture-review`.
+- Sign-off: TD-ARCHITECTURE self-review completed as APPROVED WITH CONDITIONS; LP-FEASIBILITY skipped per Lean mode; `architecture.md` Document Status updated to Version 2.3 / 2026-06-06.
+- L4 readiness update: `production/qa/evidence/ui-readiness-sprint-1.md` is now READY WITH WARNINGS for S1-5/S1-6, based on story-level evidence and MVP playtest handoff.
+- Automated visual walkthrough completed: `MVP_VISUAL_WALKTHROUGH_PASS` using `tests/integration/ui/mvp_visual_walkthrough_runner.gd`; screenshots reviewed from `C:/Users/kylin/AppData/Roaming/Godot/app_userdata/Football Town/mvp_visual_walkthrough`.
+- Playtest result evidence updated: `production/qa/evidence/mvp-playtest-result-2026-06-06.md` is PASS WITH WARNINGS for automated route-and-screenshot coverage; human clarity/fun playtest remains pending and is not replaced by automation.
+- Skill re-run evidence written: `production/qa/evidence/mvp-visual-walkthrough-2026-06-06.md` records the `/visual-walkthrough mvp` rerun, the exact command, screenshot review table, zero blockers, and carried warnings.
+- Next: move to L5 gate/readiness if route-level automation is sufficient for this milestone; otherwise run a human-observed clarity/fun playtest before L5. If blockers appear, fix only the smallest route-breaking slice.
+
+
+## Session Extract — Systems Design gate QA cleanup 2026-06-06
+
+- Result: PASS cleanup complete — Systems Design → Technical Setup gate documentation concerns were resolved.
+- Files changed: added missing MVP GDD review logs for Save/Load, Time/Season, Match Competition, League Competition, Main Loop UI, Player Management UI, Match Performance UI, and Onboarding; standardized `economy-management-system.md` and `town-building-system.md` from `## Detailed Design` to `## Detailed Rules`.
+- Verification: MVP review-log presence and required-section scan now pass; latest cross-GDD review remains `PASS WITH WARNINGS` and no active blocker verdicts remain for MVP gate purposes.
+- Next: Systems Design gate can now be reported as PASS; continue carrying playtest/prototype warnings into later phases.
 
 ## Pipeline Progress
 
@@ -56,13 +85,182 @@ Pipeline: Pre-Production vertical slice — scope locked, user approved prototyp
 
 ## Next Recommended Step
 
-Re-run `/review-all-gdds` to verify the 2026-05-31 blocker fixes, then decide whether to address remaining warnings as separate scoped tasks.
+Current MVP topology wave is frozen with warnings after automated visual walkthrough passed. Next, carry warnings forward and start the next production step; only reopen this wave for route-breaking hotfixes.
 
 <!-- STATUS -->
-Epic: Systems Design
-Feature: GDD Cross-Review Blocker Fixes
-Task: Blockers patched across MVP boundary, town-building consumers, match-day AP, and illegal-lineup fallback; awaiting `/review-all-gdds`
+Epic: MVP Topology Implementation
+Feature: MVP topology frozen with warnings
+Task: Choose next production step
 <!-- /STATUS -->
+
+## Session Extract — MVP visual walkthrough freeze 2026-06-05
+- Evidence written: `production/qa/evidence/mvp-visual-walkthrough-2026-06-05.md`.
+- Runner written: `tests/integration/ui/mvp_visual_walkthrough_runner.gd`.
+- Reusable skill written: `.claude/skills/visual-walkthrough/SKILL.md`; use `/visual-walkthrough mvp` for future visible Godot UI walkthrough and screenshot review gates.
+- Command: `"D:/Program Files/godot/Godot_v4.6.2-stable_win64_console.exe" --path "E:/code/little-football-town" --script res://tests/integration/ui/mvp_visual_walkthrough_runner.gd`.
+- Result: `MVP_VISUAL_WALKTHROUGH_PASS`; output dir `C:/Users/kylin/AppData/Roaming/Godot/app_userdata/Football Town/mvp_visual_walkthrough`.
+- Screenshots: 12 route/action PNGs covering Home, Roster, Player Detail, Training, Training Result, Home after training, disabled match reason, Match Pre, Match Live, Live timeline, Match Result, and final Home.
+- Blockers found: None.
+- Warnings carried: placeholder synced fields in Player Detail/Training, narrow pre-match text wrapping, roster sort/filter depth, Match Live/Halftime depth, league impact polish, final PlayerDevelopment UI read model, localization, onboarding persistence/cooldowns/replay/analytics, and anchor registry remain deferred.
+- Decision: Freeze MVP topology wave with warnings. Reopen only for route-breaking hotfixes, then rerun `/visual-walkthrough mvp` plus the failed route.
+
+## Session Extract — MVP playtest handoff 2026-06-05
+- Handoff written: `production/qa/evidence/mvp-playtest-handoff-2026-06-05.md`.
+- Scope: current MVP vertical slice only — `Home → Roster / Training → one training resolution → Match Pre → Match Live → Match Result → Home`.
+- Entering evidence: topology smoke and route sanity are both PASS WITH WARNINGS; A route passed `L2_PLAYABLE_LOOP_PANELS_TEST_PASS`; B route passed `MAIN_LOOP_SHELL_NAVIGATION_TEST_PASS`.
+- Playtest rule: 5 minutes per player; observer should not explain the route unless the player is blocked for more than 30 seconds.
+- Blocker policy: fix only crash/freeze/black screen, blank page, wrong route, blocked progress, missing required disabled-state text, authority gate errors, payload handoff failures, or inability to return Home.
+- Warnings preserved: roster sort/filter depth, Match Live/Halftime depth, league impact polish, final PlayerDevelopment UI read model, localization, onboarding persistence/cooldowns/replay/analytics, and anchor registry.
+- Next: run the human-observed playtest; if no blockers, freeze the MVP topology wave and carry warnings forward.
+
+## Session Extract — MVP route sanity gate 2026-06-05
+- Evidence written: `production/qa/evidence/mvp-route-sanity-2026-06-05.md`.
+- Scope: A route `Home → Roster → Player Detail → Training → Home`; B route `Home → Match Pre → Match Live → Match Result → Home`.
+- Result: PASS WITH WARNINGS.
+- Verification: A route passed with `L2_PLAYABLE_LOOP_PANELS_TEST_PASS`; B route passed with `MAIN_LOOP_SHELL_NAVIGATION_TEST_PASS` using Godot 4.6.2 console.
+- Blockers found: 0 implementation-breaking blockers in the current headless route sanity coverage.
+- Warnings carried: roster sort/filter depth, Match Live/Halftime command depth, league impact polish, final PlayerDevelopment UI read model, localization, onboarding persistence/cooldowns/replay/analytics, and anchor registry remain deferred.
+- Next: package vertical slice playtest handoff; only fix issues that break A/B route completion in a human-observed pass.
+
+## Session Extract — MVP topology smoke 2026-06-04
+- Evidence written: `production/qa/evidence/mvp-topology-smoke-2026-06-04.md`.
+- Scope: L0 LeagueStructure → L1 MainLoopShell → L2 PlayerMgmtUI / MatchPerfUI → L3 WhatNextGuidance.
+- Result: PASS WITH WARNINGS.
+- Verification: `WHAT_NEXT_GUIDANCE_TEST_PASS`, `L2_PLAYABLE_LOOP_PANELS_TEST_PASS`, `MAIN_LOOP_SHELL_NAVIGATION_TEST_PASS`, and `MINIMUM_LEAGUE_LOOP_TEST_PASS` using Godot 4.6.2 console.
+- Review inputs: QA smoke review found no new blockers; GDScript static review found no parse/type blockers after the MatchPerf authority fix.
+- Fix applied during smoke: `MatchPerfPanel.set_system_payload()` consumes system/navigation affordance payloads, `MainLoopShell` forwards `system_state_changed`, and the L2 regression asserts system-disabled pre-match start remains on `match_pre`.
+- Warnings carried: roster sort/filter depth, Match Live/Halftime command depth, league-impact polish, final PlayerDevelopment UI read model, onboarding persistence/cooldowns/replay/analytics, full localization key coverage, and anchor registry remain deferred.
+- Manual smoke recommended before playtest handoff: `Home → Roster → Player Detail → Training → Home → Match Pre → Match Live → Match Result → Home`; pass if no blank pages, wrong routes, blocking modals, or missing disabled-state text.
+- Next: package the vertical slice for playtest, or fix only implementation-breaking warnings found by the manual route sanity check.
+
+## Session Extract — L3 onboarding what-next guidance 2026-06-04
+- Files changed: `src/ui/onboarding/what_next_guidance.gd`, `src/ui/hud/main_loop_shell.gd`, `tests/integration/ui/what_next_guidance_test.gd`, `production/qa/evidence/onboarding-system-story-001-minimum-what-next-guidance.md`, `production/epics/onboarding-system/story-001-minimum-what-next-guidance.md`, `production/epics/index.md`, `production/session-state/active.md`.
+- Result: COMPLETE WITH WARNINGS — added a single non-modal `WhatNextGuidance` banner that follows Home/Roster/Training/Pre-Match/Result route context and hides after match result confirmation.
+- Behavior: first Home cue is `先看看球员` (≤25 chars); direct Training path is allowed; training completion advances toward Pre-Match; match availability copy follows `time_advanced.match_trigger_reached` and `match_center_available`; missing anchors fall back to text-only guidance.
+- Verification: `WHAT_NEXT_GUIDANCE_TEST_PASS`; regressions also passed with `L2_PLAYABLE_LOOP_PANELS_TEST_PASS`, `MAIN_LOOP_SHELL_NAVIGATION_TEST_PASS`, and `MINIMUM_LEAGUE_LOOP_TEST_PASS`.
+- Warnings carried: Match Live/Halftime guidance, persistence, cooldown, replay, analytics, full localization keys, and anchor registry remain deferred.
+- Next recommended: Run a focused smoke/regression sweep for the current MVP wave, then package the vertical slice for playtest or address only implementation-breaking warnings.
+
+## Session Extract — L2 PlayerMgmtUI + MatchPerfUI panels 2026-06-04
+- Files changed: `src/ui/player/player_mgmt_panel.gd`, `src/ui/match/match_perf_panel.gd`, `src/ui/hud/main_loop_shell.gd`, `tests/integration/ui/l2_playable_loop_panels_test.gd`, `production/qa/evidence/player-management-ui-story-001-roster-training-entry.md`, `production/qa/evidence/match-performance-ui-story-001-prematch-result-flow.md`, `production/epics/player-management-ui/story-001-roster-training-entry.md`, `production/epics/match-performance-ui/story-001-prematch-result-flow.md`, `production/epics/index.md`, `production/session-state/active.md`.
+- Result: COMPLETE WITH WARNINGS — L2 PlayerMgmtPanel and MatchPerfPanel mount into the frozen `shell_main_content` contract without changing route IDs.
+- Behavior: Player flow covers roster → player_detail → training handoff using authoritative `roster_updated` / `training_options_updated` payloads and request events only. Match flow covers match_pre → match_live → match_result → Home using `time_advanced`, `match_event_occurred`, `match_completed`, and `league_standings_updated` payloads.
+- Verification: `L2_PLAYABLE_LOOP_PANELS_TEST_PASS`; regressions also passed with `MAIN_LOOP_SHELL_NAVIGATION_TEST_PASS` and `MINIMUM_LEAGUE_LOOP_TEST_PASS`.
+- Warnings carried: full roster sort/filter controls, final PlayerDevelopment UI read model, full lineup/fallback package, `team_match_strength` labels, league impact delta, and halftime command contract remain future depth; current MVP uses low-noise placeholders rather than recomputing authority in UI.
+- Next recommended: Start L3 `production/epics/onboarding-system/story-001-minimum-what-next-guidance.md` to add minimum next-action guidance over the now-stable Home/Roster/Training/Pre-Match/Result anchors.
+
+## Session Extract — L1 MainLoop shell implementation 2026-06-03
+- Files changed: `src/ui/hud/main_loop_shell.gd`, `src/ui/hud/Hud.tscn`, `src/ui/hud/hud.gd`, `tests/integration/ui/main_loop_shell_navigation_test.gd`, `production/qa/evidence/main-loop-ui-framework-story-001-home-loop-navigation.md`, `production/epics/main-loop-ui-framework/EPIC.md`, `production/epics/main-loop-ui-framework/story-001-home-loop-navigation.md`, `production/epics/index.md`, `production/session-state/active.md`.
+- Result: COMPLETE — added `MainLoopShell` under HUD with frozen route IDs `home`, `roster`, `player_detail`, `training`, `match_pre`, `match_live`, `match_result`, and a single `shell_main_content` mount for L2 pages.
+- Behavior: `screen_requested` routes mount inside the shell; `match_result_confirmed`, `training_cancelled`, and `roster_cancelled` return to Home through `ScreenManager.reset_to_screen("home")`; Home displays only authoritative payload snapshots from `time_advanced`, `system_state_changed`, and `player_action_completed` without recomputing gameplay truth.
+- Verification: `MAIN_LOOP_SHELL_NAVIGATION_TEST_PASS` via `tests/integration/ui/main_loop_shell_navigation_test.gd`; L0 League regression also passed with `MINIMUM_LEAGUE_LOOP_TEST_PASS`.
+- Evidence: `production/qa/evidence/main-loop-ui-framework-story-001-home-loop-navigation.md` created with automated smoke and manual walkthrough notes.
+- Next recommended: Start L2 PlayerMgmtUI and MatchPerfUI in parallel; both should mount into `shell_main_content` and avoid altering route IDs or recomputing authoritative payloads.
+
+## Session Extract — L0 League implementation 2026-06-03
+- Files changed: `src/config/league_config.gd`, `config/league_config.tres`, `src/core/league_structure.gd`, `src/autoload/config_loader.gd`, `tests/integration/league/minimum_league_loop_test.gd`, `production/epics/league-competition-structure-system/EPIC.md`, `production/epics/league-competition-structure-system/story-001-minimum-league-loop.md`, `production/epics/index.md`, `production/session-state/active.md`.
+- Result: COMPLETE — L0 LeagueConfig/LeagueStructure and the minimum league loop integration test are in place and verified.
+- Verification: `"D:/Program Files/godot/Godot_v4.6.2-stable_win64_console.exe" --headless --path "E:/code/little-football-town" --script res://tests/test_script_runner.gd -- --test-script=res://tests/integration/league/minimum_league_loop_test.gd` passed with `MINIMUM_LEAGUE_LOOP_TEST_PASS`.
+- Fixes during verification: added explicit `LeagueConfig` preload in `LeagueStructure`, normalized the test's `time_season_ended` payload to `Dictionary[String, Variant]`, and removed the LeagueConfig integer-division warning.
+- Carry-forward warning: `SETTLEMENT` is currently an instantaneous internal transition to `COMPLETED`; keep it as acceptable for L0 unless a future story needs an observable settlement window.
+- Next recommended: Start L1 `production/epics/main-loop-ui-framework/story-001-home-loop-navigation.md`; L2 PlayerMgmtUI and MatchPerfUI should still wait for L1 route/container anchors.
+
+## Session Extract — MVP topology story planning 2026-06-03
+- Files changed: `production/epics/index.md`, `production/session-state/active.md`, plus 10 new planning files under `production/epics/league-competition-structure-system/`, `production/epics/main-loop-ui-framework/`, `production/epics/player-management-ui/`, `production/epics/match-performance-ui/`, and `production/epics/onboarding-system/`.
+- Result: COMPLETE WITH WARNINGS — created topology-ordered current-wave epics/stories for L0 LeagueStructure, L1 MainLoop shell, L2 PlayerMgmt/MatchPerf UI packages, and L3 minimum what-to-do-next guidance.
+- Topology: L0 League must freeze schedule/standings/next-match/settlement authority first; L1 MainLoop freezes route/container anchors next; L2 PlayerMgmtUI and MatchPerfUI can proceed in parallel after MainLoop contract; L3 onboarding waits for stable Home/Roster/Training/Pre-Match/Result anchors.
+- Blockers retained: League save registration, `match_context` contract closure, `MatchResultPacket` read-only boundary, typed shallow payloads, duplicate result/settlement dedup, and UI not recomputing authoritative payloads.
+- Warnings carried: Random Event and Audio remain future ADR gaps; `TR-economy-008`, `TR-town-013`, full Tutorial/Hint, full Town UI, deep schedule, complete sorting/filtering, and audio polish remain outside the current MVP wave.
+- Next recommended: Start `production/epics/league-competition-structure-system/story-001-minimum-league-loop.md` with `godot-gdscript-specialist`; do not start UI implementation until L0 contract blockers are closed or explicitly accepted for additive-only scope.
+
+## Session Extract — registry cleanup + RTM sync 2026-06-03
+- Files changed: `docs/architecture/tr-registry.yaml`, `docs/architecture/requirements-traceability.md`.
+- Result: COMPLETE WITH WARNINGS — fixed implementation-breaking registry wording drift and registered previously untracked designed systems without expanding gameplay scope.
+- Registry changes: `last_updated` is now `2026-06-03`; active TR count is now 201; `TR-save-013`, `TR-skill-001`, and `TR-skill-008` now align with ADR-0010/control-manifest settlement rules (`rule_version` metadata-only; evaluated + processed ledgers tracked).
+- New TR ranges: `TR-random-001`–`TR-random-008`, `TR-audio-001`–`TR-audio-006`, `TR-townui-001`–`TR-townui-007`, and `TR-tutorial-001`–`TR-tutorial-007`.
+- RTM sync: full-chain coverage is now 90/201 (44.8%); 14 registered `NO ADR` rows are Random Event and Audio future-system gaps; there are still 0 missing stated automated test paths.
+- Convergence posture: Warnings remain allowed. Random Event settlement and Audio settings require ADR coverage before Beta implementation; Town Management UI and Tutorial/Hint can wait until their Alpha/Polish story waves.
+- Next recommended: Proceed to implementation planning rather than more broad cleanup.
+
+## Session Extract — /architecture-review rtm 2026-06-03
+- File changed: `docs/architecture/requirements-traceability.md`.
+- Result: COMPLETE WITH WARNINGS — refreshed the full GDD → ADR → Story → Test RTM after the Control Manifest update.
+- Coverage: 173 active TR entries; 90 full-chain covered (52.0%); 2 story/test-backed partial ADR warnings (`TR-economy-008`, `TR-town-013`); 81 `NO STORY`; 0 missing stated automated test paths; 0 registered `NO ADR` rows.
+- Notes: Main gaps are unscheduled future work, not broken MVP evidence. Registry drift remains for Skill/Trait settlement key wording (`rule_version` must be metadata only), evaluated/processed settlement ledger wording, and unregistered Random Event / Audio / Town Management UI / Tutorial-Hint GDD contracts.
+- Convergence posture: Continue allowing warnings; block only implementation-breaking stable payload, save/load, or settlement contract gaps before the related implementation starts.
+- Next recommended: Focused registry cleanup before creating stories for Skill/Trait, Random Event, Audio settings, Town Management UI, or Tutorial-Hint implementation.
+
+## Session Extract — /create-control-manifest update 2026-06-03
+- File changed: `docs/architecture/control-manifest.md`.
+- Result: COMPLETE — refreshed the manifest from 11 Accepted ADRs (`ADR-0001` through `ADR-0011`), `.claude/docs/technical-preferences.md`, and Godot 4.6 engine reference docs.
+- Review mode: `lean`; TD-MANIFEST skipped per director-gate rules.
+- Notes: Manifest version is now `2026-06-03`; ADR coverage now includes cross-system payload/settlement contracts and Reputation/Achievement recognition rules, plus current Godot 4.6 forbidden APIs and the custom headless runner test policy.
+- Convergence posture: User wants fast convergence and allows warnings; continue to treat warnings as trackable unless they break implementation or stable payload/save/settlement contracts.
+- Next recommended: Run `/architecture-review rtm`.
+
+## Session Extract — /architecture-review 2026-06-03
+- Report written: `docs/architecture/architecture-review-2026-06-03.md`.
+- Verdict: CONCERNS — no Godot 4.6 engine blocker and no blocking accepted-ADR dependency cycle, but architecture artifacts still lag behind 2026-06-03 GDD/registry contract convergence.
+- Requirements focus: Reviewed high-risk contracts from the registry; `match_result_packet` is covered, `forfeit_result_packet`, `pre_match_skill_trait_snapshot`, `pending_skill_trait_feedback`, `feedback_ack`, `match_context`, and reputation settlement keys remain partial, while Random Event settlement keys and Audio settings fields are architecture gaps until their implementation phases.
+- GDD revision flags: None.
+- Top follow-ups: refresh `control-manifest.md` beyond ADR-0009; update `architecture.md` stale FAIL/Pending status and coverage wording; use `/architecture-review rtm` for full production traceability after ADR cleanup.
+- Next recommended: Run `/create-control-manifest update`, then `/architecture-review rtm`.
+
+## Session Extract — payload registry coverage cleanup 2026-06-03
+- Files changed: `design/registry/entities.yaml`.
+- Fixes completed: Added a `contracts` registry section and registered 11 high-risk cross-system payload/durable-state/settlement contracts: `match_context`, `match_result_packet`, `forfeit_result_packet`, `pre_match_skill_trait_snapshot`, `pending_skill_trait_feedback`, `feedback_ack`, `event_settlement_key`, `processed_event_settlement_keys`, `reputation_settlement_key`, `processed_reputation_settlement_keys`, and `audio_settings_fields`.
+- Verification: Lightweight structure check passed with `REGISTRY_CONTRACTS_CHECK_PASS 11`; `contracts` appears before `formulas`, all expected entries are present, and there are no duplicate contract names.
+- Notes: No gameplay scope was expanded and no code/tests were run; this was registry/traceability cleanup for existing cross-system contracts.
+- Remaining warnings: match-strength terminology normalization and playtest/prototype validation risks remain follow-up items, not GDD blockers.
+- Next recommended: Proceed toward Technical Setup / architecture planning with warnings tracked.
+
+## Session Extract — cross-feature contract cleanup 2026-06-03
+- Files changed: `design/gdd/reputation-and-achievement-system.md`, `design/gdd/systems-index.md`, `design/gdd/match-competition-system.md`, `design/gdd/league-competition-structure-system.md`.
+- Fixes completed: Closed Random Event → Reputation/Achievement receiving contract by adding random-event confirmed fact intake, safe no-op for unmapped `effect_request_type`, `event_settlement_key`-based reputation de-duplication, and acceptance criteria. Clarified Match ↔ League as a packet contract: `league -> match_context` before kickoff and `match -> match_result_packet` after final result, with no concrete runtime mutual state ownership.
+- Notes: No design scope was expanded and no code/tests were run; this was warning/flag cleanup to reduce implementation ambiguity.
+- Remaining warnings: non-formula payload registry coverage is still incomplete; facilities-first, Alpha attention budget, fallback-frequency, and town-identity risks remain playtest/prototype validation items rather than GDD blockers.
+- Next recommended: Either add highest-risk non-formula registry entries, or proceed toward Technical Setup / architecture planning with warnings tracked.
+
+## Session Extract — scoped warning cleanup 2026-06-03
+- Files changed: `design/gdd/audio-system.md`, `design/gdd/player-development-system.md`, `design/gdd/town-management-ui.md`, `design/registry/entities.yaml`, `design/gdd/main-loop-ui-framework.md`, `design/gdd/town-building-system.md`.
+- Fixes completed: Synced remaining obvious GDD header/status drift for Audio, Player Development, and Town Management UI; updated registry `training_actual_gain` to include `skill_training_multiplier` and `skill-and-trait-system.md` as a reference; assigned minimal audio Settings/Options UI container ownership to Main Loop UI without moving audio field semantics; added Town Building → Audio downstream dependency for construction/upgrade feedback events.
+- Notes: No design scope was expanded and no code/tests were run; this was implementation-ambiguity cleanup for existing warnings/flags.
+- Remaining warnings: non-formula payload registry coverage is still incomplete; Random Event → Reputation/Achievement receiving contract remains a scoped warning/flag; match/league packet wording and playtest validation risks remain follow-up items.
+- Next recommended: If continuing cleanup, address match/league contract wording and highest-risk non-formula registry entries; otherwise proceed toward Technical Setup / architecture planning with warnings tracked.
+
+## Session Extract — GDD tracking cleanup 2026-06-03
+- Files changed: `design/gdd/gdd-cross-review-2026-06-03.md`, `design/gdd/systems-index.md`.
+- Fixes completed: Renumbered Warning / Flag Items in the 2026-06-03 global review; replaced residual “scoped blocker” scenario and gate wording with scoped warning/flag language; updated Recommended Next GDD from already-approved Audio to `多周目与挑战模式系统`, with `商业化与 DLC 规划系统` as the following not-started item.
+- Notes: No design scope was expanded; this was tracking/report cleanup to match the user-approved convergence posture.
+- Next recommended: Continue scoped warning cleanup only where it reduces implementation ambiguity: sync remaining GDD headers, update `training_actual_gain` in the registry, assign minimal audio settings UI ownership, and add town-building → audio downstream back-reference.
+
+## Session Extract — skill-and-trait lean re-review 2026-06-03
+- Target: `design/gdd/skill-and-trait-system.md` and `design/gdd/reviews/skill-and-trait-system-review-log.md`.
+- Verdict: APPROVED WITH WARNINGS — prior 2026-06-02 NEEDS REVISION blockers are accepted as resolved under the convergence posture.
+- Files changed: `design/gdd/skill-and-trait-system.md`, `design/gdd/systems-index.md`, `design/gdd/reviews/skill-and-trait-system-review-log.md`.
+- Fixes completed: Synchronized Skill & Trait status to Approved in the GDD header and both systems-index tables; appended a lean re-review entry documenting 0 blockers and 4 warnings/flags.
+- Remaining warnings: UI optimization pressure needs playtest validation; high-risk non-formula payload contracts are not yet represented in the global registry; implementation must preserve typed payload boundaries and add regression coverage for stable keys, snapshot companions, feedback lifecycle, and partial-commit rejection.
+- Next recommended: Continue status/report cleanup before implementation: fix stale cross-review wording/numbering, sync other GDD headers, update the recommended next GDD, then address registry/audio/town-building warning items as scoped follow-ups.
+
+## Session Extract — /review-all-gdds 2026-06-03
+- Report written: `design/gdd/gdd-cross-review-2026-06-03.md`.
+- Scope: Full global GDD review after Audio approval and related Alpha/Beta system design additions, covering cross-GDD consistency, holistic design review, and key multi-system scenario walkthroughs.
+- Verdict: PASS WITH WARNINGS — Systems Design may continue toward Technical Setup / architecture planning, with no project-blocking items.
+- Scoped warning/flag: `random-event-system.md` can emit confirmed event facts for reputation/achievement consumption, but `reputation-and-achievement-system.md` does not yet define the receiving contract. Track before implementing that specific cross-feature hook, or explicitly scope it out; do not block global GDD convergence on it.
+- Main warnings: GDD header/status and `systems-index.md` next-GDD drift; stale `training_actual_gain` registry entry missing `skill_training_multiplier`; empty non-formula registry contracts; audio settings entry ownership split across Audio/Save/Main UI; town-building lacks audio downstream back-reference; match/league should be phrased as packet contract exchange; facilities-first, Alpha attention budget, and fallback-frequency risks need validation.
+- Notes: No code or tests were run; this was a design-document consistency and scenario review pass. User explicitly prefers warnings/flags for convergence unless a gap breaks implementation or core contracts.
+- User choice: Wrote the PASS WITH WARNINGS report and updated session state.
+- Next recommended: Resolve or scope out Random Event → Reputation/Achievement recognition, then sync status tracking and update the registry before implementation relies on those contracts.
+
+## Session Extract — /review-all-gdds 2026-06-01
+- Report written: `design/gdd/gdd-cross-review-2026-06-01.md`.
+- Scope: Re-review after blocker-repair and skill/trait patch alignment, covering cross-GDD consistency, holistic design review, and key multi-system scenario walkthroughs.
+- Verdict: PASS WITH CONCERNS — Systems Design may proceed to Technical Setup / architecture planning.
+- Blockers closed: `match_day_ap_safety_grant` now aligns across time, economy, UI, and onboarding; illegal lineup fallback is closed through recommended lineup, out-of-position fill, or `forfeit_result_packet`; town-building MVP outputs are compressed to consumed contracts; skill/trait long-term state is fully carried by save/load; skill/trait UI consumption is closed through snapshot, feedback, candidate visibility, and identity-history contracts.
+- Remaining concerns: match-strength terminology should be normalized between balance and match layers before implementation; `design/registry/entities.yaml` still lacks non-formula ownership entries for active payload contracts; economy soft-stall is formally recoverable but still needs feel validation; town-building facility attractiveness may still skew toward training-first choices.
+- Notes: No code or tests were run; this was a design-document consistency and scenario review pass.
+- User choice: Wrote the PASS WITH CONCERNS report file and did not update `systems-index.md` in the same step.
+- Next recommended: Begin Technical Setup / architecture planning and track the remaining warnings as targeted follow-up work.
 
 ## Session Extract — GDD blocker repair 2026-05-31
 - Source report: `design/gdd/gdd-cross-review-2026-05-31.md` — verdict was FAIL pending blocker fixes.
@@ -70,6 +268,16 @@ Task: Blockers patched across MVP boundary, town-building consumers, match-day A
 - Fixes completed: MVP now includes a tightly scoped town-building slice; complete building UI/deep layout remains Alpha; core dependency direction no longer depends on Presentation UI; town-building MVP outputs are limited to consumed contracts; match-day AP deadlock is resolved via `match_day_ap_safety_grant`; illegal lineup fallback resolves through recommended lineup, out-of-position fill, or `forfeit_result_packet`.
 - Notes: No code or tests were run; this was a design-document consistency pass. Remaining review warnings should be split into follow-up tasks rather than bundled into this blocker repair.
 - Next recommended: Re-run `/review-all-gdds`; if PASS or PASS WITH CONCERNS, continue with scoped warning cleanup or Technical Setup planning.
+
+## Session Extract — /review-all-gdds skill-trait patch 2026-05-31
+- Report written: `design/gdd/gdd-cross-review-2026-05-31-skill-trait-patch.md`.
+- Scope: Full global GDD re-review after the skill-and-trait targeted patch, including cross-GDD consistency, holistic design review, and multi-system scenario walkthrough.
+- Verdict: FAIL — Systems Design should not advance to Technical Setup until blockers are resolved or explicitly accepted.
+- Blockers originally: town-building still competes for primary progression; pre-match attention budget remains overloaded; economic soft-stall recovery is not proven; skill-system long-term state is not fully carried by save/load; skill-system UI consumption contract is incomplete.
+- Resolved in this repair pass: #49 caps Match Pre active decisions at 4 and demotes AP/facility/skill/league/growth context to automatic or read-only summary; #50 compresses town-building MVP into a minimum visible support slice with no numeric adjacency, no facility AP recovery, no stadium revenue multiplier, `facility_training_multiplier` capped at 1.35, and `home_advantage_bonus` capped at 5; #51 proves economic soft-stall recovery through formal match progression, loss income, season bottom bonus, and `season_recovery_floor_grant` that tops up only to `minimum_regular_funds_action_cost` after season settlement; #52 closes the skill/trait UI consumption contract by defining Player Detail candidate stages, blocked reasons, identity history, feedback ack behavior, Match Pre read-only snapshots, and Match Result skill/trait explanations; #53 closes the skill/trait save-load contract by adding field-level persistence for `candidate_progress_record`, `trait_cooldown_state`, `feedback_ack`, `player_identity_history_entry`, `skill_trait_migration_record`, stable settlement keys, and illegal half-settlement restore prevention.
+- Still pending: No known blockers from the skill-trait patch review; needs `/review-all-gdds` verification.
+- User choice: Wrote a new report file and did not update `systems-index.md` for the FAIL verdict.
+- Next recommended: Re-run `/review-all-gdds` to verify blocker closure.
 
 ## Session Extract — /dev-story 2026-05-25
 - Story: `production/epics/balance-system/story-001-balance-config-validation.md` — Story 001: 定义 BalanceConfig 数据资源与启动校验

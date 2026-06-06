@@ -2,14 +2,14 @@
 
 ## Document Status
 
-- **Version**: 2.0
-- **Last Updated**: 2026-05-17
+- **Version**: 2.3
+- **Last Updated**: 2026-06-06
 - **Engine**: Godot 4.6 + GDScript
-- **GDDs Covered**: game-concept.md, systems-index.md, balance-system.md, time-and-season-progression-system.md, save-and-load-system.md, player-development-system.md, match-competition-system.md, economy-management-system.md, town-building-system.md, league-competition-structure-system.md, main-loop-ui-framework.md, player-management-ui.md, match-performance-ui.md, onboarding-system.md
-- **ADRs Referenced**: ADR-0001 through ADR-0009 (full Foundation + Core set)
-- **Architecture Review**: CONCERNS verdict (2026-05-17) — 0 gaps, 1 resolved conflict
-- **Technical Director Sign-Off**: Pending
-- **Lead Programmer Feasibility**: Skipped (Lean mode)
+- **GDDs Covered**: game-concept.md, systems-index.md, balance-system.md, time-and-season-progression-system.md, save-and-load-system.md, player-development-system.md, match-competition-system.md, economy-management-system.md, town-building-system.md, league-competition-structure-system.md, main-loop-ui-framework.md, player-management-ui.md, match-performance-ui.md, onboarding-system.md, skill-and-trait-system.md, reputation-and-achievement-system.md
+- **ADRs Referenced**: ADR-0001 through ADR-0011 (Foundation + Core set with cross-system payload contract layer plus reputation/achievement recognition)
+- **Architecture Review**: CONCERNS verdict (2026-06-03) — no Godot 4.6 engine blocker and no Foundation/Core hard gap; remaining gaps are future Random Event, Audio, and Presentation ADR coverage before their production work
+- **Technical Director Sign-Off**: 2026-06-06 — APPROVED WITH CONDITIONS (Foundation/Core covered; Feature/Presentation warning ADRs carried forward)
+- **Lead Programmer Feasibility**: Skipped — Lean mode
 
 ## Engine Knowledge Gap Summary
 
@@ -27,415 +27,276 @@ All MEDIUM risk domains are addressable via engine reference docs. No HIGH risk 
 
 ## System Layer Map
 
+The architecture is ordered by dependency topology. Foundation and Core are implementation-blocking. Feature and Presentation gaps may be carried as warnings unless they affect the active implementation slice.
+
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  PRESENTATION LAYER                                      │
-│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐     │
-│  │ MainLoopUI   │ │PlayerMgmtUI  │ │MatchPerfUI   │     │
-│  │(screen stack)│ │(list/detail) │ │(pre/live/result)│  │
-│  └──────┬───────┘ └──────┬───────┘ └──────┬───────┘     │
-│         │                │                │              │
-│  ┌──────┴────────────────┴────────────────┴───────┐     │
-│  │              Onboarding (Polish)                │     │
-│  └────────────────────────────────────────────────┘     │
+│  PRESENTATION / POLISH LAYER                            │
+│  MainLoopUI • PlayerMgmtUI • MatchPerfUI                │
+│  TownMgmtUI [Alpha] • Onboarding • TutorialHint [Alpha] │
 ├─────────────────────────────────────────────────────────┤
-│  FEATURE LAYER                                           │
-│  ┌──────────────────────────────────────────────┐       │
-│  │         League & Competition Structure        │       │
-│  │    (standings, promotion, season schedule)    │       │
-│  └──────────────────────┬───────────────────────┘       │
+│  FEATURE CONTRACT LAYER                                 │
+│  LeagueStructure • SkillTraitSystem • ReputationAch     │
+│  RandomEvent [WARNING: ADR gap] • Audio [WARNING: ADR]  │
 ├─────────────────────────────────────────────────────────┤
-│  CORE LAYER                                              │
-│  ┌────────────┐ ┌────────────┐ ┌────────────┐          │
-│  │PlayerDev   │ │MatchComp   │ │Economy     │          │
-│  │(training,  │ │(simulation,│ │(funds/AP/  │          │
-│  │ growth)    │ │ events)    │ │ RP)        │          │
-│  └─────┬──────┘ └─────┬──────┘ └─────┬──────┘          │
-│        │              │              │                   │
-│  ┌─────┴──────────────┴──────────────┴──────┐           │
-│  │           Town Building                   │           │
-│  │    (facilities, grid, adjacency)          │           │
-│  └────────────────────┬─────────────────────┘           │
+│  CORE LAYER                                             │
+│  TownBuilding • PlayerDevelopment                       │
+│  MatchCompetition • EconomyManager                      │
 ├─────────────────────────────────────────────────────────┤
-│  FOUNDATION LAYER (Autoload Singletons)                  │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐  │
-│  │Config    │ │TimeMgr   │ │SaveMgr   │ │EventBus  │  │
-│  │(balance) │ │(calendar)│ │(persist) │ │(signals) │  │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘  │
-│  ┌──────────────────────────────────────────────┐       │
-│  │             ScreenManager                     │       │
-│  └──────────────────────────────────────────────┘       │
+│  FOUNDATION LAYER                                       │
+│  ConfigLoader / BalanceConfig • EventBus                │
+│  TimeManager • SaveManager • ScreenManager              │
 ├─────────────────────────────────────────────────────────┤
-│  PLATFORM LAYER                                          │
-│  Godot 4.6 + GDScript + Compatibility Renderer           │
-│  PC (Windows/Linux) — Keyboard/Mouse                     │
+│  PLATFORM LAYER                                         │
+│  Godot 4.6 • GDScript • Compatibility Renderer          │
+│  PC (Windows/Linux) • Keyboard/Mouse                    │
 └─────────────────────────────────────────────────────────┘
 ```
 
 ### Layer Assignments
 
-| System | GDD | Layer | Rationale |
-|--------|-----|-------|-----------|
-| 数值系统 | balance-system.md | Foundation (ConfigLoader Autoload) | Shared formula constants and tuning data — read-only, loaded at startup |
-| 存档与读档 | save-and-load-system.md | Foundation (SaveManager Autoload) | Unified persistence boundary — all systems register serialize/deserialize |
-| 时间与赛季推进 | time-and-season-progression-system.md | Foundation (TimeManager Autoload) | Global clock — only authority for time advancement and key node scheduling |
-| EventBus | (ADR-0001) | Foundation (Autoload) | Global signal routing — all cross-system communication |
-| ScreenManager | (ADR-0001) | Foundation (Autoload) | Screen stack + lifecycle — all UI navigation |
-| 运动员培养 | player-development-system.md | Core | Player growth authority — consumes Foundation, produces player state |
-| 比赛竞技 | match-competition-system.md | Core | Match simulation authority — consumes player state, produces result packets |
-| 经济管理 | economy-management-system.md | Core | Resource transaction authority — only writer of funds/AP/RP |
-| 小镇建设 | town-building-system.md | Core | Facility grid authority — produces multipliers consumed by other Core systems |
-| 联赛与赛事 | league-competition-structure-system.md | Feature | Season competition structure — consumes match results, produces standings |
-| 主循环 UI | main-loop-ui-framework.md | Presentation | Screen containers and navigation — consumes EventBus events |
-| 球员管理 UI | player-management-ui.md | Presentation | Player list/detail display — read-only consumer |
-| 比赛表现 UI | match-performance-ui.md | Presentation | Match visual presentation — event-driven display |
-| 新手引导 | onboarding-system.md | Polish | Guided onboarding — consumes UI anchor IDs |
+| System / Module | Source | Layer | Owns Exclusively | Boundary Rule |
+|---|---|---|---|---|
+| Godot Platform | technical-preferences.md | Platform | Engine API surface, renderer, file system, input primitives | Project must explicitly use the Compatibility renderer for pixel-art 2D instead of relying on Windows D3D12 defaults. |
+| 数值系统 / ConfigLoader | balance-system.md, ADR-0004 | Foundation | Formula constants, tuning tables, config validation | Core systems read validated config; gameplay values are not hardcoded in `src/`. |
+| EventBus | ADR-0002 | Foundation | Cross-system signal/event routing | Transmits serializable payloads only; no UI/Core object references cross this boundary. |
+| 时间与赛季推进 / TimeManager | time-and-season-progression-system.md, ADR-0002 | Foundation | Timeline position, phase state, match triggers, stable settlement windows | Downstream systems react to scheduled nodes; they do not create competing clocks. |
+| 存档与读档 / SaveManager | save-and-load-system.md, ADR-0003 | Foundation | Save slots, version validation, migration, atomic snapshot orchestration | Only stable durable state is saved; half-match and half-settlement runtime state is rejected or delayed. |
+| ScreenManager | main-loop-ui-framework.md, ADR-0001 | Foundation | Screen stack, scene transitions, active screen ID | Presentation navigation goes through ScreenManager; gameplay systems never push screens directly. |
+| 小镇建设 / TownBuilding | town-building-system.md, ADR-0008 | Core | Facility grid, facility state, construction progress, MVP facility outputs | MVP hard outputs are only `facility_training_multiplier`, `facility_total_maintenance`, and `home_advantage_bonus`. |
+| 运动员培养 / PlayerDevelopment | player-development-system.md, ADR-0005 | Core | Player roster, attributes, growth history, training authority | Consumes config/time/town read models; outputs typed player and training payloads. |
+| 比赛竞技 / MatchCompetition | match-competition-system.md, ADR-0006 | Core | Match state, lineup validation, simulation, result packet authority | Consumes `match_context` and pre-match snapshots; emits `match_result_packet` or `forfeit_result_packet`. |
+| 经济管理 / EconomyManager | economy-management-system.md, ADR-0007 | Core | Funds, research, AP, transaction ledger, settlement grants | Only writer of resource balances; other systems submit requests or confirmed result packets. |
+| 联赛与赛事 / LeagueStructure | league-competition-structure-system.md, ADR-0009 | Feature Contract | Schedule, standings, promotion/relegation, season tags | Provides `match_context`; consumes confirmed match packets only. |
+| 技能与特性 / SkillTraitSystem | skill-and-trait-system.md, ADR-0010 | Feature Contract | Skill/trait durable outcomes, immutable pre-match read model, feedback lifecycle | Uses stable IDs and typed shallow payloads; no live Resource/Node references in durable contracts. |
+| 声望与成就 / ReputationAchievementSystem | reputation-and-achievement-system.md, ADR-0011 | Feature Contract | Reputation state, achievement state, evaluated/processed reward ledgers | Consumes confirmed settlement facts; repeated settlement keys are idempotent no-ops. |
+| 随机事件 / RandomEventSystem | random-event-system.md | Feature Contract | Pending event instance, event history, cooldowns, settlement keys | Warning carried: requires ADR before Random Event production work; not blocking Foundation/Core convergence. |
+| 音频 / AudioSystem | audio-system.md | Feature Contract / Presentation Support | Audio settings, playback cooldowns, event-to-cue mapping | Warning carried: requires ADR before Audio production work; cues must consume stable events, not infer gameplay truth. |
+| 主循环 UI / MainLoopUI | main-loop-ui-framework.md | Presentation | Main shell containers, route vocabulary, `screen_id` / `anchor_id` registry | Presentation consumes read models and owns visual sequencing, not gameplay truth. |
+| 球员管理 UI / PlayerManagementUI | player-management-ui.md | Presentation | Roster/detail display state and player UI anchors | Reads PlayerDevelopment and SkillTrait payloads; does not recompute eligibility or effects. |
+| 比赛表现 UI / MatchPerformanceUI | match-performance-ui.md | Presentation | Pre-match/live/result display state and match UI anchors | Reads match packets and snapshots; does not recompute match results or skill triggers. |
+| 建设与经营 UI / TownManagementUI | town-management-ui.md | Presentation [Alpha] | Town view, budget preview display, facility anchors | Sends requests to Town/Economy/Time; does not deduct funds or mutate facilities directly. |
+| 新手引导 / OnboardingSystem | onboarding-system.md | Polish / Presentation Support | Onboarding step state and completion markers | Targets stable MainLoop anchors; missing anchors degrade to text guidance rather than blocking navigation. |
+| 教程与提示 / TutorialHintSystem | tutorial-and-hint-system.md | Polish / Presentation Support [Alpha] | Hint cooldowns, seen records, contextual help state | Hints trigger only in stable UI windows after core feedback. |
+
+### Engine Awareness for Foundation/Core
+
+| Domain | Risk | Applies To | Required Handling |
+|---|---|---|---|
+| GDScript typed containers and Resources | HIGH | SaveManager, EventBus, all Core payload APIs | Stable contracts use `Dictionary[String, Variant]` / typed arrays; untyped runtime containers are normalized before entering typed APIs. |
+| FileAccess return values | MEDIUM | SaveManager | Godot 4.4+ `FileAccess.store_*` returns `bool`; save implementations must check write success instead of assuming void success. |
+| UI dual-focus | HIGH | ScreenManager and Presentation consumers | Mouse and keyboard focus must be tested separately; focus behavior is not assumed from pre-4.6 Godot knowledge. |
+| Rendering backend | HIGH | Platform, MainLoopUI, Town UI | Compatibility renderer must be explicit for the 2D pixel-art management sim; Windows D3D12 default is not the desired baseline. |
+| Tile map API | LOW/MEDIUM | TownBuilding if tile rendering is adopted | Use `TileMapLayer`, never deprecated `TileMap`. |
+
+### Warnings Carried Forward
+
+- Random Event ADR gap is tracked and must be closed before Random Event production work.
+- Audio ADR gap is tracked and must be closed before Audio production work.
+- Presentation-specific ADRs for Main/Player/Match/Town UI are tracked and must be closed before deep UI production expansion.
+- Requirements traceability and old story/architecture wording drift are cleanup warnings, not blockers for this topology convergence pass.
 
 ## Module Ownership
 
-### Foundation Layer — Autoload Singletons
+All exposed gameplay payloads that cross module boundaries must use stable scalar values, stable IDs, `Dictionary[String, Variant]`, and typed arrays. UI modules may copy these into local view models, but they do not own or recompute gameplay truth.
 
-| Module | Owns | Exposes | Consumes | Engine APIs |
-|--------|------|---------|----------|-------------|
-| ConfigLoader | All tuning values, formula constants, data tables (.tres Custom Resources) | `get_balance(key)`, `get_formula_constant(key)`, `get_table(path)` | None (self-sufficient) | `ResourceLoader.load()` |
-| TimeManager | Timeline position, phase state, season progress, key node scheduling | `signal phase_changed`, `signal match_triggered`, `signal season_ended`, `get_state()` | None (consumed by downstream) | `Node` (Autoload) |
-| SaveManager | Serialization/deserialization, version migration, save slot management | `save(slot)`, `load(slot)`, `signal save_completed`, `get_save_metadata()` | TimeManager (node state), ScreenManager (UI position), all Core `serialize()/deserialize()` | `FileAccess`, `ResourceSaver`, `ResourceLoader` |
-| EventBus | Global signal routing, event priority queue | `emit(event, payload)`, `subscribe(event, callable)`, `signal event_fired` | None | `Signal` (Godot native) |
-| ScreenManager | Screen stack, lifecycle callback orchestration | `push_screen(path, data)`, `pop_screen()`, `replace_screen(path, data)`, `get_active_screen_id()` | EventBus (cross-screen communication) | `PackedScene.instantiate()`, `Node.add_child()`, `queue_free()` |
+### Foundation Layer
 
-### Core Layer — Gameplay Systems
+| Module | Owns | Exposes | Consumes | Engine APIs / Risk |
+|---|---|---|---|---|
+| ConfigLoader / BalanceConfig | `.tres` configuration, formula constants, tuning tables, configuration validation | `get_config(id)`, `get_formula_constant(key)`, `validate_all()` | None | `ResourceLoader`, `Resource`; Resource typed boundaries are HIGH risk under post-cutoff GDScript/resource rules. |
+| EventBus | Cross-system event queue, event priority, subscription registry | `emit_event(event_id, payload)`, `subscribe(event_id, callable)` | None | Godot `Signal`; string-based `connect()` is forbidden. |
+| TimeManager | Timeline, phase state, season progress, stable settlement windows, match triggers | `advance_day()`, `get_time_state()`, `match_triggered`, `phase_changed` | ConfigLoader, EventBus | `Node` autoload; game logic is node-event driven, not per-frame. |
+| SaveManager | Save slots, version validation, migration, atomic snapshots, restore order | `save(slot)`, `load(slot)`, `get_save_metadata()`, `register_system()` | TimeManager, ScreenManager, all authority systems | `FileAccess`, `ResourceSaver`, `ResourceLoader`; Godot 4.4+ FileAccess write return values must be checked. |
+| ScreenManager | Screen stack, current `screen_id`, scene transition lifecycle | `push_screen()`, `replace_screen()`, `get_active_screen_id()` | EventBus | `PackedScene.instantiate()`, `Node.add_child()`, `queue_free()`; UI dual-focus is HIGH risk in Godot 4.6. |
 
-| Module | Owns | Exposes | Consumes | Engine APIs |
-|--------|------|---------|----------|-------------|
-| PlayerDevelopment | Player current attributes, training efficiency, growth history, potential bands, training project data | `get_player_state(id)`, `train(player_id, project)`, `signal training_completed`, `signal milestone_reached` | TimeManager (action windows), ConfigLoader (formula constants), SaveManager (persistence), TownBuilding (`facility_training_multiplier`) | `Resource` (data tables) |
-| MatchCompetition | Match state machine, lineup/tactics, key event stream, result packet | `start_match(home, away, context)`, `signal match_event`, `signal match_completed(result_packet)`, `get_match_state()` | PlayerDevelopment (player abilities), TimeManager (match trigger), TownBuilding (`facility_rating_bonus`), ConfigLoader (win probability parameters) | `Node` (state machine) |
-| EconomyManager | Funds/AP/RP balances, transaction ledger, settlement formulas, warning thresholds | `get_balances()`, `preview_cost(action)`, `execute_transaction(tx)`, `signal balance_changed`, `signal warning_triggered` | MatchCompetition (result packet → reward calc), LeagueStructure (season bonus labels), TownBuilding (maintenance, revenue multipliers), ConfigLoader (resource formulas), SaveManager (persistence) | `Resource` |
-| TownBuilding | Facility grid (5×5), construction progress, adjacency calculation, facility effect multipliers | `get_facility_multipliers()`, `build(x, y, facility_type)`, `signal facility_completed`, `signal grid_changed` | EconomyManager (resource sufficiency validation), TimeManager (construction duration), ConfigLoader (facility data tables), SaveManager (persistence) | `TileMapLayer` (2D grid render, if used) |
-| LeagueStructure | Standings table, match schedule, league tiers, promotion/relegation rules | `get_standings()`, `record_result(match_packet)`, `signal standings_updated`, `signal promotion_triggered` | MatchCompetition (result packet), TimeManager (season nodes), ConfigLoader (league parameters) | `Resource` |
+### Core Layer
 
-### Presentation Layer — UI Modules
+| Module | Owns | Exposes | Consumes | Engine APIs / Risk |
+|---|---|---|---|---|
+| TownBuilding | 5×5 grid, facility type/level/state/duration, MVP facility outputs | `get_facility_training_multiplier()`, `get_facility_total_maintenance()`, `get_home_advantage_bonus()`, `request_build()` | Economy authorization, TimeManager, ConfigLoader | Pure data plus optional Control rendering; use `TileMapLayer` if tile rendering is adopted. |
+| PlayerDevelopment | Roster, player attributes, potential, training history, confirmed growth facts, player status | `get_player_state()`, `train_player()`, `get_roster_view_payload()` | TimeManager, TownBuilding read model, ConfigLoader, SkillTrait read model | `Resource` data tables; typed payload boundaries are HIGH risk. |
+| MatchCompetition | Match state machine, lineup legality, simulation, `match_result_packet`, `forfeit_result_packet` | `start_match(match_context)`, `simulate_match()`, `get_match_result_packet()` | PlayerDevelopment, TownBuilding, League match context, pre-match snapshot | Formula/RNG pipeline; UI must not recompute match results. |
+| EconomyManager | Funds, research, AP, transaction ledger, resource preview, AP safety grant, recovery floor | `preview_cost()`, `execute_transaction()`, `apply_match_settlement()`, `get_balances()` | Match result packet, Town maintenance, League season tags, ConfigLoader | `Resource` ledger; idempotency keys must be stable. |
 
-| Module | Owns | Exposes | Consumes | Engine APIs |
-|--------|------|---------|----------|-------------|
-| MainLoopUI | Home/Roster/Match/SaveLoad containers, navigation rules, refresh triggers | Container placeholders, `refresh_trigger(screen_id)` | ScreenManager (navigation), EventBus (data update events), ConfigLoader (UI parameters) | `Control`, `Container` nodes |
-| PlayerMgmtUI | Player list/detail/sort/filter display state | Display anchor IDs (for onboarding targeting) | EventBus (player data changes), PlayerDevelopment (read-only queries) | `Control`, `ItemList`, scroll containers |
-| MatchPerfUI | Pre-match/live/post-match container UI state | Display anchor IDs, event display pacing control | EventBus (match event stream, final whistle signal), LeagueStructure (standings context) | `Control`, `AnimationPlayer`, `Timer` |
-| Onboarding | Onboarding step state, completed step markers | Anchor targeting requests | ScreenManager (screen switching), all UI anchor IDs | `Control` (overlay) |
+### Feature Contract Layer
+
+| Module | Owns | Exposes | Consumes | Engine APIs / Risk |
+|---|---|---|---|---|
+| LeagueStructure | Schedule, standings, promotion/relegation, season tags, `match_context` | `get_next_match_context()`, `record_result_packet()`, `get_standings_payload()` | TimeManager, match result packet, Economy tags | `Resource`; packet contract is covered by ADR-0009. |
+| SkillTraitSystem | Skill/trait durable truth, immutable pre-match snapshot, pending feedback, identity history | `build_pre_match_snapshot()`, `get_skill_trait_read_model()`, `ack_feedback()` | Player confirmed facts, match settlement facts, SaveManager | ADR-0010; typed shallow payloads are HIGH risk and must remain serializable. |
+| ReputationAchievementSystem | Reputation, achievements, evaluated/processed ledgers, pending rewards | `evaluate_settlement_fact()`, `get_reputation_view_payload()`, `claim_reward()` | Match, League, Player, Economy, Skill facts; Random Event facts are optional | ADR-0011; Random Event intake remains a warning until its ADR is written. |
+| RandomEventSystem | Pending event instance, event history, cooldowns, processed event settlement keys | `offer_event()`, `resolve_event_choice()`, `get_event_view_payload()` | Time stable windows, Player/Economy/Town read models | Warning carried: requires ADR before Random Event production. |
+| AudioSystem | Volume settings, mute categories, playback cooldowns, event-to-cue mapping | `play_cue_for_event()`, `set_volume()`, `get_audio_settings()` | Stable UI/Core event labels | Warning carried: requires ADR before Audio production. |
+
+### Presentation / Polish Layer
+
+| Module | Owns | Exposes | Consumes | Engine APIs / Risk |
+|---|---|---|---|---|
+| MainLoopUI | Main shell, Home/Roster/Match/Town containers, `screen_id` / `anchor_id` vocabulary | `refresh_screen()`, `show_feedback_queue()`, anchor registry | ScreenManager, EventBus, authority read models | `Control`, `Container`; Godot 4.6 dual-focus is HIGH risk. |
+| PlayerManagementUI | Player list/detail display state, sort/filter UI, player anchors | `show_player_detail(player_id)`, anchor IDs | PlayerDevelopment read model, SkillTrait read model | `Control`, `ItemList`. |
+| MatchPerformanceUI | Match Pre/Live/Result display state, pre-match summary, post-match feedback display | `show_pre_match()`, `show_live_match()`, `show_match_result()` | Match packets, League standings, SkillTrait snapshot | `Control`, `Timer`, `AnimationPlayer`. |
+| TownManagementUI | Town screen, budget preview display, facility detail anchors | `show_budget_preview()`, `request_build_command()` | Town read model, Economy preview, Time duration | `Control`; Alpha warning. |
+| OnboardingSystem | Onboarding step state, completion markers, current target anchor | `start_step()`, `complete_step()`, `get_current_hint_target()` | MainLoop anchors, SaveManager | `Control` overlay; missing anchors degrade safely to text guidance. |
+| TutorialHintSystem | Seen hints, cooldowns, help unlock state, hint preferences | `maybe_show_hint()`, `mark_seen()` | Anchor IDs, authority payloads | `Control`; Alpha warning. |
+
+### Required Topological Order
+
+```text
+ConfigLoader
+  → EventBus
+  → TimeManager
+  → SaveManager
+  → ScreenManager
+  → TownBuilding
+  → PlayerDevelopment
+  → MatchCompetition
+  → LeagueStructure
+  → EconomyManager
+  → SkillTraitSystem / ReputationAchievementSystem
+  → MainLoopUI / PlayerManagementUI / MatchPerformanceUI / TownManagementUI
+  → OnboardingSystem / TutorialHintSystem / AudioSystem
+```
 
 ### Ownership Rules
 
-1. Each authoritative data type has exactly one writer module
-2. EventBus transmits data only (Dictionary payloads), never object references
-3. Core systems never import UI modules — UI subscribes to Core events via EventBus
-4. Foundation Autoloads form no circular dependencies
+1. Each authoritative data type has exactly one writer module.
+2. EventBus transmits serializable payloads only, never object references.
+3. Core systems never import UI modules; UI subscribes to Core events or reads explicit view payloads.
+4. Foundation Autoloads form no circular dependencies.
+5. Cross-system payloads with durable gameplay meaning must have one canonical writer and read-only consumers per ADR-0010.
+6. Presentation modules may label or sequence payloads for display, but may not recompute unlock truth, trait triggers, forced-forfeit validity, resource settlement, or resolved match strength.
+7. Random Event, Audio, Presentation ADR gaps, and traceability drift are warnings carried forward, not blockers for Foundation/Core convergence.
 
 ## Data Flow
 
-### Frame Update Path
+### Frame / Update Path
 
-Event-driven management sim — no per-frame physics or rendering loop:
+本项目采用事件驱动主循环。Presentation 可在 `_process()`、`AnimationPlayer`、`Timer` 中处理动画与提示；Core 不靠 `_process()` 推进状态，Feature 也不自建轮询。时间只在玩家确认行动、比赛节点、阶段/赛季结算与读档恢复时由 TimeManager 推进，其余系统通过 EventBus 响应稳定节点。
 
-```
-_process(delta):
-  AnimationPlayer.tick(delta)      # UI transition animations
-  Timer nodes (Godot native)       # UI timers only
+### Event / Signal Path
 
-# No Core system _process() — all logic is EventBus callback-driven
-```
+数据流严格按 Foundation → Core → Feature → Presentation 单向展开。Foundation 发 `time_*`、`save_completed`、`load_completed` 等调度事件；Core 作为权威写入者结算比赛、资源、球员与小镇；Feature 只消费已确认结果，生成 standings、promotion/relegation、skill/trait durable feedback 等衍生真相；Presentation 只订阅事件或读取权威 payload 刷新 UI，不重算胜率、资源、技能触发或联赛结果。
 
-### Event/Signal Architecture
+### Save / Load Path
 
-All cross-system communication routes through EventBus Autoload:
-
-```
-Foundation → Core:
-  TimeManager.phase_changed(new_phase)       → all Core systems
-  TimeManager.match_triggered(match_context)  → MatchCompetition
-  TimeManager.season_ended(season_summary)    → EconomyManager, LeagueStructure
-  TimeManager.stage_settled(stage_result)     → EconomyManager, TownBuilding
-  SaveManager.load_completed(snapshot)        → all Core systems (state restore)
-
-Core → Core:
-  PlayerDevelopment.training_completed(player_id, gains)  → EventBus
-  MatchCompetition.match_event(event)                     → EventBus
-  MatchCompetition.match_completed(result_packet)          → EconomyManager, LeagueStructure, PlayerDevelopment
-  EconomyManager.balance_changed(resource, new_value)      → EventBus
-  EconomyManager.warning_triggered(warning_type)           → EventBus
-  TownBuilding.facility_completed(facility, effects)       → EventBus
-  TownBuilding.grid_changed(grid_snapshot)                 → EventBus
-  LeagueStructure.standings_updated(standings)             → EventBus
-  LeagueStructure.promotion_triggered(old_tier, new_tier)  → EventBus
-
-Core → Presentation (UI read-only consumption):
-  [via EventBus]:
-  PlayerDevelopment.training_completed → MainLoopUI, PlayerMgmtUI
-  MatchCompetition.match_event         → MatchPerfUI
-  MatchCompetition.match_completed     → MainLoopUI
-  EconomyManager.balance_changed       → MainLoopUI
-  LeagueStructure.standings_updated    → MainLoopUI, MatchPerfUI
-```
-
-### Save/Load Path
-
-```
-Save (trigger: manual save / auto-save node):
-  SaveManager.save(slot):
-    1. ScreenManager.get_active_screen_id()  → record UI position
-    2. TimeManager.get_state()               → record timeline/phase/season
-    3. For each registered Core system .serialize():
-       PlayerDevelopment.serialize() → {players: [...], training_history: [...]}
-       MatchCompetition.serialize()    → current match state (if in-match)
-       EconomyManager.serialize()      → {funds, ap, rp, ledger: [...]}
-       TownBuilding.serialize()        → {grid: [...], facilities: [...]}
-       LeagueStructure.serialize()     → {standings: [...], schedule: [...]}
-    4. Package as SaveSnapshot Resource
-    5. ResourceSaver.save(snapshot, "user://saves/slot_%d.tres" % slot)
-
-Load:
-  SaveManager.load(slot):
-    1. ResourceLoader.load("user://saves/slot_%d.tres" % slot)
-    2. Version migration check (ConfigLoader.get("save_version"))
-    3. Deserialize in dependency order:
-       TimeManager → TownBuilding → PlayerDevelopment → LeagueStructure → EconomyManager → MatchCompetition
-    4. ScreenManager.replace_screen(snapshot.ui_screen_id)
-    5. emit("load_completed", snapshot)
-```
+SaveManager 只在 `Planning`、`Match Trigger`、`Post-Match Settlement`、`Stage Settlement`、`Season Settlement`、`Offseason` 等稳定节点提交快照；`Match In Progress` 与任何半结算态必须延后或拒绝保存。保存时统一采集 `screen_id`、时间状态与各权威系统序列化结果，一次性写成原子快照；权威 blob 必须同时包含 durable companions 与 evaluated/processed settlement keys。读档先校验再迁移，随后按 `TimeManager → TownBuilding → PlayerDevelopment → LeagueStructure → EconomyManager → MatchCompetition` 的依赖顺序恢复；只接受完整 durable settlement result，禁止回放半发奖、半技能判定或半比赛结果。
 
 ### Initialization Order
 
-```
-Application startup:
-  1. Godot loads Autoloads (ProjectSettings order):
-     ConfigLoader → EventBus → TimeManager → SaveManager → ScreenManager
-  2. ConfigLoader._ready():
-     - Load all .tres configuration files
-     - Validate required fields exist
-  3. ScreenManager._ready():
-     - push_screen("res://src/ui/home.tscn")
-  4. Check for existing save:
-     - Save exists → SaveManager.load(latest_slot)
-     - No save → trigger Onboarding
-  5. Enter main loop: Planning state
+启动顺序固定为 `ConfigLoader → EventBus → TimeManager → SaveManager → ScreenManager`；随后各权威系统完成配置加载、serializer/register 与事件订阅，再挂接 Feature 合同层，最后绑定 MainLoop 与其他 UI。只有首屏路由、赛季容器与必要恢复完成后，才开放玩家操作。
 
-Core system initialization (in-scene, within SceneTree):
-  6. Home scene loads — instantiates all Core system nodes:
-     PlayerDevelopment.new()  → load restore or initial player pool
-     EconomyManager.new()     → load restore or starting resources
-     TownBuilding.new()       → load restore or blank grid
-     MatchCompetition.new()   → wait for match trigger
-     LeagueStructure.new()    → load restore or new season init
-  7. UI scenes load on-demand:
-     MainLoopUI → PlayerMgmtUI, MatchPerfUI within respective Screen containers
-```
+### Post-Match Settlement Chain
 
-### Key Multi-System Scenario: Post-Match Settlement Chain
+`MatchCompetition` 产出带 `settlement_id` 的 `match_result_packet`/`forfeit_result_packet` 后，经 EventBus 先更新 `LeagueStructure` 积分榜与赛季标签，再由 `EconomyManager` 结算赛后资源，由 Player/Skill 契约消费 confirmed facts 生成成长与反馈；`TimeManager` 在核心结算完成后切到 `Post-Match Settlement`，必要时继续触发阶段或赛季结算，最后才允许自动保存。
 
-```
-MatchCompetition.match_completed(result_packet)
-  ↓ EventBus
-  ├→ LeagueStructure.record_result(result_packet)       # update standings
-  │   ↓ standings_updated
-  │   ↓ (if season-end) promotion_triggered
-  │     ├→ EconomyManager (season bonus calculation)
-  │     └→ EventBus (notify UI)
-  ├→ EconomyManager (post-match reward settlement)
-  │   ↓ balance_changed
-  │   ↓ (if resource tight) warning_triggered
-  ├→ PlayerDevelopment (post-match growth opportunity feedback)
-  │   ↓ training_completed (if growth occurred)
-  └→ TimeManager (record match complete, advance to Post-Match Settlement)
-      ↓ phase_changed → MainLoopUI
-```
+### Typed Payload / Idempotency Rules
 
-### Key Multi-System Scenario: Pre-Match Snapshot Timing
+跨系统 payload 必须是浅层、可序列化的稳定契约：标量、稳定 ID、`Dictionary[String, Variant]`、已排序 typed arrays；禁止 Node/Resource/Object 引用、未声明嵌套容器与 runtime Dictionary hash。每个 payload 只有一个 canonical writer，UI 只读不改真相。幂等边界使用 stable settlement key：`settlement_id + player_id + consumer_scope + rule_id`；`rule_version` 只作元数据不入 key。重复投递、重放或读档恢复命中 evaluated/processed keys 时必须直接 no-op。
 
-Construction completion on match day — Scenario 3 from GDD cross-review:
+### Warnings Carried Forward
 
-Rule: `MatchCompetition.start_match()` snapshots current facility state upon call (calls `TownBuilding.get_facility_multipliers()`). Any `facility_completed` signal emitted before the match trigger is included in the snapshot. Unified rule: "Match snapshot captures facility state at the moment the match trigger fires; same-day completed facilities are included."
+Random Event ADR、Audio ADR 与 Presentation ADR 覆盖缺口继续作为 warning 保留；它们必须消费现有稳定事件与 payload 契约，但在补齐对应 ADR 前不扩展新的生产级数据流，不阻塞当前 Foundation/Core 收敛。
 
 ## API Boundaries
 
-### Foundation — Autoload Public Contracts
+Boundary shorthand: `D = Dictionary[String, Variant]`, `AD = Array[Dictionary[String, Variant]]`. Stable cross-module, EventBus, and save payloads only carry shallow `D` / `AD`; `Variant` boundary data must be normalized before entering typed APIs. Core maintains single writers, and UI consumes read-only payloads.
 
-```gdscript
-# ---- ConfigLoader (Autoload) ----
-# Read-only, all config loaded at startup
+### Foundation APIs
 
-func get_balance(key: String) -> float
-func get_formula_constant(key: String) -> float
-func get_table(path: String) -> Array[Dictionary]
-func get_save_version() -> int
+| Module | Entry Points | Caller Invariants | Module Guarantees |
+|---|---|---|---|
+| ConfigLoader | `get_balance(key: String) -> float`; `get_table(id: String) -> AD`; `get_save_version() -> int` | Queries are read-only; keys and table IDs are registered in config. | Loads and validates `.tres` data at startup; runtime config is not mutated. |
+| EventBus | `emit_event(name: String, payload: D) -> void`; `subscribe(name: String, callback: Callable) -> void`; `unsubscribe(name: String, callback: Callable) -> void` | Payloads must not include `Node`, `Resource`, `Callable`, live `Object`, or unnormalized runtime containers. | Routes named events only; it never becomes a gameplay truth owner. |
+| TimeManager | `get_time_state() -> D`; `advance_time(slots: int) -> D`; `register_match_context(context: D) -> void` | Only TimeManager advances time and opens stable settlement windows. | Owns time, phase, match trigger, stage, and season sequencing. |
+| SaveManager | `register_system(id: String, serialize: Callable, deserialize: Callable) -> void`; `save(slot: int) -> bool`; `load(slot: int) -> bool`; `get_save_metadata(slot: int) -> D` | Registered systems provide authoritative durable state only; save/load occurs only at stable nodes. | Is the only disk writer; validates version/integrity and restores in dependency order. |
+| ScreenManager | `push_screen(path: String, data: D) -> void`; `replace_screen(path: String, data: D) -> void`; `pop_screen() -> void`; `get_active_screen_id() -> String` | Screen data is view context only, not gameplay truth. | Owns screen stack lifecycle, return semantics, and active screen identity. |
 
-# ---- EventBus (Autoload) ----
-# Global signal routing
+### Core APIs
 
-signal event_fired(event_name: String, payload: Dictionary)
+| Module | Entry Points | Caller Invariants | Module Guarantees |
+|---|---|---|---|
+| TownBuilding | `preview_action(cmd: D) -> D`; `commit_action(cmd: D) -> D`; `get_effects() -> D` | Economy and Time authorization must be satisfied before commit. | Single writer for facilities/grid; only exposes MVP outputs `facility_training_multiplier`, `facility_total_maintenance`, `home_advantage_bonus`. |
+| PlayerDevelopment | `get_roster_summary() -> AD`; `get_player_view(player_id: String) -> D`; `train(player_id: String, training_id: String) -> D`; `consume_match_feedback(result: D) -> void` | Long-term player attributes/status are modified only here; training consumes skill read models, not live skill state. | Persists growth outcomes and emits confirmed facts for Match/Skill/UI consumers. |
+| MatchCompetition | `start_match(match_context: D, lineup: D, tactic: D) -> void`; `get_match_state() -> D`; `get_result_view() -> D` | Enter only through `time_match_triggered`; AP safety grant is complete; no live skill backfill. | Single writer for `match_result_packet`, `forfeit_result_packet`, `settlement_id`, and snapshot status. |
+| EconomyManager | `get_balances() -> D`; `preview_cost(scope: String, args: D) -> D`; `execute_transaction(tx: D) -> D`; `apply_match_day_ap_safety_grant(match_id: String) -> D` | All resource changes go through Economy; transactions include stable IDs. | Single writer for funds/AP/research; ledger is auditable and idempotent. |
+| LeagueStructure | `get_match_context(match_id: String) -> D`; `record_result(packet: D) -> void`; `get_standings() -> AD`; `get_season_summary() -> D` | Consumes confirmed result packets only. | Single writer for schedule, standings, promotion/relegation, and season tags. |
 
-func emit(event_name: String, payload: Dictionary) -> void
-func subscribe(event_name: String, callable: Callable) -> void
-func unsubscribe(event_name: String, callable: Callable) -> void
+### Feature Contract APIs
 
-# ---- TimeManager (Autoload) ----
-# Sole time authority
+| Module | Entry Points | Caller Invariants | Module Guarantees |
+|---|---|---|---|
+| SkillTraitSystem | `build_pre_match_snapshot(lineup_player_ids: Array[String], settlement_id: String) -> D`; `consume_settlement(input: D) -> D`; `ack_feedback(feedback_key: String, surface_id: String) -> void`; `get_player_identity_view(player_id: String) -> D` | Consumes confirmed facts and stable `settlement_id` only. | Single writer for skill/trait state, candidates, identity history, feedback ack, and settlement-key ledgers. |
+| ReputationAchievementSystem | `consume_event(input: D) -> D`; `get_reputation_view() -> D`; `get_achievement_view() -> D` | Consumes confirmed upstream events only; UI must not infer completion state. | Single writer for reputation total/level, achievement state, reward records, and idempotency keys. |
 
-signal phase_changed(old_phase: String, new_phase: String)
-signal match_triggered(match_context: Dictionary)
-signal season_ended(season_summary: Dictionary)
-signal stage_settled(stage_result: Dictionary)
+### Presentation API
 
-func get_state() -> Dictionary
-func advance_time(amount: float) -> void
-func get_available_windows() -> int
+| Module | Entry Points | Caller Invariants | Module Guarantees |
+|---|---|---|---|
+| MainLoopUI | `bind_home(view: D) -> void`; `present_growth_summary(route_id: String) -> void`; `request_navigation(screen_id: String, args: D) -> void` | Consumes read-only Core/Feature payloads; write actions route to owning systems. | Displays in order: core settlement → skill/trait → reputation/achievement → hints; never recomputes gameplay truth. |
 
-# ---- SaveManager (Autoload) ----
+### Godot 4.6 Risk Handling
 
-signal save_completed(slot: int, metadata: Dictionary)
-signal load_completed(snapshot: Dictionary)
+- `Signal`: use typed `signal.connect(callable)` only; hidden screens must unsubscribe.
+- `FileAccess`: Godot 4.4+ `store_*` returns `bool`; failed writes must be checked explicitly.
+- `Resource`: `.tres` is valid for config/save resources, but EventBus/save payloads must not carry live `Resource` references; use `duplicate_deep()` for nested resource copies when needed.
+- `PackedScene.instantiate()`: only `instantiate()` is valid; ScreenManager owns screen instantiation.
+- `Control dual-focus`: Godot 4.6 separates mouse and keyboard focus; screen transitions and load restore must restore focus intentionally.
 
-func save(slot: int) -> bool
-func load(slot: int) -> bool
-func delete_save(slot: int) -> bool
-func get_save_metadata(slot: int) -> Dictionary
-func register_serializer(system_id: String, serialize_callable: Callable, deserialize_callable: Callable) -> void
+### Warnings / Future API
 
-# ---- ScreenManager (Autoload) ----
-
-signal screen_pushed(screen_id: String)
-signal screen_popped(screen_id: String)
-signal screen_replaced(screen_id: String)
-
-func push_screen(screen_path: String, data: Dictionary = {}) -> void
-func pop_screen() -> void
-func replace_screen(screen_path: String, data: Dictionary = {}) -> void
-func get_active_screen_id() -> String
-func get_screen_stack_depth() -> int
-```
-
-### Core — System Public Contracts
-
-```gdscript
-# ---- PlayerDevelopment ----
-signal training_completed(player_id: int, gains: Dictionary)
-signal milestone_reached(player_id: int, milestone: String)
-
-func get_player_state(player_id: int) -> Dictionary
-func get_roster_summary() -> Array[Dictionary]
-func train(player_id: int, training_project_id: String) -> Dictionary
-func serialize() -> Dictionary
-func deserialize(data: Dictionary) -> void
-
-# ---- MatchCompetition ----
-signal match_event(event: Dictionary)
-signal match_completed(result_packet: Dictionary)
-
-func start_match(home_lineup: Dictionary, away_lineup: Dictionary, context: Dictionary) -> void
-func get_match_state() -> Dictionary
-func serialize() -> Dictionary
-func deserialize(data: Dictionary) -> void
-
-# ---- EconomyManager ----
-signal balance_changed(resource_type: String, old_value: float, new_value: float, reason: String)
-signal warning_triggered(warning_type: String, threshold: float)
-
-func get_balances() -> Dictionary  # {funds: float, ap: float, rp: float}
-func preview_cost(action_type: String, action_params: Dictionary) -> Dictionary
-func execute_transaction(tx_type: String, tx_params: Dictionary) -> Dictionary
-func serialize() -> Dictionary
-func deserialize(data: Dictionary) -> void
-
-# ---- TownBuilding ----
-signal facility_completed(facility_id: int, facility_type: String, effects: Dictionary)
-signal grid_changed(grid_snapshot: Array)
-
-func get_facility_multipliers() -> Dictionary
-func build(x: int, y: int, facility_type: String) -> Dictionary
-func upgrade(x: int, y: int) -> Dictionary
-func get_grid_state() -> Array
-func serialize() -> Dictionary
-func deserialize(data: Dictionary) -> void
-
-# ---- LeagueStructure ----
-signal standings_updated(standings: Array[Dictionary])
-signal promotion_triggered(team_id: int, old_tier: int, new_tier: int)
-
-func record_result(match_packet: Dictionary) -> void
-func get_standings() -> Array[Dictionary]
-func get_team_context(team_id: int) -> Dictionary
-func serialize() -> Dictionary
-func deserialize(data: Dictionary) -> void
-```
-
-### Presentation — Screen Base Class
-
-```gdscript
-class_name Screen
-extends Control
-
-func on_enter(data: Dictionary) -> void: pass
-func on_leave() -> void: pass
-func on_resume() -> void: pass
-func on_pause() -> void: pass
-func can_pop() -> bool: return true
-func get_anchor_id() -> String: return ""
-```
-
-### Critical Invariants
-
-| Rule | Detail |
-|------|--------|
-| Resource writes | Only EconomyManager modifies funds/AP/RP — all others use `execute_transaction()` |
-| Time advancement | Only TimeManager advances the timeline — downstream systems query `get_available_windows()` only |
-| Player attributes | Only PlayerDevelopment modifies `current_attribute` — match/events influence via feedback tags |
-| Match state | Only MatchCompetition modifies the match state machine — UI is read-only display |
-| Save files | Only SaveManager writes save files — Core systems provide `serialize()/deserialize()` only |
-| Screen navigation | Only ScreenManager switches screens — others request navigation via EventBus |
+- RandomEvent submits confirmed `event_settlement_key` facts and effect request packages; it does not directly modify resources or growth.
+- Audio subscribes to EventBus/ScreenManager events read-only and never owns Core truth.
+- TutorialHint consumes stable `screen_id`, anchors, and view payloads; it never blocks core settlement.
 
 ## ADR Audit
 
-| ADR | Status | Assessment |
-|-----|--------|------------|
-| ADR-0001: Scene Management & Autoload Architecture | Accepted | 5 Autoloads (ConfigLoader, EventBus, TimeManager, SaveManager, ScreenManager). Screen Stack pattern adopted. |
-| ADR-0002: Event/Signal Architecture + TimeManager | Accepted | EventBus with 16 signals + TimeManager. All cross-system communication routed through EventBus. |
-| ADR-0003: Save/Load Persistence | Accepted | .tres save format, 3+1 slots, version migration, all Core systems register serialize/deserialize. |
-| ADR-0004: Data-Driven Configuration | Accepted | 9 .tres Custom Resource files loaded by ConfigLoader at startup. Read-only, all tuning values external. |
-| ADR-0005: Player Data Model | Accepted | Player (RefCounted), PlayerRoster, 5-attribute triplets (current/potential/effective), training system. Fixed: uses `accredit_training_cost()` per ADR-0007. |
-| ADR-0006: Match Simulation Architecture | Accepted | 8-state machine, seeded RNG, 6 event categories, result packet structure, lineup/tactics data. |
-| ADR-0007: Economy Transaction Framework | Accepted | `execute_transaction()` sole mutation path, Transaction class, settlement formulas, warning thresholds. |
-| ADR-0008: Town Grid & Facility System | Accepted | 5×5 grid, 4 facility types × 5 levels, adjacency bonus (capped 15.0), 8 formula methods. |
-| ADR-0009: League Competition Structure | Accepted | Circle method round-robin, 3/1/0 points, 4-level tiebreaker, promotion/relegation, season schedule. |
+| Area | Result | Notes |
+|---|---|---|
+| ADR status | 11/11 Accepted | ADR-0001 through ADR-0011 are accepted and remain valid for the current Foundation/Core topology. |
+| Required sections | Complete | All accepted ADRs include Engine Compatibility and GDD Requirements Addressed sections. |
+| Foundation/Core coverage | Pass | Scene/autoloads, EventBus/TimeManager, SaveManager, ConfigLoader, PlayerDevelopment, MatchCompetition, EconomyManager, TownBuilding, LeagueStructure, and cross-system settlement contracts are covered. |
+| Conflicts/cycles | None known | No ADR dependency cycle or layer-ownership conflict is known. |
+| Godot 4.6 risk | No blocker | Deprecated API usage is not present in the architecture contracts; post-cutoff risks remain explicitly flagged. |
+| Traceability drift | Warning | Random Event, Audio, and Presentation ADR coverage remain future-slice warnings; TR-economy-008 and TR-town-013 wording drift is resolved in the traceability matrix. |
 
-All 9 ADRs currently Accepted. No dependency cycles.
+### Traceability Coverage Check
 
-### GDD Technical Requirement → ADR Coverage
+Foundation and Core requirements are sufficiently covered to proceed into Technical Setup / Pre-Production planning with warnings. ADR-0010 closes the implementation-blocking payload and settlement contract gaps for match fallback, pre-match skill/trait snapshots, save/load durability, and read-only UI consumption. ADR-0011 closes the implementation-blocking reputation/achievement recognition contract.
 
-| Req # | GDD System | Technical Requirement | ADR Coverage |
-|-------|-----------|----------------------|--------------|
-| TR-config-001 | balance-system.md | Data-driven config loader | ADR-0004 ✅ |
-| TR-time-001 | time-and-season-progression-system.md | Unified timeline + phase scheduling | ADR-0002 ✅ |
-| TR-save-001 | save-and-load-system.md | Serialization contract + version migration | ADR-0003 ✅ |
-| TR-event-001 | All Core systems | Event naming conventions + payload schema | ADR-0002 ✅ |
-| TR-player-001 | player-development-system.md | Player data model schema | ADR-0005 ✅ |
-| TR-match-001 | match-competition-system.md | Match state machine + result packet structure | ADR-0006 ✅ |
-| TR-econ-001 | economy-management-system.md | Transaction interface (preview → execute) | ADR-0007 ✅ |
-| TR-town-001 | town-building-system.md | 5×5 grid + adjacency calculation | ADR-0008 ✅ |
-| TR-league-001 | league-competition-structure-system.md | Standings + schedule + promotion rules | ADR-0009 ✅ |
-| TR-screen-001 | main-loop-ui-framework.md | Screen stack navigation | ADR-0001 ✅ |
-| TR-ui-core-001 | All Presentation GDDs | UI/Core decoupling via EventBus | ADR-0001 ✅ |
+Remaining traceability warnings are not Foundation/Core blockers:
 
-Coverage: 11/11 covered. Full traceability: 143 TRs across all layers, 0 gaps (see `architecture-review-2026-05-17.md`).
+Gate Classification: Random Event, Audio, and future Presentation ADR gaps are future-slice warnings for this gate. They do not block Technical Setup → Pre-Production on the current Foundation/Core scope, but each becomes blocking before its own implementation starts.
+
+| Gap | Status | Resolution Path |
+|---|---|---|
+| Random Event contracts | Warning | Write Random Event ADR before Random Event production. |
+| Audio settings/persistence | Warning | Write Audio ADR before Audio production/settings work. |
+| Presentation-specific UI architecture | Warning | Write UI ADRs before deep Main/Player/Match/Town UI production. |
+| TR-economy-008 / TR-town-013 wording drift | Cleanup note | RTM wording cleanup only; not a gate blocker. |
 
 ## Required ADRs
 
-All 9 Foundation + Core ADRs (0001-0009) are complete as of 2026-05-17. See `architecture-review-2026-05-17.md` for full coverage analysis and dependency ordering.
+### Must have before coding starts
 
-Next ADRs needed (Feature/Presentation layer):
-| # | Title | Covers |
-|---|-------|--------|
-| ADR-0010 | Main UI Framework | Screen container architecture, refresh triggers, navigation rules |
-| ADR-0011 | Player UI Architecture | List/detail/sort/filter patterns, anchor IDs for onboarding |
-| ADR-0012 | Match Performance UI | Pre-match/live/post-match display, event pacing, animation triggers |
+No new Foundation/Core ADRs are required before coding starts. ADR-0001 through ADR-0011 cover the current Foundation, Core, and cross-system contract topology.
 
-> Presentation-layer ADRs are lower priority — UI can be prototyped against Core API contracts without formal ADRs in place. Create them when the UI GDDs enter their implementation phase.
+### Should have before the relevant system is built
+
+| Proposed ADR | Covers | Needed Before |
+|---|---|---|
+| Random Event Settlement Contracts | RandomEvent authority, `event_settlement_key`, dedupe ledgers, save/load, effect request boundaries. | Random Event production/Beta implementation. |
+| Audio Settings Persistence | `audio_*` settings ownership, UI → Audio → SaveManager persistence, read-only audio event consumption. | Audio settings or production audio integration. |
+
+### Can defer as warnings
+
+| Proposed ADR | Covers | Needed Before |
+|---|---|---|
+| Main UI Framework | Navigation, refresh triggers, focus/anchor rules. | Deep MainLoop UI production. |
+| Player UI Architecture | List/detail read-only payloads, sorting/filtering, onboarding anchors. | Deep Player UI production. |
+| Match Performance UI | Pre-match/live/post-match display sequencing and no-recompute truth rules. | Deep Match Performance UI production. |
+
+Traceability/review wording drift remains a cleanup warning and should be resolved by the next `/architecture-review`, not by adding blocker ADRs.
 
 ## Architecture Principles
 

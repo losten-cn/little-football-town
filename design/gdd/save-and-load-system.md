@@ -2,7 +2,7 @@
 
 > **Status**: Designed
 > **Author**: 用户 + Claude
-> **Last Updated**: 2026-05-15
+> **Last Updated**: 2026-06-02
 > **Implements Pillar**: 轻度足球经营、低压力长期成长
 > **Source**:
 > - `design/gdd/game-concept.md`
@@ -29,25 +29,30 @@
 2. 一个“游戏存档”必须至少包含以下五类内容：
    - 存档元数据：存档 ID、存档名/显示名、创建时间、最后保存时间、累计游玩时长、数据版本、兼容状态、最近稳定节点；
    - 小镇状态：设施、等级、布局、已解锁建设内容、进行中的建设进度；
-   - 球员与队伍状态：球员列表、属性、潜力、状态、技能/特性、阵容配置、队伍相关长期状态；
-   - 资源与成长状态：经费、研究点数、运动点数、阶段奖励、长期解锁、声望/成就相关已确认结果；
+   - 球员与队伍状态：球员列表、属性、潜力、状态、阵容配置、队伍相关长期状态，以及由技能与特性系统定义的完整长期状态集合；
+   - 资源与成长状态：经费、研究点数、运动点数、阶段奖励、长期解锁、声望/成就相关已确认结果，以及已领取奖励标记、待展示奖励状态、待挂接提示状态；
    - 时间与赛季状态：当前时间轴位置、当前阶段、当前赛季、赛程节点、待处理结算节点、下一关键节点上下文。
-3. 本系统保存的是“可继续推进的整体世界状态”，而不是单个子系统的局部片段。任何一次有效保存，都必须保证资源、球员、小镇与赛季进度来自同一时间点。
-4. 本系统必须区分稳定节点与瞬时节点。常规保存只能在可验证的稳定节点生成；稳定节点至少包括 `Planning`、`Match Trigger`、`Post-Match Settlement`、`Stage Settlement`、`Season Settlement`、`Offseason`，以及 `SeasonStart` 完成后的返回节点。
-5. `Match In Progress`、未完成的行动结算、尚未提交的奖励选择、以及其他“时间已推进但结果未落地”的中间态，不能被当作标准可恢复存档点直接写入。
-6. 如果玩家或系统在瞬时节点发起保存请求，本系统必须明确采用以下两种方式之一：延后到最近下一个稳定节点执行，或阻止本次保存并清晰说明原因；不得静默写出半完成状态。
-7. 本系统必须同时支持手动保存与自动保存，但两者共享同一套一致性与校验规则；自动保存不能因为“后台触发”而降低数据完整性要求。
-8. 自动保存必须优先覆盖“高价值且跨系统影响大”的节点，至少包括：完成一次日常行动结算后、完成赛后结算后、完成阶段结算后、完成赛季结算后，以及确认重大解锁或阵容/建设长期变更之后。
-9. 任何一次保存，在玩家体验层都必须表现为原子结果：要么新快照完整可用，要么保留之前最后一个有效快照；不得出现“新旧各保存一半”的可见结果。
-10. 读档必须先做完整性校验，再做版本兼容性判断，再进入状态恢复；校验失败的档案不得直接套用到当前世界状态。
-11. 如果旧版本存档仍在支持范围内，本系统必须先完成版本迁移，再允许读档成功；迁移后的结果必须重新通过一致性校验，才能成为新的有效快照。
-12. 如果存档损坏、缺失关键字段、或版本超出支持范围，本系统必须进入恢复流程：优先回退到最近一个有效自动存档或备份快照；若无可恢复项，必须明确告诉玩家该档案不可继续使用。
-13. 本系统必须保存“最近稳定节点语义”，使读档后能回到一个玩家可理解、可继续操作的入口，而不是回到结算一半、奖励半领、比赛半开始的模糊状态。
-14. 读档完成后，下游系统只能根据恢复后的权威状态重建运行时缓存、UI 展示和临时派生值；任何派生缓存都不得在读档时反向覆盖权威存档数据。
-15. 本系统必须为 UI 提供可展示的存档摘要字段，至少包括：存档名、最后保存时间、累计游玩时长、当前赛季/阶段、关键资源概览，以及最近稳定节点类型。
-16. 覆盖存档、删除存档、或载入另一进度前，系统必须明确提示将要影响的目标存档；任何会放弃当前未保存长期进度的操作都不得静默发生。
-17. 本系统的 MVP 目标是“可靠恢复长期经营进度”，不是“支持任意时刻自由回滚到瞬间态”。如果两者冲突，必须优先保证一致性、可验证性和可恢复性。
-18. 任何下游系统若希望新增必须持久化的长期字段、改变快照边界、或允许新的中间态可恢复，必须先回到本系统修订接口，而不能在本地文档中默认“顺带保存”。
+3. 技能与特性长期状态集合必须作为球员与队伍状态的一部分保存，但其语义由技能与特性系统拥有。Alpha 起该集合至少包含：已拥有技能 ID、等级、当前等级剩余进度、累计进度、规则版本和来源稳定结算键；`candidate_progress_record`（含 `candidate_record_id`、`candidate_progress_milli` 与 `candidate_display_priority`）；已拥有特性 ID、类型、来源结算、规则版本和 `trait_cooldown_state`；`trait_trigger_effect_record`；`anti_grind_window_state`；`reliable_rotation_accumulator_state`（含 `reliable_rotation_season_settlement_id` 与 `reliable_rotation_season_settlement_key`）；`evaluated_settlement_keys`（所有已评估消费键，含 no-op）；`processed_settlement_keys`（已产生 durable outcome 的消费键）；`pending_skill_trait_feedback`（含完整 `attention_state` 与 `surface_state` 生命周期字段）；已确认 `feedback_ack`；`player_identity_history_entry`；`skill_trait_migration_record`（含 `old_feedback_key_aliases[]`、`processed_key_aliases[]` 与 evaluated key alias）与废弃 ID 映射记录。`pre_match_skill_trait_snapshot` 不作为读档后的权威赛前状态保存；若赛后回看需要说明本场技能/特性状态，只能保存比赛结果包中的标量摘要 companion（如 `skill_trait_snapshot_status`、已应用摘要标签和 `team_skill_trait_summary` 的结果标量），不得依赖读档后重新恢复旧赛前快照来回补效果。
+4. 技能与特性的 `trait_cooldown_state` 必须持久化到同一快照中，至少包含 `last_visible_feedback_settlement_id`、`settlements_since_last_visible_trigger` 和 `trait_visible_cooldown_window`。该冷却仅限制重复可见反馈，不限制特性幕后效果生效；读档后不得因为冷却计数丢失而重复展示同一特性触发，也不得把仍在冷却中的特性误判为从未触发。
+5. `feedback_ack` 是持久化确认状态，不是 UI 临时态。同一 `feedback_key` 一旦确认，读档、回到同一比赛结果、重新打开球员详情或迁移后都不得再次作为新提示弹出；长期回看应通过 `player_identity_history_entry` 完成。写入 `feedback_ack` 的同次原子提交必须把对应 `pending_skill_trait_feedback.attention_state` 更新为 `acknowledged`，并保持 `surface_state` 为该反馈最后一次合法展示或补读路由；合法持久化组合由技能与特性系统矩阵定义，包括 `awaiting_ack/shown_on_first_surface` 与 `needs_followup/deferred_to_followup_notice`。若只存在 ack、只存在 attention state 变化，或恢复出未声明的状态组合，技能/特性快照复检必须返回 `skill_trait_snapshot_invalid_partial_commit`。
+6. 本系统保存的是“可继续推进的整体世界状态”，而不是单个子系统的局部片段。任何一次有效保存，都必须保证资源、球员、小镇与赛季进度来自同一时间点。
+7. 本系统必须区分稳定节点与瞬时节点。常规保存只能在可验证的稳定节点生成；稳定节点至少包括 `Planning`、`Match Trigger`、`Post-Match Settlement`、`Stage Settlement`、`Season Settlement`、`Offseason`，以及 `SeasonStart` 完成后的返回节点。
+8. `Match In Progress`、未完成的行动结算、尚未提交的奖励选择、技能/特性 `Collect Confirmed Facts`、`Evaluate Skill/Trait Outcomes`、`Build Durable Settlement Result`、`Skill Evaluation`、`Trait Evaluation`、`Settlement Transaction`，以及其他“时间已推进但结果未落地”的中间态，不能被当作标准可恢复存档点直接写入。技能/特性恢复只能看到完整 durable settlement result 已经原子提交后的状态，或完全看不到该 result；不得恢复到可重放半结算入口。
+9. 如果玩家或系统在瞬时节点发起保存请求，本系统必须明确采用以下两种方式之一：延后到最近下一个稳定节点执行，或阻止本次保存并清晰说明原因；不得静默写出半完成状态。
+10. 本系统必须同时支持手动保存与自动保存，但两者共享同一套一致性与校验规则；自动保存不能因为“后台触发”而降低数据完整性要求。
+11. 自动保存必须优先覆盖“高价值且跨系统影响大”的节点，至少包括：完成一次日常行动结算后、完成赛后结算后、完成阶段结算后、完成赛季结算后，以及确认重大解锁或阵容/建设长期变更之后。
+12. 任何一次保存，在玩家体验层都必须表现为原子结果：要么新快照完整可用，要么保留之前最后一个有效快照；不得出现“新旧各保存一半”的可见结果。
+13. 读档必须先做完整性校验，再做版本兼容性判断，再进入状态恢复；校验失败的档案不得直接套用到当前世界状态。
+14. 如果旧版本存档仍在支持范围内，本系统必须先完成版本迁移，再允许读档成功；迁移后的结果必须重新通过一致性校验，才能成为新的有效快照。
+15. 技能/特性迁移必须保存 `skill_trait_migration_record` 和废弃 ID 映射记录。迁移后必须证明旧技能/特性 ID、历史记录、`candidate_progress_record`、`candidate_record_id`、`pending_skill_trait_feedback.attention_state`、`pending_skill_trait_feedback.surface_state`、`feedback_ack`、`evaluated_settlement_keys`、`processed_settlement_keys`、`old_feedback_key_aliases[]`、`processed_key_aliases[]`、`reliable_rotation_accumulator_state`、`reliable_rotation_season_settlement_id` 和 `reliable_rotation_season_settlement_key` 仍可追溯；不得用显示名、资源路径或数组顺序推断旧状态。旧反馈不得因迁移改名重新进入新提示队列，旧稳定结算键重放仍必须 no-op。
+16. 如果存档损坏、缺失关键字段、或版本超出支持范围，本系统必须进入恢复流程：优先回退到最近一个有效自动存档或备份快照；若无可恢复项，必须明确告诉玩家该档案不可继续使用。
+17. 本系统必须保存“最近稳定节点语义”，使读档后能回到一个玩家可理解、可继续操作的入口，而不是回到结算一半、奖励半领、比赛半开始、技能/特性半判定的模糊状态。
+18. 读档完成后，下游系统只能根据恢复后的权威状态重建运行时缓存、UI 展示和临时派生值；任何派生缓存都不得在读档时反向覆盖权威存档数据。
+19. 本系统必须为 UI 提供可展示的存档摘要字段，至少包括：存档名、最后保存时间、累计游玩时长、当前赛季/阶段、关键资源概览，以及最近稳定节点类型。
+20. 覆盖存档、删除存档、或载入另一进度前，系统必须明确提示将要影响的目标存档；任何会放弃当前未保存长期进度的操作都不得静默发生。
+21. 本系统的 MVP 目标是“可靠恢复长期经营进度”，不是“支持任意时刻自由回滚到瞬间态”。如果两者冲突，必须优先保证一致性、可验证性和可恢复性。
+22. 任何下游系统若希望新增必须持久化的长期字段、改变快照边界、或允许新的中间态可恢复，必须先回到本系统修订接口，而不能在本地文档中默认“顺带保存”。
+23. 技能/特性快照复检必须支持固定错误码 `skill_trait_snapshot_invalid_partial_commit`。当快照包含技能/特性 durable settlement result 的任一 outcome，但缺少技能与特性系统 Durable Result Companion Matrix 声明的同次原子提交 companion records 时，本系统必须返回该错误码，并拒绝作为标准成功读档结果恢复。
 
 ### States and Transitions
 
@@ -71,16 +76,18 @@
 |---|---|---|---|
 | 数值系统 | 共享数值类别的持久化入口、版本化快照边界、一致性恢复点 | 权威属性值、资源值、共享数值状态字段定义 | 存档系统定义“哪些数值必须被保存以及何时写入”；数值系统定义“这些数值本身代表什么” |
 | 时间与赛季推进系统 | 稳定节点恢复、时间状态快照、赛季进度回放入口 | 当前时间轴位置、当前阶段、赛季进度、待触发关键节点、稳定节点语义 | 存档系统定义“如何保存/恢复推进状态”；时间系统定义“哪些节点可被安全恢复” |
-| 运动员培养系统 | 球员长期成长数据的持久化容器 | 球员 roster、属性/潜力、训练结果、技能/特性、状态变更 | 存档系统定义“训练结果何时落档”；培养系统定义“球员数据结构与成长含义” |
+| 运动员培养系统 | 球员长期成长数据的持久化容器 | 球员 roster、属性/潜力、训练结果、状态变更 | 存档系统定义“训练结果何时落档”；培养系统定义“基础球员数据结构与成长含义”，不拥有技能/特性状态写入 |
 | 比赛竞技系统 | 比赛前后可恢复节点、赛果落档时机、异常退出恢复策略 | 已确认的比赛结果、赛后奖励、比赛相关长期状态变化 | 存档系统定义“不保存半场中的未定态”；比赛系统定义“哪些结果已被视为最终确认” |
 | 经济管理系统 | 周期账期与资源状态的统一持久化 | 收入/支出结算结果、账期状态、长期费用或收益字段 | 存档系统定义“账目何时与其他系统一起快照”；经济系统定义“具体收支内容” |
 | 小镇建设系统 | 建设队列、完工进度与布局状态的恢复入口 | 建筑列表、等级、布局、工期进度、已完成效果 | 存档系统定义“建设状态如何被整体恢复”；建设系统定义“建设内容本身与效果” |
 | 联赛与赛事结构系统 | 赛程与排名的持久化框架 | 当前联赛层级、赛程表、积分/排名、晋级/降级相关长期状态 | 存档系统定义“赛事容器如何随赛季一起保存”；赛事系统定义“赛事结构与规则细节” |
-| 声望与成就系统 | 已确认长期解锁与已领取奖励的持久化 | 声望等级、已解锁内容、已完成成就、已领取奖励标记 | 存档系统定义“哪些结果必须被永久保留”；声望系统定义“哪些条件算达成” |
+| 声望与成就系统 | 已确认长期解锁、奖励状态与后续反馈队列的持久化 | 声望等级、已解锁内容、已完成成就、已领取奖励标记、待展示奖励状态、待挂接提示状态 | 存档系统定义“哪些结果与反馈队列必须被永久保留”；声望系统定义“哪些条件算达成，以及哪些长期反馈仍待展示” |
+| 技能与特性系统 | 技能/特性长期状态、稳定结算键、迁移历史、待展示反馈、反馈确认和身份历史的持久化 | 技能等级、技能进度、候选进度、特性状态、可见触发冷却、稳定结算键、迁移历史、`pending_skill_trait_feedback`、`feedback_ack`、`player_identity_history_entry` | 存档系统定义“如何保存/恢复这些长期状态”；技能与特性系统定义状态语义、幂等键、反馈确认和迁移规则 |
 | 主循环 UI 框架 | 存档列表摘要、保存/读档结果、冲突与错误提示语义 | 存档入口、确认流程、展示优先级、失败反馈界面 | 存档系统定义“哪些存档信息可展示”；UI 系统定义“如何让玩家操作和理解这些信息” |
 | 球员管理 UI | 已恢复球员状态的权威来源 | 当前查看目标、排序偏好等可选展示上下文 | 存档系统只负责长期权威数据；球员 UI 负责展示层偏好是否需要单独保留由后续 UI 规则决定 |
 | 建设与经营 UI | 已恢复建设/经营状态的权威来源 | 当前选中建筑、过滤条件等临时展示上下文 | 存档系统优先保证长期经营状态恢复；展示层临时态是否持久化不由本系统默认拥有 |
-| 教程与提示系统 | 保存失败、恢复成功、兼容迁移等可提示事件语义 | 面向玩家的说明文本、引导节奏和风险提示展示 | 存档系统定义“发生了什么”；提示系统定义“怎样告诉玩家” |
+| 教程与提示系统 | 已看提示记录、提示冷却、玩家提示偏好、帮助索引状态的恢复入口，以及保存失败、恢复成功、兼容迁移等可提示事件语义 | `seen_hint_records`、`hint_cooldown_state`、`hint_user_preferences`、`help_index_unlock_state`、面向玩家的说明文本和风险提示展示 | 存档系统定义“提示支持状态如何保存/恢复、存档事件发生了什么”；提示系统定义“哪些提示状态需要保留、怎样告诉玩家” |
+| 音频系统 | 玩家音量、静音和音频偏好设置的恢复入口，以及无声降级、恢复成功等说明语义 | `audio_master_volume`、`audio_bgm_volume`、`audio_sfx_volume`、`audio_ambience_volume`、`audio_muted_categories`、播放器可见的设置项名称与恢复提示 | 存档系统定义“音频设置如何保存/恢复”；音频系统定义“哪些播放偏好需要保留、怎样在无声或恢复后表达状态” |
 | 存档与读档系统 | 全局一致性快照、兼容迁移、恢复路径 | - | 本系统拥有快照边界、版本校验和恢复策略；不拥有下游系统的业务内容定义 |
 
 ## Formulas
@@ -208,14 +215,20 @@
 - **If 读档时发现存档版本低于当前版本但仍在支持跨度内**: 系统必须先执行迁移，再做完整性与一致性复检；迁移未通过前不得进入 `State Restore`。
 - **If 读档时发现存档版本超出 `supported_version_gap`**: 该档案必须被标记为不受支持；系统不得尝试“尽量读一部分”，以免恢复出看似能玩但实际错误的世界状态。
 - **If 迁移后新增字段需要默认值**: 默认值必须来自当前版本已声明的兼容规则；不得临时猜测或按运行时缓存补值后直接视为正式权威数据。
+- **If 旧存档缺少技能/特性新增的长期字段**: 迁移必须按技能与特性系统声明的兼容规则补齐候选进度、特性冷却、反馈确认、身份历史和迁移历史；无法补齐到可验证状态时，该档不得进入 `State Restore`。
 - **If 最近稳定节点语义与实际快照内容冲突**: 该快照应判定为异常数据；系统必须优先信任完整性校验和一致性结果，并进入恢复或回退流程。
-- **If 当前档案记录自己停在 `Match In Progress` 或其他瞬时节点**: 该档案不得作为标准成功读档结果直接恢复；系统必须回退到最近一个已确认稳定节点，或判定该档异常。
+- **If 当前档案记录自己停在 `Match In Progress`、技能/特性 `Skill Evaluation`、`Trait Evaluation`、`Settlement Transaction` 或其他瞬时节点**: 该档案不得作为标准成功读档结果直接恢复；系统必须回退到最近一个已确认稳定节点，或判定该档异常。
 - **If 某次赛后结算已经发奖，但存档中未写入对应资源变化**: 这是典型跨系统不一致；系统必须视为校验失败，而不是在读档时再次自动补发，避免重复奖励。
 - **If 某次阶段结算完成后立刻触发赛季结算**: 本系统必须保证这两个节点的已确认结果都进入同一一致性快照，或按固定顺序生成可解释的连续稳定快照；不得只落其中一半。
 - **If 玩家读档时当前运行世界已有未保存进度**: 系统必须明确提示当前未保存进度将被放弃；只有玩家确认后才能切换到目标档案。
 - **If 自动保存与手动保存几乎同时命中同一稳定节点**: 系统必须使用固定优先级或队列顺序处理，避免两个保存流程互相覆盖或生成来源不明的最终快照。
 - **If 存档摘要可读，但正文数据损坏**: UI 不能仅凭摘要把它当作正常档案；进入读档时必须以正文校验结果为准，并把该档标记为损坏或需恢复。
 - **If 下游系统在读档恢复后尝试用本地缓存覆盖权威值**: 该覆盖必须无效；所有运行时缓存都只能从恢复后的权威快照重新派生。
+- **If 技能/特性反馈已确认并写入 `feedback_ack` 后保存**: 读档后该反馈不得再次作为新提示出现；若玩家需要回看原因，只能从 `player_identity_history_entry` 读取。`pending_skill_trait_feedback.attention_state` 必须原样恢复，合法值为 `needs_first_surface`, `awaiting_ack`, `needs_followup`, `acknowledged`；`surface_state` 必须原样恢复，合法值为 `not_routed`, `queued_for_first_surface`, `shown_on_first_surface`, `deferred_to_followup_notice`, `seen_as_detail_followup`；恢复流程不得把 `deferred_to_followup_notice` 重置回首次提示，且任何未在技能与特性系统矩阵声明的 state pair 都必须判定为不完整。
+- **If 候选技能或候选特性因家族槽位阻塞而未解锁**: 其 `candidate_progress_record` 必须随存档恢复，读档后球员详情仍能展示原候选阶段和阻塞原因，不得被清空成“无进度”。
+- **If 某特性可见触发仍处于冷却窗口内时保存并读档**: 冷却计数必须恢复，后续结算不得因为读档而绕过 `trait_visible_cooldown_window` 重复生成可见触发反馈。
+- **If 技能/特性稳定结算键集合、`anti_grind_window_state`、`reliable_rotation_accumulator_state`、`reliable_rotation_season_settlement_key`、`trait_trigger_effect_record`、`trait_changed` 必需 companion record、`skill_progress_updated` 必需 companion record、浅层 `pre_match_skill_trait_snapshot` 结果 companion 或任一 outcome 必需 companion record 在读档后缺失**: 快照必须判定为不一致；系统不得通过重放旧训练、比赛结果或 UI 缓存来猜测恢复，否则可能重复授予技能、特性或反馈。
+- **If 技能/特性状态变化已经写入但缺少技能与特性系统 Durable Result Companion Matrix 要求的同次 companion records**: 复检必须返回 `skill_trait_snapshot_invalid_partial_commit`，并拒绝该快照作为标准成功读档结果恢复；恢复流程只能回退到最近有效快照或标记该档异常。
 - **If MVP 阶段尚未实现完整多备份链或复杂云同步**: 系统仍必须至少保证“最后一个有效手动档 + 最近有效自动档”的本地恢复底线，优先满足可靠恢复而不是扩展特性。
 
 ## Dependencies
@@ -236,17 +249,20 @@
 
 | Dependent system | Type | What it consumes from 存档与读档系统 | What must be back-referenced later |
 |---|---|---|---|
-| 运动员培养系统 | Hard | 球员长期成长数据的保存/恢复边界、训练结果落档时机 | 必须声明哪些球员字段属于长期权威状态，哪些只是运行时缓存 |
+| 运动员培养系统 | Hard | 球员基础长期成长数据的保存/恢复边界、训练结果落档时机 | 必须声明哪些球员字段属于长期权威状态，哪些只是运行时缓存；技能/特性状态由技能与特性系统定义 |
+| 技能与特性系统 | Hard | 技能等级、技能进度、候选进度、特性状态、可见触发冷却、稳定结算键、迁移历史、待展示反馈、反馈确认和身份历史的保存/恢复边界 | 必须声明其幂等键、反馈确认状态、身份历史和迁移规则如何被持久化，且不通过培养系统间接改写 |
 | 比赛竞技系统 | Hard | 比赛前后恢复节点、赛果确认后持久化入口、异常退出后的恢复规则 | 必须声明哪些比赛结果算“已确认”，以及比赛中途为何不能直接落标准档 |
 | 经济管理系统 | Hard | 资源、账期和长期收支结果的一致性快照入口 | 必须声明资源结算在什么节点视为正式落档，而不是只在内存中暂存 |
 | 小镇建设系统 | Hard | 建设进度、布局和完工结果的统一恢复边界 | 必须声明建设状态中哪些字段必须被持久化，哪些完工结果视为已确认 |
 | 联赛与赛事结构系统 | Hard | 赛季容器、赛程状态、积分与排名的长期持久化框架 | 必须声明赛事数据如何随赛季和关键节点一起保存，而不是独立漂移 |
-| 声望与成就系统 | Hard | 长期解锁、奖励领取标记、成就完成状态的永久保留入口 | 必须声明哪些奖励结果一旦确认就不可重复发放，并依赖本系统防止重复结算 |
+| 声望与成就系统 | Hard | 长期解锁、奖励领取标记、成就完成状态，以及待展示奖励/提示队列的永久保留入口 | 必须声明哪些奖励结果一旦确认就不可重复发放，并依赖本系统保证读档恢复后既不重复发放已确认奖励，也不丢失尚未展示的长期反馈队列 |
+| 随机事件系统 | Hard (Beta) | 待处理事件实例、近期事件历史、事件冷却和事件去重账本的永久保留入口 | 必须声明 `pending_random_event_instance`、`recent_random_event_history`、`event_cooldown_state` 与 `processed_event_settlement_keys` 如何被持久化，并依赖本系统保证读档恢复后既不重复抽取/结算事件，也不丢失尚未处理的事件实例 |
 | 时间与赛季推进系统 | Hard | 已恢复的时间轴位置、阶段状态、关键节点语义 | 必须声明恢复后如何回到 `Planning`、`Match Trigger` 等稳定节点，而不是半完成中间态 |
 | 主循环 UI 框架 | Hard | 存档列表摘要字段、保存/读档/恢复结果语义、风险确认流程 | 必须声明 UI 展示的存档信息直接来自本系统定义的摘要字段 |
 | `design/gdd/player-management-ui.md` | Hard | 读档后球员长期状态的权威来源 | 必须声明展示层缓存不会反向覆盖读档后的正式数据 |
 | 建设与经营 UI | Soft | 读档后经营状态、建设状态和存档摘要展示语义 | 必须声明展示层使用的是恢复后的权威状态，而不是本地旧缓存 |
-| 教程与提示系统 | Soft | 保存失败、迁移成功、兼容性不支持、损坏恢复等提示事件口径 | 必须声明玩家看到的提示文案引用本系统规则，而不是另写一套存档逻辑 |
+| 教程与提示系统 | Hard (Alpha) | 已看提示记录、提示冷却、提示用户偏好和帮助索引状态的永久保留入口；同时消费保存失败、迁移成功、兼容性不支持、损坏恢复等提示事件口径 | 必须声明 `seen_hint_records`、`hint_cooldown_state`、`hint_user_preferences` 与 `help_index_unlock_state` 如何被持久化，并依赖本系统保证读档恢复后不重复刷屏、不丢失玩家提示偏好，且玩家看到的存档提示文案引用本系统规则 |
+| 音频系统 | Hard (Beta) | 玩家音量、静音和音频偏好设置的永久保留入口 | 必须声明 `audio_master_volume`、`audio_bgm_volume`、`audio_sfx_volume`、`audio_ambience_volume` 与 `audio_muted_categories` 如何被持久化，并依赖本系统保证读档恢复后播放设置一致，且这些字段只影响声音播放、不影响玩法状态 |
 | `design/gdd/onboarding-system.md` | Soft | 新档创建、首个自动存档、覆盖确认等流程语义 | 必须声明新手流程不会绕过统一存档接口私自创建或写入特殊进度 |
 
 ### Dependency Rules
@@ -254,10 +270,14 @@
 1. 存档与读档系统提供的是统一持久化边界，不是下游系统业务内容的定义；下游系统可以扩展自己的数据字段，但不能私自绕过本系统写入另一套长期权威状态。
 2. 任何下游系统若希望新增“必须持久化”的长期字段、改变保存时机、或把新的中间态声明为可恢复状态，必须先回到本系统修订，而不能在本地 GDD 中静默扩张存档边界。
 3. 下游系统可以拥有自己的内容表、运行时缓存、临时 UI 状态和推导值，但必须明确区分哪些属于长期权威数据、哪些属于读档后可重建的派生数据。
-4. 当后续 GDD 完成时，依赖关系必须双向成立：本节列出的下游系统，需要在它们各自的 Dependencies 或 Interactions 章节中反向声明“依赖存档与读档系统”。
-5. 如果某个系统只展示存档信息而不改变长期状态，则它对本系统属于软依赖；如果某个系统会生成、确认、恢复、迁移或持久化长期状态，则属于硬依赖。
-6. 在 MVP 阶段，时间与赛季推进系统、运动员培养系统、比赛竞技系统和经济管理系统是最关键的承接者；它们的状态边界必须优先验证是否能被本系统稳定保存与恢复。
-7. 本系统必须优先兼容 Foundation 层已定义的共享语义，尤其是数值系统的权威长期值和时间系统的稳定节点；若这些上游语义变更，本系统必须同步修订，否则下游恢复语义会失真。
+4. 技能与特性系统的长期字段必须以该系统声明的稳定 ID、稳定结算键和迁移规则为准；存档系统不得用球员管理 UI、比赛表现 UI 或运动员培养系统的展示缓存反推技能/特性状态。
+5. 当后续 GDD 完成时，依赖关系必须双向成立：本节列出的下游系统，需要在它们各自的 Dependencies 或 Interactions 章节中反向声明“依赖存档与读档系统”。
+6. 随机事件系统的待处理事件、事件历史、冷却和去重账本属于长期权威状态；存档系统不得通过 UI 展示缓存、时间推进回放或经济/培养侧副作用反推事件是否已触发或已结算。
+7. 教程与提示系统的已看提示、提示冷却、玩家提示偏好和帮助索引状态属于长期展示支持状态；存档系统必须保存并恢复这些字段，但不得把它们用于推导任何玩法结算结果。
+8. 音频系统的主音量、BGM 音量、SFX 音量、环境音音量和静音分类属于长期播放偏好；存档系统必须保存并恢复这些字段，但不得把它们用于推导任何玩法结算结果或 UI 流程结果。
+9. 如果某个系统只展示存档信息而不改变长期状态，则它对本系统属于软依赖；如果某个系统会生成、确认、恢复、迁移或持久化长期状态，则属于硬依赖。
+10. 在 MVP 阶段，时间与赛季推进系统、运动员培养系统、比赛竞技系统和经济管理系统是最关键的承接者；它们的状态边界必须优先验证是否能被本系统稳定保存与恢复。
+11. 本系统必须优先兼容 Foundation 层已定义的共享语义，尤其是数值系统的权威长期值和时间系统的稳定节点；若这些上游语义变更，本系统必须同步修订，否则下游恢复语义会失真。
 
 ## Tuning Knobs
 
@@ -299,6 +319,13 @@
 - **GIVEN** 一次阶段结算与赛季结算连续命中，**WHEN** QA 在该节点后保存并读档恢复，**THEN** 两个节点已经确认的长期结果都必须被正确保留，不得只恢复其中一半。
 - **GIVEN** 读档前当前运行世界存在未保存长期变更，**WHEN** QA 尝试载入另一档，**THEN** 系统必须明确警告当前未保存进度将被放弃，且只有在确认后才允许切换。
 - **GIVEN** 读档完成后下游系统需要展示属性、资源、建设或赛季信息，**WHEN** QA 检查展示值来源，**THEN** 所有展示都必须来自恢复后的权威快照或其重新派生值，而不是旧缓存反向覆盖。
+- **GIVEN** 一个存档包含已拥有技能、技能等级、当前等级剩余进度、候选进度、`candidate_record_id`、特性状态、可见触发冷却、`anti_grind_window_state`、`reliable_rotation_accumulator_state`、`reliable_rotation_season_settlement_key`、`evaluated_settlement_keys`、`processed_settlement_keys`、`pending_skill_trait_feedback.attention_state`、`pending_skill_trait_feedback.surface_state`、`feedback_ack` 和 `player_identity_history_entry`，**WHEN** QA 保存并读档，**THEN** 这些字段必须逐项恢复一致，且技能与特性系统恢复后只能处于完整 durable settlement result 已提交后的 `Skill Idle`，或完全看不到该 result；不得恢复到可重放半结算入口。
+- **GIVEN** 某同家族候选技能因主技能槽位占用而只写入 `candidate_progress_record`，**WHEN** QA 保存、读档并打开 Player Detail，**THEN** 候选阶段和 `blocked_reason_label` 必须仍可展示，不得丢失为“无候选进度”。
+- **GIVEN** 某特性在保存前刚生成过一次可见反馈且未达到 `trait_visible_cooldown_window`，**WHEN** QA 读档后推进下一次相关结算，**THEN** 系统必须保留 `last_visible_feedback_settlement_id` 与 `settlements_since_last_visible_trigger`，不得因读档而重复创建可见触发反馈；若规则层效果仍满足生效条件，幕后效果可继续生效，但不得绕过可见冷却。
+- **GIVEN** 一条 `pending_skill_trait_feedback` 已展示并写入 `feedback_ack` 后保存，**WHEN** QA 读档、返回同一比赛结果或打开对应球员详情，**THEN** 该反馈不得再次作为新提示弹出，但对应原因必须仍能在 `player_identity_history_entry` 中回看；若 `feedback_ack` 存在但对应 `pending_skill_trait_feedback.attention_state != acknowledged`，或 `attention_state = acknowledged` 但缺少 `feedback_ack`，复检必须返回 `skill_trait_snapshot_invalid_partial_commit`。
+- **GIVEN** 同一训练、比赛或可靠轮换赛季稳定结算结果在读档后被重复提交，**WHEN** QA 检查 `evaluated_settlement_keys` 与 `processed_settlement_keys`，**THEN** 已评估键必须使重复提交返回 idempotent no-op，系统不得重复授予技能、重复升级、重复添加特性、重复生成候选进度、重复累计 `reliable_rotation_accumulator_state` 或重复创建反馈。
+- **GIVEN** 一个快照包含 `skill_unlocked`、`skill_upgraded`、`skill_progress_updated`、`trait_added`、`trait_changed`、`trait_trigger_effect`、`trait_trigger_visible`、`candidate_updated` 或 `feedback_ack` 等技能/特性 durable outcome，但缺少技能与特性系统 Durable Result Companion Matrix 声明的任一必需 companion record，**WHEN** QA 执行读档复检，**THEN** 系统必须返回 `skill_trait_snapshot_invalid_partial_commit`，并拒绝进入 `State Restore`；若 `candidate_updated` 的 subject 是 `trait_reliable_rotation`，复检还必须要求同次存在 `reliable_rotation_accumulator_state` 与通用 canonical 生成的 `reliable_rotation_season_settlement_key`。
+- **GIVEN** 旧版本存档中的技能或特性 ID 需要迁移，**WHEN** QA 完成迁移并检查迁移历史，**THEN** 新 ID 必须保留等级、剩余进度、`candidate_progress_record`、`candidate_record_id`、`pending_skill_trait_feedback.attention_state`、`pending_skill_trait_feedback.surface_state`、`feedback_ack`、`evaluated_settlement_keys`、`processed_settlement_keys`、`old_feedback_key_aliases[]`、`processed_key_aliases[]`、`reliable_rotation_accumulator_state`、`reliable_rotation_season_settlement_id`、`reliable_rotation_season_settlement_key` 和身份历史，旧 ID 必须写入迁移历史或废弃映射记录，且迁移结果重新通过完整性与一致性复检；旧反馈不得重新弹出，旧结算键重放不得产生新技能/特性结果。
 - **GIVEN** 存档列表展示摘要信息，**WHEN** QA 核对 `save_summary_progress_ratio` 与当前赛季/阶段进度，**THEN** 展示比例必须与公式计算结果一致，并与实际存档进度语义保持一致。
 - **GIVEN** MVP 版本尚未实现复杂云同步或长备份链，**WHEN** QA 制造一次最近档损坏场景，**THEN** 系统至少必须能验证“最后一个有效手动档 + 最近有效自动档”的本地恢复底线是否成立。
 - **GIVEN** 一次典型玩家会话在正常节奏中推进训练、比赛和结算，**WHEN** QA 采集保存与读档体感样本，**THEN** 自动保存频率、保存耗时和读档耗时必须落在本 GDD 调参目标带内，或明确标记为调优未通过。

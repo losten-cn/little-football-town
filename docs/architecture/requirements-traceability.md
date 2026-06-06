@@ -1,63 +1,373 @@
-# Architecture Requirements Traceability Matrix
+# Requirements Traceability Matrix (RTM)
 
-> **Generated**: 2026-05-19
-> **Source Registry**: `docs/architecture/tr-registry.yaml`
-> **Architecture Review**: `docs/architecture/architecture-review-2026-05-17.md`
-> **Status**: 0 Foundation gaps / 0 Core gaps / 2 partial coverage items
+> Last Updated: 2026-06-03
+> Mode: `/architecture-review rtm`
+> Coverage: 45.8% full chain complete (92/201 GDD → ADR → Story → Test)
+> Convergence posture: warnings are allowed; block only implementation-breaking stable payload, save/load, or settlement contract gaps.
 
-## Gate Summary
+## How to read this matrix
 
-| Layer | Total Requirements | Covered | Partial / N/A | Gaps |
-|-------|--------------------|---------|---------------|------|
-| Foundation | 42 | 36 | 6 | 0 |
-| Core | 56 | 54 | 2 | 0 |
-| Feature | 14 | 14 | 0 | 0 |
-| Presentation | 21 | 4 | 17 | 0 |
-| Polish | 10 | 0 | 10 | 0 |
-| Total | 143 | 108 | 35 | 0 |
+| Column | Meaning |
+|--------|---------|
+| TR-ID | Stable requirement ID from `docs/architecture/tr-registry.yaml`. |
+| GDD | Source design document. |
+| ADR | Architectural decision governing implementation. |
+| Story | Story file that implements this requirement. |
+| Test File | Automated test evidence path stated by the story. |
+| Status | `COVERED`, `MISSING TEST`, `NONE`, `NO STORY`, or `NO ADR`. |
 
-## Foundation Coverage
+## Coverage Summary
 
-| Domain | Source GDD | Governing ADR(s) | Coverage |
-|--------|------------|------------------|----------|
-| Game Concept / Core Loop | `design/gdd/game-concept.md` | `ADR-0001`, `ADR-0002`, `ADR-0005`, `ADR-0006`, `ADR-0007`, `ADR-0008`, `ADR-0009` | Covered |
-| Balance / Formula Config | `design/gdd/balance-system.md` | `ADR-0004`, `ADR-0005`, `ADR-0006`, `ADR-0007`, `ADR-0008` | Covered |
-| Save / Load | `design/gdd/save-and-load-system.md` | `ADR-0003` | Covered |
-| Time / Season Progression | `design/gdd/time-and-season-progression-system.md` | `ADR-0002`, `ADR-0003` | Covered |
-| Scene / Screen Navigation | `design/gdd/main-loop-ui-framework.md` | `ADR-0001`, `ADR-0002` | Covered |
+| Status | Count | % | Notes |
+|--------|------:|---:|-------|
+| COVERED — full chain complete | 92 | 45.8% | ADR + story + existing automated test evidence are present. |
+| MISSING test — story exists, stated automated test file missing | 0 | 0.0% | No automated evidence path exists on disk. |
+| NONE — story exists, no automated test path stated | 0 | 0.0% | May be acceptable for UI/visual/manual evidence only. |
+| NO STORY — ADR exists, not yet implemented | 95 | 47.3% | Expected for future layer or not-yet-scheduled systems. |
+| NO ADR — registered requirement lacks architecture coverage | 14 | 7.0% | Not a global blocker, but blocks the related implementation before story work starts. |
+| Total requirements | 201 | 100.0% | Active, non-deprecated TR registry entries. |
 
-## Core Coverage
+> Gate Classification: For the Technical Setup → Pre-Production gate, `NO ADR` rows for Random Event, Audio, and future Presentation slices are warning-only unless that slice is in active implementation. They become blocking before related story implementation begins.
 
-| Domain | Source GDD | Governing ADR(s) | Coverage |
-|--------|------------|------------------|----------|
-| Player Development | `design/gdd/player-development-system.md` | `ADR-0005`, `ADR-0007`, `ADR-0008`, `ADR-0003` | Covered |
-| Match Competition | `design/gdd/match-competition-system.md` | `ADR-0006`, `ADR-0005`, `ADR-0008`, `ADR-0007`, `ADR-0009` | Covered |
-| Economy Management | `design/gdd/economy-management-system.md` | `ADR-0007`, `ADR-0004`, `ADR-0003` | Partial |
-| Town Building | `design/gdd/town-building-system.md` | `ADR-0008`, `ADR-0007`, `ADR-0004`, `ADR-0003` | Partial |
-| League Competition | `design/gdd/league-competition-structure-system.md` | `ADR-0009`, `ADR-0006`, `ADR-0007`, `ADR-0002` | Covered |
+## Source Inventory
 
-## Partial Coverage Items
+- Active TR registry entries: 201
+- Story files scanned: 63
+- Automated test glob matches: 135
+- Missing stated automated test paths: 0
+- Story files with no TR-ID: 1
+  - `production/epics/balance-system/story-009-balance-statistical-validation.md` — Story 009: 验证数值公式可复核性与随机统计边界
+- Missing non-automated/manual evidence paths noted but not counted as blocking RTM automated-test failures:
+  - `production/qa/smoke-balance-config.md` — referenced by `production/epics/balance-system/story-001-balance-config-validation.md`; actual replacement evidence exists at `production/qa/smoke-2026-05-25.md`.
+  - `production/qa/evidence/balance-statistical-validation-evidence.md` — referenced by `production/epics/balance-system/story-009-balance-statistical-validation.md` as optional supplemental manual evidence.
 
-| TR-ID | Requirement | Governing ADR | Status | Required Follow-up |
-|-------|-------------|---------------|--------|--------------------|
-| TR-economy-008 | AP daily recovery formula | `ADR-0007` | Partial | ADR covers settlement but not daily AP regeneration timing detail. Clarify during Economy implementation story or ADR revision. |
-| TR-town-013 | Maximum adjacency bonus cap 15.0 | `ADR-0008` | Partial | ADR computes adjacency bonuses but must explicitly enforce the GDD cap before implementation. |
+## Full Traceability Matrix
 
-## ADR Implementation Order
+| TR-ID | GDD | Requirement | ADR | Story | Test File | Status |
+|-------|-----|-------------|-----|-------|-----------|--------|
+| `TR-gameconcept-001` | `design/gdd/game-concept.md` | Dual-core loop: 培养→比赛→反馈→再培养 | ADR-0001, ADR-0002, ADR-0005, ADR-0006, ADR-0007, ADR-0008, ADR-0009 | — | — | NO STORY |
+| `TR-gameconcept-002` | `design/gdd/game-concept.md` | Three resource types: 经费, 运动点数(AP), 研究点数(RP) | ADR-0001, ADR-0002, ADR-0005, ADR-0006, ADR-0007, ADR-0008, ADR-0009 | — | — | NO STORY |
+| `TR-gameconcept-003` | `design/gdd/game-concept.md` | 8 game states spanning Planning through SeasonStart | ADR-0001, ADR-0002, ADR-0005, ADR-0006, ADR-0007, ADR-0008, ADR-0009 | — | — | NO STORY |
+| `TR-gameconcept-004` | `design/gdd/game-concept.md` | Three-layer time cycles: action windows → stages → seasons | ADR-0001, ADR-0002, ADR-0005, ADR-0006, ADR-0007, ADR-0008, ADR-0009 | — | — | NO STORY |
+| `TR-gameconcept-005` | `design/gdd/game-concept.md` | `core_progress = (player_power_growth_index + competition_achievement_index) / 2` | ADR-0001, ADR-0002, ADR-0005, ADR-0006, ADR-0007, ADR-0008, ADR-0009 | — | — | NO STORY |
+| `TR-gameconcept-006` | `design/gdd/game-concept.md` | `decision_pressure = (1 - remaining_action_windows / max) × urgency_multiplier` | ADR-0001, ADR-0002, ADR-0005, ADR-0006, ADR-0007, ADR-0008, ADR-0009 | — | — | NO STORY |
+| `TR-gameconcept-007` | `design/gdd/game-concept.md` | `retention_drive = next_key_node_visible × (1 - season_completion) × content_promise_strength` | ADR-0001, ADR-0002, ADR-0005, ADR-0006, ADR-0007, ADR-0008, ADR-0009 | — | — | NO STORY |
+| `TR-balance-001` | `design/gdd/balance-system.md` | Five core attributes (SPD/PWR/TEC/INT/STA) with three-layer semantics (current/potential/effective) | ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008 | `production/epics/balance-system/story-002-attribute-formula.md` | `tests/unit/balance/attribute_formula_test.gd` | COVERED |
+| `TR-balance-002` | `design/gdd/balance-system.md` | `effective_attribute_value = (current + flat_modifiers) × (1 + percent_modifiers), clamped [1, 100]` | ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008 | `production/epics/balance-system/story-002-attribute-formula.md` | `tests/unit/balance/attribute_formula_test.gd` | COVERED |
+| `TR-balance-003` | `design/gdd/balance-system.md` | `attribute_growth = raw × (1 - current/potential)^decay_factor` | ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008 | `production/epics/balance-system/story-003-attribute-growth.md` | `tests/unit/balance/attribute_growth_test.gd` | COVERED |
+| `TR-balance-004` | `design/gdd/balance-system.md` | `positional_overall_rating` aggregates position-weighted attributes into 0-100 score | ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008 | `production/epics/balance-system/story-005-positional-rating.md` | `tests/unit/balance/positional_rating_test.gd` | COVERED |
+| `TR-balance-005` | `design/gdd/balance-system.md` | `base_win_probability = 0.5 + rating_win_slope × (home_strength - away_strength), clamped [0.05, 0.95]` | ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008 | `production/epics/balance-system/story-006-win-probability.md` | `tests/unit/balance/win_probability_test.gd` | COVERED |
+| `TR-balance-006` | `design/gdd/balance-system.md` | `flat_modifier_sum_budget [-10, 15]; percent_modifier_sum_budget [-0.20, 0.30]` | ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008 | `production/epics/balance-system/story-001-balance-config-validation.md` | `tests/unit/balance/balance_config_validation_test.gd`<br>`tests/integration/balance/balance_config_loader_integration_test.gd` | COVERED |
+| `TR-balance-007` | `design/gdd/balance-system.md` | `resource_buffer_multiplier ∈ [2.0, 4.0]` | ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008 | `production/epics/balance-system/story-001-balance-config-validation.md`<br>`production/epics/balance-system/story-004-resource-settlement.md` | `tests/unit/balance/balance_config_validation_test.gd`<br>`tests/integration/balance/balance_config_loader_integration_test.gd`<br>`tests/unit/balance/resource_settlement_test.gd` | COVERED |
+| `TR-balance-008` | `design/gdd/balance-system.md` | 4 player tiers with distinct potential_cap and training_efficiency bands | ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008 | `production/epics/balance-system/story-001-balance-config-validation.md` | `tests/unit/balance/balance_config_validation_test.gd`<br>`tests/integration/balance/balance_config_loader_integration_test.gd` | COVERED |
+| `TR-balance-009` | `design/gdd/balance-system.md` | 4 diagnostic formulas: AP use rate, overall win rate, even match win rate, milestone completion time | ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008 | `production/epics/balance-system/story-007-kpi-formulas.md` | `tests/unit/balance/kpi_formula_test.gd` | COVERED |
+| `TR-balance-010` | `design/gdd/balance-system.md` | All shared formula parameters must live in data-driven config, not hardcoded in `src/` | ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008 | `production/epics/balance-system/story-001-balance-config-validation.md`<br>`production/epics/balance-system/story-008-balance-consistency-scan.md` | `tests/unit/balance/balance_config_validation_test.gd`<br>`tests/integration/balance/balance_config_loader_integration_test.gd`<br>`tests/integration/balance/balance_consistency_test.gd` | COVERED |
+| `TR-balance-011` | `design/gdd/balance-system.md` | Modifier application order: flat first, then percent | ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008 | `production/epics/balance-system/story-002-attribute-formula.md` | `tests/unit/balance/attribute_formula_test.gd` | COVERED |
+| `TR-balance-012` | `design/gdd/balance-system.md` | `decay_factor ∈ [0.8, 1.8], default 1.2` | ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008 | `production/epics/balance-system/story-001-balance-config-validation.md`<br>`production/epics/balance-system/story-003-attribute-growth.md` | `tests/unit/balance/balance_config_validation_test.gd`<br>`tests/integration/balance/balance_config_loader_integration_test.gd`<br>`tests/unit/balance/attribute_growth_test.gd` | COVERED |
+| `TR-balance-013` | `design/gdd/balance-system.md` | `potential_cap_span ∈ [10, 20], default 15` | ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008 | `production/epics/balance-system/story-001-balance-config-validation.md`<br>`production/epics/balance-system/story-003-attribute-growth.md` | `tests/unit/balance/balance_config_validation_test.gd`<br>`tests/integration/balance/balance_config_loader_integration_test.gd`<br>`tests/unit/balance/attribute_growth_test.gd` | COVERED |
+| `TR-balance-014` | `design/gdd/balance-system.md` | Numeric lifecycle states: Draft→Tuned→Locked→Revised→Deprecated | ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008 | `production/epics/balance-system/story-008-balance-consistency-scan.md` | `tests/integration/balance/balance_consistency_test.gd` | COVERED |
+| `TR-save-001` | `design/gdd/save-and-load-system.md` | SaveManager is the sole disk writer | ADR-0003, ADR-0010 | `production/epics/save-and-load-system/story-001-save-snapshot-slots.md`<br>`production/epics/save-and-load-system/story-008-save-recovery-flow.md` | `tests/integration/save/save_snapshot_slots_test.gd`<br>`tests/integration/save/save_recovery_flow_test.gd` | COVERED |
+| `TR-save-002` | `design/gdd/save-and-load-system.md` | 3 manual save slots + 1 autosave slot | ADR-0003, ADR-0010 | `production/epics/save-and-load-system/story-001-save-snapshot-slots.md`<br>`production/epics/save-and-load-system/story-009-save-summary-performance.md` | `tests/integration/save/save_snapshot_slots_test.gd`<br>`tests/integration/save/save_summary_performance_test.gd` | COVERED |
+| `TR-save-003` | `design/gdd/save-and-load-system.md` | Save completeness: all 12 dependency systems captured atomically | ADR-0003, ADR-0010 | `production/epics/save-and-load-system/story-002-save-registration-snapshot.md` | `tests/integration/save/save_registration_snapshot_test.gd` | COVERED |
+| `TR-save-004` | `design/gdd/save-and-load-system.md` | Cross-system consistency: `save_time_state == TimeManager.get_state()` instantaneously | ADR-0003, ADR-0010 | `production/epics/save-and-load-system/story-007-load-restore-order.md` | `tests/integration/save/load_restore_order_test.gd` | COVERED |
+| `TR-save-005` | `design/gdd/save-and-load-system.md` | Stable save nodes: Planning, Match Trigger, Post-Match Settlement, Stage Settlement, Season Settlement, Offseason | ADR-0003, ADR-0010 | `production/epics/save-and-load-system/story-003-stable-node-save-gate.md`<br>`production/epics/save-and-load-system/story-004-autosave-triggers.md` | `tests/unit/save/stable_node_save_gate_test.gd`<br>`tests/integration/save/autosave_triggers_test.gd` | COVERED |
+| `TR-save-006` | `design/gdd/save-and-load-system.md` | Match In Progress is NOT a stable save node | ADR-0003, ADR-0010 | `production/epics/save-and-load-system/story-003-stable-node-save-gate.md`<br>`production/epics/save-and-load-system/story-004-autosave-triggers.md` | `tests/unit/save/stable_node_save_gate_test.gd`<br>`tests/integration/save/autosave_triggers_test.gd` | COVERED |
+| `TR-save-007` | `design/gdd/save-and-load-system.md` | Version migration: additive-forward only, no field deletion | ADR-0003, ADR-0010 | `production/epics/save-and-load-system/story-006-save-migration.md` | `tests/integration/save/save_migration_test.gd` | COVERED |
+| `TR-save-008` | `design/gdd/save-and-load-system.md` | Save integrity verified via hash checksum | ADR-0003, ADR-0010 | `production/epics/save-and-load-system/story-005-save-integrity-atomic-commit.md`<br>`production/epics/save-and-load-system/story-008-save-recovery-flow.md` | `tests/integration/save/save_integrity_atomic_commit_test.gd`<br>`tests/integration/save/save_recovery_flow_test.gd` | COVERED |
+| `TR-save-009` | `design/gdd/save-and-load-system.md` | Load time < 500ms for full save | ADR-0003, ADR-0010 | `production/epics/save-and-load-system/story-009-save-summary-performance.md` | `tests/integration/save/save_summary_performance_test.gd` | COVERED |
+| `TR-save-010` | `design/gdd/save-and-load-system.md` | Auto-save triggers: `match_completed`, `time_season_ended`, `town_facility_completed`, `WM_CLOSE_REQUEST` | ADR-0003, ADR-0010 | `production/epics/save-and-load-system/story-004-autosave-triggers.md` | `tests/integration/save/autosave_triggers_test.gd` | COVERED |
+| `TR-save-011` | `design/gdd/save-and-load-system.md` | Registration contract: each Core system registers serialize/deserialize callables with SaveManager | ADR-0003, ADR-0010 | `production/epics/save-and-load-system/story-002-save-registration-snapshot.md` | `tests/integration/save/save_registration_snapshot_test.gd` | COVERED |
+| `TR-save-012` | `design/gdd/save-and-load-system.md` | Deserialize order: Time→Town→Player→League→Economy→Match | ADR-0003, ADR-0010 | `production/epics/save-and-load-system/story-007-load-restore-order.md` | `tests/integration/save/load_restore_order_test.gd` | COVERED |
+| `TR-save-013` | `design/gdd/save-and-load-system.md` | Skill/trait durable state persists `candidate_progress_record`, `trait_cooldown_state`, `pending_skill_trait_feedback`, `feedback_ack`, `identity_history`, `migration_record`, and processed settlement keys | ADR-0003, ADR-0010 | — | — | NO STORY |
+| `TR-save-014` | `design/gdd/save-and-load-system.md` | Save/load restores durable settlement outcomes only and never replays half-resolved skill/trait evaluation state | ADR-0003, ADR-0010 | — | — | NO STORY |
+| `TR-time-001` | `design/gdd/time-and-season-progression-system.md` | 7 game states: Planning through SeasonStart | ADR-0002, ADR-0003 | `production/epics/time-and-season-progression-system/story-001-time-manager-state-contract.md`<br>`production/epics/time-and-season-progression-system/story-005-season-progress-flow.md`<br>`production/epics/time-and-season-progression-system/story-008-time-restore-boundary.md` | `tests/integration/time/time_manager_state_contract_test.gd`<br>`tests/unit/time/season_progress_flow_test.gd`<br>`tests/integration/time/time_restore_boundary_test.gd` | COVERED |
+| `TR-time-002` | `design/gdd/time-and-season-progression-system.md` | `action_time_cost` defines action window consumption | ADR-0002, ADR-0003 | `production/epics/time-and-season-progression-system/story-002-action-window-formula.md` | `tests/unit/time/action_window_formula_test.gd` | COVERED |
+| `TR-time-003` | `design/gdd/time-and-season-progression-system.md` | `available_action_windows`: remaining actions before forced time advance | ADR-0002, ADR-0003 | `production/epics/time-and-season-progression-system/story-002-action-window-formula.md`<br>`production/epics/time-and-season-progression-system/story-009-time-status-regression.md` | `tests/unit/time/action_window_formula_test.gd`<br>`tests/integration/time/time_status_regression_test.gd` | COVERED |
+| `TR-time-004` | `design/gdd/time-and-season-progression-system.md` | `match_trigger_reached = accumulated ≥ match_interval AND no match in progress` | ADR-0002, ADR-0003 | `production/epics/time-and-season-progression-system/story-003-match-trigger.md`<br>`production/epics/time-and-season-progression-system/story-006-key-node-priority.md`<br>`production/epics/time-and-season-progression-system/story-007-time-eventbus-integration.md` | `tests/unit/time/match_trigger_test.gd`<br>`tests/integration/time/key_node_priority_test.gd`<br>`tests/integration/time/time_eventbus_integration_test.gd` | COVERED |
+| `TR-time-005` | `design/gdd/time-and-season-progression-system.md` | `stage_settlement_trigger_reached = matches_played ≥ matches_per_stage` | ADR-0002, ADR-0003 | `production/epics/time-and-season-progression-system/story-004-stage-settlement-trigger.md`<br>`production/epics/time-and-season-progression-system/story-006-key-node-priority.md`<br>`production/epics/time-and-season-progression-system/story-007-time-eventbus-integration.md` | `tests/unit/time/stage_settlement_trigger_test.gd`<br>`tests/integration/time/key_node_priority_test.gd`<br>`tests/integration/time/time_eventbus_integration_test.gd` | COVERED |
+| `TR-time-006` | `design/gdd/time-and-season-progression-system.md` | `season_progress_ratio = matches_played / total_matches` | ADR-0002, ADR-0003 | `production/epics/time-and-season-progression-system/story-005-season-progress-flow.md`<br>`production/epics/time-and-season-progression-system/story-006-key-node-priority.md`<br>`production/epics/time-and-season-progression-system/story-007-time-eventbus-integration.md`<br>`production/epics/time-and-season-progression-system/story-009-time-status-regression.md` | `tests/unit/time/season_progress_flow_test.gd`<br>`tests/integration/time/key_node_priority_test.gd`<br>`tests/integration/time/time_eventbus_integration_test.gd`<br>`tests/integration/time/time_status_regression_test.gd` | COVERED |
+| `TR-time-007` | `design/gdd/time-and-season-progression-system.md` | TimeManager is Autoload #5 — loaded after ScreenManager, before Core systems | ADR-0002, ADR-0003 | `production/epics/time-and-season-progression-system/story-001-time-manager-state-contract.md` | `tests/integration/time/time_manager_state_contract_test.gd` | COVERED |
+| `TR-time-008` | `design/gdd/time-and-season-progression-system.md` | TimeManager exposes `get_state()` for save snapshots | ADR-0002, ADR-0003 | `production/epics/time-and-season-progression-system/story-001-time-manager-state-contract.md`<br>`production/epics/time-and-season-progression-system/story-007-time-eventbus-integration.md`<br>`production/epics/time-and-season-progression-system/story-008-time-restore-boundary.md`<br>`production/epics/time-and-season-progression-system/story-009-time-status-regression.md` | `tests/integration/time/time_manager_state_contract_test.gd`<br>`tests/integration/time/time_eventbus_integration_test.gd`<br>`tests/integration/time/time_restore_boundary_test.gd`<br>`tests/integration/time/time_status_regression_test.gd` | COVERED |
+| `TR-playerdev-001` | `design/gdd/player-development-system.md` | Player must have: id, name, age, position, 5 attrs, train_efficiency, condition, morale, history, milestones | ADR-0005, ADR-0007, ADR-0008, ADR-0003 | `production/epics/player-development-system/story-001-player-data-serialization-boundary.md`<br>`production/epics/player-development-system/story-007-player-milestone-history.md`<br>`production/epics/player-development-system/story-008-player-state-boundary.md` | `tests/integration/player-dev/player_data_serialization_boundary_test.gd`<br>`tests/integration/player-dev/player_milestone_history_test.gd`<br>`tests/integration/player-dev/player_state_boundary_test.gd` | COVERED |
+| `TR-playerdev-002` | `design/gdd/player-development-system.md` | `fatigue_adjusted_training_efficiency = efficiency × condition × morale, clamped [0.5, 1.8]` | ADR-0005, ADR-0007, ADR-0008, ADR-0003 | `production/epics/player-development-system/story-002-training-efficiency-formula.md`<br>`production/epics/player-development-system/story-008-player-state-boundary.md` | `tests/unit/player-dev/training_efficiency_formula_test.gd`<br>`tests/integration/player-dev/player_state_boundary_test.gd` | COVERED |
+| `TR-playerdev-003` | `design/gdd/player-development-system.md` | `training_actual_gain = attribute_growth × fatigue × focus_match × facility_multiplier` | ADR-0005, ADR-0007, ADR-0008, ADR-0003 | `production/epics/player-development-system/story-003-training-gain-cap.md`<br>`production/epics/player-development-system/story-005-training-roi.md` | `tests/unit/player-dev/training_gain_cap_test.gd`<br>`tests/unit/player-dev/training_roi_test.gd` | COVERED |
+| `TR-playerdev-004` | `design/gdd/player-development-system.md` | `facility_training_multiplier ∈ [1.0, 1.75]` — consumed from TownBuilding | ADR-0005, ADR-0007, ADR-0008, ADR-0003 | `production/epics/player-development-system/story-003-training-gain-cap.md` | `tests/unit/player-dev/training_gain_cap_test.gd` | COVERED |
+| `TR-playerdev-005` | `design/gdd/player-development-system.md` | Training must be atomic: validate→deduct→grow→apply→emit | ADR-0005, ADR-0007, ADR-0008, ADR-0003 | `production/epics/player-development-system/story-006-training-atomic-integration.md` | `tests/integration/player-dev/training_atomic_integration_test.gd` | COVERED |
+| `TR-playerdev-006` | `design/gdd/player-development-system.md` | Training costs via `EconomyManager.accredit_training_cost()` only | ADR-0005, ADR-0007, ADR-0008, ADR-0003 | `production/epics/player-development-system/story-006-training-atomic-integration.md` | `tests/integration/player-dev/training_atomic_integration_test.gd` | COVERED |
+| `TR-playerdev-007` | `design/gdd/player-development-system.md` | `ap_to_funds_weight = 50` from EconomyManager, not overridden locally | ADR-0005, ADR-0007, ADR-0008, ADR-0003 | `production/epics/player-development-system/story-005-training-roi.md` | `tests/unit/player-dev/training_roi_test.gd` | COVERED |
+| `TR-playerdev-008` | `design/gdd/player-development-system.md` | Training gains survive save/load without loss or double-settlement | ADR-0005, ADR-0007, ADR-0008, ADR-0003 | `production/epics/player-development-system/story-001-player-data-serialization-boundary.md`<br>`production/epics/player-development-system/story-009-player-development-regression.md` | `tests/integration/player-dev/player_data_serialization_boundary_test.gd`<br>`tests/integration/player-dev/player_development_regression_test.gd` | COVERED |
+| `TR-playerdev-009` | `design/gdd/player-development-system.md` | Tier potential bands: 普通(60-75), 优秀(72-85), 明星(82-95), 传奇胚子(90-99) | ADR-0005, ADR-0007, ADR-0008, ADR-0003 | `production/epics/player-development-system/story-004-player-tier-band.md` | `tests/unit/player-dev/player_tier_band_test.gd` | COVERED |
+| `TR-playerdev-010` | `design/gdd/player-development-system.md` | Individual `training_efficiency ∈ [0.8, 1.5]` per player | ADR-0005, ADR-0007, ADR-0008, ADR-0003 | `production/epics/player-development-system/story-002-training-efficiency-formula.md`<br>`production/epics/player-development-system/story-004-player-tier-band.md` | `tests/unit/player-dev/training_efficiency_formula_test.gd`<br>`tests/unit/player-dev/player_tier_band_test.gd` | COVERED |
+| `TR-playerdev-011` | `design/gdd/player-development-system.md` | Milestone check: attribute reaching 10-multiple triggers `player_milestone_reached` | ADR-0005, ADR-0007, ADR-0008, ADR-0003 | `production/epics/player-development-system/story-007-player-milestone-history.md` | `tests/integration/player-dev/player_milestone_history_test.gd` | COVERED |
+| `TR-match-001` | `design/gdd/match-competition-system.md` | 8-state match flow: Entry→Pre-Match→Confirmation→First Half→Halftime→Second Half→Result Review→Settlement | ADR-0006, ADR-0005, ADR-0008, ADR-0007, ADR-0009, ADR-0010 | `production/epics/match-competition-system/story-001-match-state-flow.md` | `tests/integration/match/match_state_flow_test.gd` | COVERED |
+| `TR-match-002` | `design/gdd/match-competition-system.md` | `team_match_strength = weighted positional ratings × chemistry + facility_bonus` | ADR-0006, ADR-0005, ADR-0008, ADR-0007, ADR-0009, ADR-0010 | `production/epics/match-competition-system/story-002-team-strength-aggregation.md` | `tests/unit/match/team_strength_aggregation_test.gd` | COVERED |
+| `TR-match-003` | `design/gdd/match-competition-system.md` | `actual_win_probability = base + home + condition + tactical modifiers, clamped [0.05, 0.95]` | ADR-0006, ADR-0005, ADR-0008, ADR-0007, ADR-0009, ADR-0010 | `production/epics/match-competition-system/story-003-actual-win-probability.md` | `tests/unit/match/actual_win_probability_test.gd` | COVERED |
+| `TR-match-004` | `design/gdd/match-competition-system.md` | Key event count per match: 3 ≤ count ≤ 15 | ADR-0006, ADR-0005, ADR-0008, ADR-0007, ADR-0009, ADR-0010 | `production/epics/match-competition-system/story-004-key-event-generation.md` | `tests/unit/match/key_event_generation_test.gd` | COVERED |
+| `TR-match-005` | `design/gdd/match-competition-system.md` | 6 event categories: offensive_push, shot_on_goal, goal_scored, key_defense, tactical_adaptation, stamina_decline | ADR-0006, ADR-0005, ADR-0008, ADR-0007, ADR-0009, ADR-0010 | `production/epics/match-competition-system/story-004-key-event-generation.md` | `tests/unit/match/key_event_generation_test.gd` | COVERED |
+| `TR-match-006` | `design/gdd/match-competition-system.md` | Half-time adjustment: change tactics + up to 3 substitutions, second half only | ADR-0006, ADR-0005, ADR-0008, ADR-0007, ADR-0009, ADR-0010 | `production/epics/match-competition-system/story-005-halftime-adjustment.md` | `tests/integration/match/halftime_adjustment_test.gd` | COVERED |
+| `TR-match-007` | `design/gdd/match-competition-system.md` | Match In Progress NOT a stable restore point — save abandons partial state | ADR-0006, ADR-0005, ADR-0008, ADR-0007, ADR-0009, ADR-0010 | `production/epics/match-competition-system/story-001-match-state-flow.md`<br>`production/epics/match-competition-system/story-008-match-restore-dedup.md` | `tests/integration/match/match_state_flow_test.gd`<br>`tests/integration/match/match_restore_dedup_test.gd` | COVERED |
+| `TR-match-008` | `design/gdd/match-competition-system.md` | Standardized MatchResultPacket consumed by LeagueStructure, EconomyManager, TimeManager, MatchPerfUI | ADR-0006, ADR-0005, ADR-0008, ADR-0007, ADR-0009, ADR-0010 | `production/epics/match-competition-system/story-006-match-result-packet.md` | `tests/integration/match/match_result_packet_test.gd` | COVERED |
+| `TR-match-009` | `design/gdd/match-competition-system.md` | Seeded RNG per match — same seed + inputs = identical outcome | ADR-0006, ADR-0005, ADR-0008, ADR-0007, ADR-0009, ADR-0010 | `production/epics/match-competition-system/story-007-match-rng-determinism.md` | `tests/unit/match/match_rng_determinism_test.gd` | COVERED |
+| `TR-match-010` | `design/gdd/match-competition-system.md` | 5 win_reason categories for post-match analysis | ADR-0006, ADR-0005, ADR-0008, ADR-0007, ADR-0009, ADR-0010 | `production/epics/match-competition-system/story-006-match-result-packet.md` | `tests/integration/match/match_result_packet_test.gd` | COVERED |
+| `TR-match-011` | `design/gdd/match-competition-system.md` | `post_match_growth_tag`: 5 discrete labels | ADR-0006, ADR-0005, ADR-0008, ADR-0007, ADR-0009, ADR-0010 | `production/epics/match-competition-system/story-006-match-result-packet.md` | `tests/integration/match/match_result_packet_test.gd` | COVERED |
+| `TR-match-012` | `design/gdd/match-competition-system.md` | `match_id` in `match_completed` event for LeagueStructure correlation | ADR-0006, ADR-0005, ADR-0008, ADR-0007, ADR-0009, ADR-0010 | `production/epics/match-competition-system/story-006-match-result-packet.md`<br>`production/epics/match-competition-system/story-008-match-restore-dedup.md` | `tests/integration/match/match_result_packet_test.gd`<br>`tests/integration/match/match_restore_dedup_test.gd` | COVERED |
+| `TR-match-013` | `design/gdd/match-competition-system.md` | Full match simulation < 100ms | ADR-0006, ADR-0005, ADR-0008, ADR-0007, ADR-0009, ADR-0010 | `production/epics/match-competition-system/story-009-match-loop-regression.md` | `tests/integration/match/match_loop_regression_test.gd` | COVERED |
+| `TR-match-014` | `design/gdd/match-competition-system.md` | Home advantage bonus consumed from `TownBuilding.compute_home_advantage_bonus()` | ADR-0006, ADR-0005, ADR-0008, ADR-0007, ADR-0009, ADR-0010 | `production/epics/match-competition-system/story-003-actual-win-probability.md` | `tests/unit/match/actual_win_probability_test.gd` | COVERED |
+| `TR-match-015` | `design/gdd/match-competition-system.md` | Stadium revenue multiplier consumed from TownBuilding | ADR-0006, ADR-0005, ADR-0008, ADR-0007, ADR-0009, ADR-0010 | `production/epics/match-competition-system/story-009-match-loop-regression.md` | `tests/integration/match/match_loop_regression_test.gd` | COVERED |
+| `TR-match-016` | `design/gdd/match-competition-system.md` | Formal match fallback resolves through recommended lineup → out-of-position fill → `forfeit_result_packet` | ADR-0006, ADR-0005, ADR-0008, ADR-0007, ADR-0009, ADR-0010 | — | — | NO STORY |
+| `TR-match-017` | `design/gdd/match-competition-system.md` | `pre_match_skill_trait_snapshot` is a locked read-only match input consumed by MatchPerfUI and never recomputed in UI | ADR-0006, ADR-0005, ADR-0008, ADR-0007, ADR-0009, ADR-0010 | — | — | NO STORY |
+| `TR-economy-001` | `design/gdd/economy-management-system.md` | Three resources: funds (可负债), AP (≥1), RP (≥0, MVP隐藏) | ADR-0007, ADR-0004, ADR-0003 | `production/epics/economy-management-system/story-001-economy-authority-transaction-model.md`<br>`production/epics/economy-management-system/story-002-execute-transaction-atomic-validation.md` | `tests/unit/economy/economy_authority_transaction_model_test.gd`<br>`tests/unit/economy/execute_transaction_atomic_validation_test.gd` | COVERED |
+| `TR-economy-002` | `design/gdd/economy-management-system.md` | `execute_transaction()` is the SOLE resource mutation path | ADR-0007, ADR-0004, ADR-0003 | `production/epics/economy-management-system/story-001-economy-authority-transaction-model.md`<br>`production/epics/economy-management-system/story-002-execute-transaction-atomic-validation.md`<br>`production/epics/economy-management-system/story-007-accredited-entry-points.md` | `tests/unit/economy/economy_authority_transaction_model_test.gd`<br>`tests/unit/economy/execute_transaction_atomic_validation_test.gd`<br>`tests/integration/economy/accredited_entry_points_test.gd` | COVERED |
+| `TR-economy-003` | `design/gdd/economy-management-system.md` | Pre-validation rejects transactions violating resource floors | ADR-0007, ADR-0004, ADR-0003 | `production/epics/economy-management-system/story-002-execute-transaction-atomic-validation.md`<br>`production/epics/economy-management-system/story-004-budget-preview-affordability-query.md`<br>`production/epics/economy-management-system/story-009-settlement-order-concurrency-regression.md` | `tests/unit/economy/execute_transaction_atomic_validation_test.gd`<br>`tests/integration/economy/budget_preview_affordability_query_test.gd`<br>`tests/integration/economy/settlement_order_concurrency_regression_test.gd` | COVERED |
+| `TR-economy-004` | `design/gdd/economy-management-system.md` | Warning thresholds: funds_low, ap_low, debt → emit `economy_warning_triggered` | ADR-0007, ADR-0004, ADR-0003 | `production/epics/economy-management-system/story-003-warning-threshold-cooldown-events.md` | `tests/integration/economy/warning_threshold_cooldown_events_test.gd` | COVERED |
+| `TR-economy-005` | `design/gdd/economy-management-system.md` | Three settlement stages: post-match, stage settlement, season settlement | ADR-0007, ADR-0004, ADR-0003 | `production/epics/economy-management-system/story-006-staged-settlement-formulas.md`<br>`production/epics/economy-management-system/story-009-settlement-order-concurrency-regression.md` | `tests/integration/economy/staged_settlement_formulas_test.gd`<br>`tests/integration/economy/settlement_order_concurrency_regression_test.gd` | COVERED |
+| `TR-economy-006` | `design/gdd/economy-management-system.md` | `post_match_funds = base × result_multiplier × stadium × season_bonus` | ADR-0007, ADR-0004, ADR-0003 | `production/epics/economy-management-system/story-006-staged-settlement-formulas.md` | `tests/integration/economy/staged_settlement_formulas_test.gd` | COVERED |
+| `TR-economy-007` | `design/gdd/economy-management-system.md` | Float-to-int conversion: all uses `floor()` | ADR-0007, ADR-0004, ADR-0003 | `production/epics/economy-management-system/story-006-staged-settlement-formulas.md` | `tests/integration/economy/staged_settlement_formulas_test.gd` | COVERED |
+| `TR-economy-008` | `design/gdd/economy-management-system.md` | Daily AP recovery and rest AP recovery formulas | ADR-0007, ADR-0004, ADR-0003 | `production/epics/economy-management-system/story-005-daily-recovery-maintenance-settlement.md` | `tests/integration/economy/daily_recovery_maintenance_settlement_test.gd` | COVERED |
+| `TR-economy-009` | `design/gdd/economy-management-system.md` | `daily_maintenance_cost` deducted from funds, computed by TownBuilding | ADR-0007, ADR-0004, ADR-0003 | `production/epics/economy-management-system/story-005-daily-recovery-maintenance-settlement.md` | `tests/integration/economy/daily_recovery_maintenance_settlement_test.gd` | COVERED |
+| `TR-economy-010` | `design/gdd/economy-management-system.md` | Transaction log retained, last approximately 200, serialized in save | ADR-0007, ADR-0004, ADR-0003 | `production/epics/economy-management-system/story-008-transaction-log-save-contract.md`<br>`production/epics/economy-management-system/story-009-settlement-order-concurrency-regression.md` | `tests/integration/economy/transaction_log_save_contract_test.gd`<br>`tests/integration/economy/settlement_order_concurrency_regression_test.gd` | COVERED |
+| `TR-economy-011` | `design/gdd/economy-management-system.md` | Accredited entry points: `accredit_match_reward`, `accredit_facility_cost`, `accredit_training_cost` | ADR-0007, ADR-0004, ADR-0003 | `production/epics/economy-management-system/story-004-budget-preview-affordability-query.md`<br>`production/epics/economy-management-system/story-007-accredited-entry-points.md` | `tests/integration/economy/budget_preview_affordability_query_test.gd`<br>`tests/integration/economy/accredited_entry_points_test.gd`<br>`tests/integration/town/build_request_validation_test.gd`<br>`tests/integration/town/upgrade_completion_flow_test.gd` | COVERED |
+| `TR-economy-012` | `design/gdd/economy-management-system.md` | Warning cooldown per threshold type to prevent alert spam | ADR-0007, ADR-0004, ADR-0003 | `production/epics/economy-management-system/story-003-warning-threshold-cooldown-events.md`<br>`production/epics/economy-management-system/story-009-settlement-order-concurrency-regression.md` | `tests/integration/economy/warning_threshold_cooldown_events_test.gd`<br>`tests/integration/economy/settlement_order_concurrency_regression_test.gd` | COVERED |
+| `TR-economy-013` | `design/gdd/economy-management-system.md` | Budget preview and affordability queries are read-only and return projected balances plus reason codes without mutating authoritative resources | ADR-0007, ADR-0004, ADR-0003 | `production/epics/economy-management-system/story-004-budget-preview-affordability-query.md` | `tests/integration/economy/budget_preview_affordability_query_test.gd` | COVERED |
+| `TR-town-001` | `design/gdd/town-building-system.md` | 5×5 grid, 4-directional adjacency (Manhattan distance = 1) | ADR-0008, ADR-0007, ADR-0004, ADR-0003 | `production/epics/town-building-system/story-001-town-grid-facility-contract.md`<br>`production/epics/town-building-system/story-003-build-request-validation.md` | `tests/integration/town/town_grid_contract_test.gd`<br>`tests/integration/town/build_request_validation_test.gd` | COVERED |
+| `TR-town-002` | `design/gdd/town-building-system.md` | 4 MVP facility types, 5 levels each | ADR-0008, ADR-0007, ADR-0004, ADR-0003 | `production/epics/town-building-system/story-001-town-grid-facility-contract.md` | `tests/integration/town/town_grid_contract_test.gd` | COVERED |
+| `TR-town-003` | `design/gdd/town-building-system.md` | Facility state machine: Empty→Constructing→Active↔Upgrading→Demolishing→Empty | ADR-0008, ADR-0007, ADR-0004, ADR-0003 | `production/epics/town-building-system/story-001-town-grid-facility-contract.md`<br>`production/epics/town-building-system/story-003-build-request-validation.md`<br>`production/epics/town-building-system/story-004-upgrade-completion-flow.md`<br>`production/epics/town-building-system/story-005-demolish-grid-release.md`<br>`production/epics/town-building-system/story-009-serialization-restore-regression.md` | `tests/integration/town/town_grid_contract_test.gd`<br>`tests/integration/town/build_request_validation_test.gd`<br>`tests/integration/town/upgrade_completion_flow_test.gd`<br>`tests/integration/town/demolish_grid_release_test.gd`<br>`tests/integration/town/serialization_restore_regression_test.gd` | COVERED |
+| `TR-town-004` | `design/gdd/town-building-system.md` | Construction cost: `ceil(base × 1.8^(level-1))` | ADR-0008, ADR-0007, ADR-0004, ADR-0003 | `production/epics/town-building-system/story-002-facility-cost-time-formulas.md` | `tests/unit/town/facility_cost_time_formula_test.gd` | COVERED |
+| `TR-town-005` | `design/gdd/town-building-system.md` | Construction time: `ceil(base × 1.3^(level-1))` | ADR-0008, ADR-0007, ADR-0004, ADR-0003 | `production/epics/town-building-system/story-002-facility-cost-time-formulas.md` | `tests/unit/town/facility_cost_time_formula_test.gd` | COVERED |
+| `TR-town-006` | `design/gdd/town-building-system.md` | `training_efficiency_multiplier = 1.0 + 0.05 × training_ground_level` | ADR-0008, ADR-0007, ADR-0004, ADR-0003 | `production/epics/town-building-system/story-006-training-medical-youth-formulas.md` | `tests/unit/town/training_medical_youth_formula_test.gd` | COVERED |
+| `TR-town-007` | `design/gdd/town-building-system.md` | `home_advantage_bonus = 2.0 × stadium_level, max 10.0` | ADR-0008, ADR-0007, ADR-0004, ADR-0003 | `production/epics/town-building-system/story-007-stadium-adjacency-formulas.md` | `tests/unit/town/stadium_adjacency_formula_test.gd` | COVERED |
+| `TR-town-008` | `design/gdd/town-building-system.md` | `stadium_revenue_multiplier = 1.0 + 0.08 × stadium_level, max 1.40` | ADR-0008, ADR-0007, ADR-0004, ADR-0003 | `production/epics/town-building-system/story-007-stadium-adjacency-formulas.md` | `tests/unit/town/stadium_adjacency_formula_test.gd` | COVERED |
+| `TR-town-009` | `design/gdd/town-building-system.md` | `medical_ap_bonus: clamp(floor(level × bonus_per_level), 1, 3) + adjacency, total [0, 3]` | ADR-0008, ADR-0007, ADR-0004, ADR-0003 | `production/epics/town-building-system/story-006-training-medical-youth-formulas.md` | `tests/unit/town/training_medical_youth_formula_test.gd` | COVERED |
+| `TR-town-010` | `design/gdd/town-building-system.md` | `injury_recovery_reduction: clamp(floor(level × recovery_per_level), 1, 2)` | ADR-0008, ADR-0007, ADR-0004, ADR-0003 | `production/epics/town-building-system/story-006-training-medical-youth-formulas.md` | `tests/unit/town/training_medical_youth_formula_test.gd` | COVERED |
+| `TR-town-011` | `design/gdd/town-building-system.md` | `youth_potential_floor_boost: base + adjacency, clamp [0, 5]` | ADR-0008, ADR-0007, ADR-0004, ADR-0003 | `production/epics/town-building-system/story-006-training-medical-youth-formulas.md` | `tests/unit/town/training_medical_youth_formula_test.gd` | COVERED |
+| `TR-town-012` | `design/gdd/town-building-system.md` | 3 adjacency pairs: training_ground↔medical_room, training_ground↔youth_academy, stadium↔training_ground | ADR-0008, ADR-0007, ADR-0004, ADR-0003 | `production/epics/town-building-system/story-007-stadium-adjacency-formulas.md` | `tests/unit/town/stadium_adjacency_formula_test.gd` | COVERED |
+| `TR-town-013` | `design/gdd/town-building-system.md` | Maximum adjacency bonus: 15.0 (stadium Lv.5 + training_ground Lv.5 adjacent) | ADR-0008, ADR-0007, ADR-0004, ADR-0003 | `production/epics/town-building-system/story-007-stadium-adjacency-formulas.md` | `tests/unit/town/stadium_adjacency_formula_test.gd` | COVERED |
+| `TR-town-014` | `design/gdd/town-building-system.md` | Construction/upgrade costs via `EconomyManager.accredit_facility_cost()` exclusively | ADR-0008, ADR-0007, ADR-0004, ADR-0003 | `production/epics/town-building-system/story-003-build-request-validation.md`<br>`production/epics/town-building-system/story-004-upgrade-completion-flow.md` | `tests/integration/town/build_request_validation_test.gd`<br>`tests/integration/town/upgrade_completion_flow_test.gd` | COVERED |
+| `TR-town-015` | `design/gdd/town-building-system.md` | Demolish under-construction facility returns error | ADR-0008, ADR-0007, ADR-0004, ADR-0003 | `production/epics/town-building-system/story-005-demolish-grid-release.md` | `tests/integration/town/demolish_grid_release_test.gd` | COVERED |
+| `TR-town-016` | `design/gdd/town-building-system.md` | Construction timers decrement on `time_phase_changed` | ADR-0008, ADR-0007, ADR-0004, ADR-0003 | `production/epics/town-building-system/story-004-upgrade-completion-flow.md`<br>`production/epics/town-building-system/story-009-serialization-restore-regression.md` | `tests/integration/town/upgrade_completion_flow_test.gd`<br>`tests/integration/town/serialization_restore_regression_test.gd` | COVERED |
+| `TR-town-017` | `design/gdd/town-building-system.md` | Adjacency bonuses computed on state change, not polled per-frame | ADR-0008, ADR-0007, ADR-0004, ADR-0003 | `production/epics/town-building-system/story-005-demolish-grid-release.md`<br>`production/epics/town-building-system/story-007-stadium-adjacency-formulas.md` | `tests/integration/town/demolish_grid_release_test.gd`<br>`tests/unit/town/stadium_adjacency_formula_test.gd` | COVERED |
+| `TR-town-018` | `design/gdd/town-building-system.md` | 8 public formula methods for downstream consumption | ADR-0008, ADR-0007, ADR-0004, ADR-0003 | `production/epics/town-building-system/story-006-training-medical-youth-formulas.md`<br>`production/epics/town-building-system/story-007-stadium-adjacency-formulas.md`<br>`production/epics/town-building-system/story-008-downstream-query-maintenance.md` | `tests/unit/town/training_medical_youth_formula_test.gd`<br>`tests/unit/town/stadium_adjacency_formula_test.gd`<br>`tests/integration/town/downstream_query_maintenance_test.gd` | COVERED |
+| `TR-town-019` | `design/gdd/town-building-system.md` | Daily maintenance = Σ active facilities × (base + delta × (level-1)) | ADR-0008, ADR-0007, ADR-0004, ADR-0003 | `production/epics/town-building-system/story-008-downstream-query-maintenance.md` | `tests/integration/town/downstream_query_maintenance_test.gd` | COVERED |
+| `TR-skill-001` | `design/gdd/skill-and-trait-system.md` | 技能/特质系统必须使用由 settlement_id、player_id、consumer_scope、rule_id、rule_version 组成的稳定 settlement_key 去重，避免同一结算被重复消费。 | ADR-0010, ADR-0003, ADR-0006 | — | — | NO STORY |
+| `TR-skill-002` | `design/gdd/skill-and-trait-system.md` | 技能解锁判定必须基于 accumulated_skill_points、skill_unlock_threshold、family_slot_available 与 settlement_key_not_processed 的组合条件，并且已拥有技能不可重复解锁。 | ADR-0010, ADR-0003, ADR-0006 | — | — | NO STORY |
+| `TR-skill-003` | `design/gdd/skill-and-trait-system.md` | 技能升级必须按 level_thresholds 顺序消耗 available_upgrade_progress，直到命中 level_cap 或剩余进度不足以下一阈值。 | ADR-0010, ADR-0003, ADR-0006 | — | — | NO STORY |
+| `TR-skill-004` | `design/gdd/skill-and-trait-system.md` | 候选技能进度必须持久化 candidate_progress_record，并通过 candidate_progress_ratio 映射 sprouting、forming、near_unlock 等可见阶段。 | ADR-0010, ADR-0003, ADR-0006 | — | — | NO STORY |
+| `TR-skill-005` | `design/gdd/skill-and-trait-system.md` | 特质冷却必须由 trait_cooldown_state 作为唯一耐久状态来源，避免 UI 或消费方重算冷却真值。 | ADR-0010, ADR-0003, ADR-0006 | — | — | NO STORY |
+| `TR-skill-006` | `design/gdd/skill-and-trait-system.md` | 比赛前技能/特质快照必须以 `pre_match_skill_trait_snapshot` 作为只读输入提供给比赛表现与主循环 UI，展示层不得重算技能触发或强度真值。 | ADR-0010, ADR-0003, ADR-0006 | — | — | NO STORY |
+| `TR-skill-007` | `design/gdd/skill-and-trait-system.md` | 待确认反馈必须以 `pending_skill_trait_feedback` 与 `feedback_ack` 分离建模，并在存档中保持可恢复的一致状态。 | ADR-0010, ADR-0003, ADR-0006 | — | — | NO STORY |
+| `TR-skill-008` | `design/gdd/skill-and-trait-system.md` | 技能/特质系统必须持久化 `identity_history`、`skill_trait_migration_record` 与 `processed_settlement_keys`，以支持回放安全、迁移兼容与身份演化追踪。 | ADR-0010, ADR-0003, ADR-0006 | — | — | NO STORY |
+| `TR-league-001` | `design/gdd/league-competition-structure-system.md` | MVP 2-tier league chain, extensible to N via config | ADR-0009, ADR-0006, ADR-0007, ADR-0002 | — | — | NO STORY |
+| `TR-league-002` | `design/gdd/league-competition-structure-system.md` | 8-12 teams, double round-robin (home/away) | ADR-0009, ADR-0006, ADR-0007, ADR-0002 | — | — | NO STORY |
+| `TR-league-003` | `design/gdd/league-competition-structure-system.md` | Points: win=3, draw=1, loss=0 | ADR-0009, ADR-0006, ADR-0007, ADR-0002 | — | — | NO STORY |
+| `TR-league-004` | `design/gdd/league-competition-structure-system.md` | 4-level tiebreaker: points→GD→goals scored→team_id | ADR-0009, ADR-0006, ADR-0007, ADR-0002 | — | — | NO STORY |
+| `TR-league-005` | `design/gdd/league-competition-structure-system.md` | Promotion/relegation: top N up, bottom N down | ADR-0009, ADR-0006, ADR-0007, ADR-0002 | — | — | NO STORY |
+| `TR-league-006` | `design/gdd/league-competition-structure-system.md` | `matches_per_team = 2×(team_count-1)` via circle method | ADR-0009, ADR-0006, ADR-0007, ADR-0002 | — | — | NO STORY |
+| `TR-league-007` | `design/gdd/league-competition-structure-system.md` | 4 season states: PRE_SEASON→IN_PROGRESS→SETTLEMENT→COMPLETED | ADR-0009, ADR-0006, ADR-0007, ADR-0002 | — | — | NO STORY |
+| `TR-league-008` | `design/gdd/league-competition-structure-system.md` | Standings update O(1) per match | ADR-0009, ADR-0006, ADR-0007, ADR-0002 | — | — | NO STORY |
+| `TR-league-009` | `design/gdd/league-competition-structure-system.md` | Season history capped at configurable retention | ADR-0009, ADR-0006, ADR-0007, ADR-0002 | — | — | NO STORY |
+| `TR-league-010` | `design/gdd/league-competition-structure-system.md` | `match_id` correlation between schedule and `match_completed` event | ADR-0009, ADR-0006, ADR-0007, ADR-0002 | — | — | NO STORY |
+| `TR-league-011` | `design/gdd/league-competition-structure-system.md` | Season settlement on `time_season_ended`: finalize, promote/relegate, emit completed | ADR-0009, ADR-0006, ADR-0007, ADR-0002 | — | — | NO STORY |
+| `TR-league-012` | `design/gdd/league-competition-structure-system.md` | Circle method requires even `team_count`; odd must be rejected | ADR-0009, ADR-0006, ADR-0007, ADR-0002 | — | — | NO STORY |
+| `TR-league-013` | `design/gdd/league-competition-structure-system.md` | `season_win_rate = wins / played` | ADR-0009, ADR-0006, ADR-0007, ADR-0002 | — | — | NO STORY |
+| `TR-league-014` | `design/gdd/league-competition-structure-system.md` | Duplicate `match_id` submission rejected (`is_completed` flag) | ADR-0009, ADR-0006, ADR-0007, ADR-0002 | — | — | NO STORY |
+| `TR-mainui-001` | `design/gdd/main-loop-ui-framework.md` | `max_navigation_depth_from_home ≤ 3` | ADR-0001, ADR-0002, ADR-0010 | — | — | NO STORY |
+| `TR-mainui-002` | `design/gdd/main-loop-ui-framework.md` | 5 MVP screens within single-click from Home | ADR-0001, ADR-0002, ADR-0010 | — | — | NO STORY |
+| `TR-mainui-003` | `design/gdd/main-loop-ui-framework.md` | `ui_event_priority_order`: 比赛>阶段结算>里程碑>一般变化 | ADR-0001, ADR-0002, ADR-0010 | — | — | NO STORY |
+| `TR-mainui-004` | `design/gdd/main-loop-ui-framework.md` | `ui_refresh_trigger = time_advanced OR system_state_changed OR player_action_completed` | ADR-0001, ADR-0002, ADR-0010 | — | — | NO STORY |
+| `TR-mainui-005` | `design/gdd/main-loop-ui-framework.md` | Visual containers: top bar, main content, bottom tabs — consistent across screens | ADR-0001, ADR-0002, ADR-0010 | — | — | NO STORY |
+| `TR-mainui-006` | `design/gdd/main-loop-ui-framework.md` | `entry_available = system_state_allows AND navigation_context_allows` | ADR-0001, ADR-0002, ADR-0010 | — | — | NO STORY |
+| `TR-mainui-007` | `design/gdd/main-loop-ui-framework.md` | `screen_transition_duration_ms ∈ [150, 400]` | ADR-0001, ADR-0002, ADR-0010 | — | — | NO STORY |
+| `TR-mainui-008` | `design/gdd/main-loop-ui-framework.md` | `home_info_density ≤ 8 key fields` | ADR-0001, ADR-0002, ADR-0010 | — | — | NO STORY |
+| `TR-mainui-009` | `design/gdd/main-loop-ui-framework.md` | Match Live: player cannot leave without explicit warning | ADR-0001, ADR-0002, ADR-0010 | — | — | NO STORY |
+| `TR-mainui-010` | `design/gdd/main-loop-ui-framework.md` | Automatic support and post-match feedback surfaces consume authoritative payloads only and never recompute unlock, trigger, or settlement truth | ADR-0001, ADR-0002, ADR-0010 | — | — | NO STORY |
+| `TR-playerui-001` | `design/gdd/player-management-ui.md` | Roster row: name, position, rating, tier, status, growth — max 7 fields | ADR-0005, ADR-0010 | — | — | NO STORY |
+| `TR-playerui-002` | `design/gdd/player-management-ui.md` | Default sort by rating desc; re-sort by name/position resets to page 1 | ADR-0005, ADR-0010 | — | — | NO STORY |
+| `TR-playerui-003` | `design/gdd/player-management-ui.md` | Detail sections: identity→attributes→growth→status→actions, fixed order | ADR-0005, ADR-0010 | — | — | NO STORY |
+| `TR-playerui-004` | `design/gdd/player-management-ui.md` | `attribute_visual`: unified 1-100 fill bar, capped marked distinctly | ADR-0005, ADR-0010 | — | — | NO STORY |
+| `TR-playerui-005` | `design/gdd/player-management-ui.md` | `growth_visible = recent_growth AND amount ≥ threshold (0.1)` | ADR-0005, ADR-0010 | — | — | NO STORY |
+| `TR-playerui-006` | `design/gdd/player-management-ui.md` | Pagination with `page_size ∈ [10, 25]`; virtual scroll for 50+ players | ADR-0005, ADR-0010 | — | — | NO STORY |
+| `TR-playerui-007` | `design/gdd/player-management-ui.md` | Empty filter result shows “无匹配球员” | ADR-0005, ADR-0010 | — | — | NO STORY |
+| `TR-playerui-008` | `design/gdd/player-management-ui.md` | Training button disabled with reason when AP unavailable | ADR-0005, ADR-0010 | — | — | NO STORY |
+| `TR-playerui-009` | `design/gdd/player-management-ui.md` | All interactive elements have stable IDs for onboarding anchoring | ADR-0005, ADR-0010 | — | — | NO STORY |
+| `TR-playerui-010` | `design/gdd/player-management-ui.md` | Empty roster shows guide text; training/match entries naturally disabled | ADR-0005, ADR-0010 | — | — | NO STORY |
+| `TR-playerui-011` | `design/gdd/player-management-ui.md` | Player Detail consumes candidate visibility stage, blocked reason, feedback ack, and identity history as read-only payload fields | ADR-0005, ADR-0010 | — | — | NO STORY |
+| `TR-matchui-001` | `design/gdd/match-performance-ui.md` | 3 UI containers: Match Pre, Match Live, Match Result | ADR-0006, ADR-0009, ADR-0010 | — | — | NO STORY |
+| `TR-matchui-002` | `design/gdd/match-performance-ui.md` | Pre-match: opponent, home/away, round, rankings, lineup, tactics, confirm | ADR-0006, ADR-0009, ADR-0010 | — | — | NO STORY |
+| `TR-matchui-003` | `design/gdd/match-performance-ui.md` | Opponent strength labels: ≥+10优势, ±10相当, ≤-10略强 | ADR-0006, ADR-0009, ADR-0010 | — | — | NO STORY |
+| `TR-matchui-004` | `design/gdd/match-performance-ui.md` | Live match: real-time score, half indicator, event timeline, clock | ADR-0006, ADR-0009, ADR-0010 | — | — | NO STORY |
+| `TR-matchui-005` | `design/gdd/match-performance-ui.md` | Event weights: goal=HIGH, shot=MEDIUM, push/defense/stamina=LOW | ADR-0006, ADR-0009, ADR-0010 | — | — | NO STORY |
+| `TR-matchui-006` | `design/gdd/match-performance-ui.md` | `event_interval = max(500ms, base_interval / intensity_factor)` | ADR-0006, ADR-0009, ADR-0010 | — | — | NO STORY |
+| `TR-matchui-007` | `design/gdd/match-performance-ui.md` | Post-match order: score→reasons→timeline→performances→league→confirm | ADR-0006, ADR-0009, ADR-0010 | — | — | NO STORY |
+| `TR-matchui-008` | `design/gdd/match-performance-ui.md` | Score change animations queue; no events lost | ADR-0006, ADR-0009, ADR-0010 | — | — | NO STORY |
+| `TR-matchui-009` | `design/gdd/match-performance-ui.md` | Halftime transition with clear separator | ADR-0006, ADR-0009, ADR-0010 | — | — | NO STORY |
+| `TR-matchui-010` | `design/gdd/match-performance-ui.md` | Match exit warning during live match | ADR-0006, ADR-0009, ADR-0010 | — | — | NO STORY |
+| `TR-matchui-011` | `design/gdd/match-performance-ui.md` | 0-0 halftime: show summary, adjustment still available | ADR-0006, ADR-0009, ADR-0010 | — | — | NO STORY |
+| `TR-reputation-001` | `design/gdd/reputation-and-achievement-system.md` | 声望增长必须按 `reputation_gain = floor((base_reputation_source + bonus_reputation_source) × source_weight × stage_multiplier)` 结算，并由权威系统统一产出结果。 | ADR-0011, ADR-0003 | — | — | NO STORY |
+| `TR-reputation-002` | `design/gdd/reputation-and-achievement-system.md` | 声望等级进度必须按当前阈值与下一阈值计算 `reputation_progress_ratio`，供 UI 直接消费而非本地推导。 | ADR-0011, ADR-0003 | — | — | NO STORY |
+| `TR-reputation-003` | `design/gdd/reputation-and-achievement-system.md` | 成就完成判定必须满足 `achievement_condition_satisfied AND NOT achievement_already_unlocked`，且同一成就不可重复解锁。 | ADR-0011, ADR-0003 | — | — | NO STORY |
+| `TR-reputation-004` | `design/gdd/reputation-and-achievement-system.md` | 声望与成就奖励必须定义明确的结算归属、去重键与消费顺序，避免跨系统重复发奖或重复广播。 | ADR-0011, ADR-0003 | — | — | NO STORY |
+| `TR-reputation-005` | `design/gdd/reputation-and-achievement-system.md` | 声望等级、进度、已解锁成就与待展示奖励必须作为可存档耐久状态恢复，避免读档后重复触发一次性奖励。 | ADR-0011, ADR-0003 | — | — | NO STORY |
+| `TR-reputation-006` | `design/gdd/reputation-and-achievement-system.md` | 展示层必须消费权威声望/成就 payload，不得自行推导成就完成、奖励归属或等级提升真值。 | ADR-0011, ADR-0003 | — | — | NO STORY |
+| `TR-onboard-001` | `design/gdd/onboarding-system.md` | 10-step flow, MVP 7 steps: Home→Roster→Training→Match Pre/Live/Halftime/Result→Loop | ADR-0001, ADR-0002, ADR-0003 | — | — | NO STORY |
+| `TR-onboard-002` | `design/gdd/onboarding-system.md` | `tip_core_text ≤ 25 chars`; `tip_optional_detail ≤ 80 chars` | ADR-0001, ADR-0002, ADR-0003 | — | — | NO STORY |
+| `TR-onboard-003` | `design/gdd/onboarding-system.md` | No modal dialogs — highlights with text annotations only | ADR-0001, ADR-0002, ADR-0003 | — | — | NO STORY |
+| `TR-onboard-004` | `design/gdd/onboarding-system.md` | `highlight_visible = screen_matches AND NOT interacting_with_other_ui` | ADR-0001, ADR-0002, ADR-0003 | — | — | NO STORY |
+| `TR-onboard-005` | `design/gdd/onboarding-system.md` | `step_advance = action_matches_target OR skipped` — context-following | ADR-0001, ADR-0002, ADR-0003 | — | — | NO STORY |
+| `TR-onboard-006` | `design/gdd/onboarding-system.md` | `onboarding_done` flag persisted in save | ADR-0001, ADR-0002, ADR-0003 | — | — | NO STORY |
+| `TR-onboard-007` | `design/gdd/onboarding-system.md` | Onboarding state persists across save/load — resume from last completed + 1 | ADR-0001, ADR-0002, ADR-0003 | — | — | NO STORY |
+| `TR-onboard-008` | `design/gdd/onboarding-system.md` | Skip all at any step, no confirmation dialog | ADR-0001, ADR-0002, ADR-0003 | — | — | NO STORY |
+| `TR-onboard-009` | `design/gdd/onboarding-system.md` | Missing UI anchor → degrade to text-only hint | ADR-0001, ADR-0002, ADR-0003 | — | — | NO STORY |
+| `TR-onboard-010` | `design/gdd/onboarding-system.md` | All anchor references use stable IDs from UI systems | ADR-0001, ADR-0002, ADR-0003 | — | — | NO STORY |
+| `TR-random-001` | `design/gdd/random-event-system.md` | RandomEventManager is the sole owner of pending_random_event_instance, recent_random_event_history, event_cooldown_state, and processed_event_settlement_keys durable truth. | — | — | — | NO ADR |
+| `TR-random-002` | `design/gdd/random-event-system.md` | Random events may trigger only in legal stable windows and must never insert into match simulation, training settlement, save writes, or load restoration. | — | — | — | NO ADR |
+| `TR-random-003` | `design/gdd/random-event-system.md` | Random event effects must be submitted as requests to the authoritative target system; RandomEventManager must not directly mutate resources, players, facilities, match results, reputation, or time state. | — | — | — | NO ADR |
+| `TR-random-004` | `design/gdd/random-event-system.md` | Every one-shot event result must use stable event_settlement_key and processed_event_settlement_keys to prevent duplicate submission, duplicate history writes, duplicate rewards, or duplicate display. | — | — | — | NO ADR |
+| `TR-random-005` | `design/gdd/random-event-system.md` | `event_settlement_key = stable_digest(canonical_join([event_instance_id, selected_option_id, target_scope, target_id, rule_version], "|"))` | — | — | — | NO ADR |
+| `TR-random-006` | `design/gdd/random-event-system.md` | random_event_offer_view_payload and random_event_history_view_payload are read-only UI payloads; presentation must not redraw event pools, recompute event eligibility, invent options, or generate results. | — | — | — | NO ADR |
+| `TR-random-007` | `design/gdd/random-event-system.md` | Event trigger chance, recent-event suppression, and weighted event selection must be data-driven and bounded by the Random Event GDD formulas. | — | — | — | NO ADR |
+| `TR-random-008` | `design/gdd/random-event-system.md` | Confirmed random event facts may be submitted to ReputationAchievementManager, but unmapped effect_request_type or unknown target_scope must degrade to safe no-op rather than direct unlocks or rewards. | — | — | — | NO ADR |
+| `TR-audio-001` | `design/gdd/audio-system.md` | AudioSystem consumes stable gameplay/UI events only and must never mutate time, resources, players, training, match, town, random event, reputation, achievement, skill, save, or navigation state. | — | — | — | NO ADR |
+| `TR-audio-002` | `design/gdd/audio-system.md` | Audio playback eligibility must require event_valid, asset_available, user_volume_weight, cooldown_weight, and focus_allowed; ineligible or missing assets must degrade silently without blocking gameplay. | — | — | — | NO ADR |
+| `TR-audio-003` | `design/gdd/audio-system.md` | Audio mixing uses `layer_output_volume = master_volume × layer_volume × category_volume × event_intensity × ducking_weight`, clamped to 0.00–1.00. | — | — | — | NO ADR |
+| `TR-audio-004` | `design/gdd/audio-system.md` | Audio preference fields audio_master_volume, audio_bgm_volume, audio_sfx_volume, audio_ambience_volume, and audio_muted_categories are durable settings only and must not affect gameplay state. | — | — | — | NO ADR |
+| `TR-audio-005` | `design/gdd/audio-system.md` | Multiple audio events in the same stable window must be prioritized, merged, delayed, or suppressed so Special Stinger playback does not overlap or obscure core feedback. | — | — | — | NO ADR |
+| `TR-audio-006` | `design/gdd/audio-system.md` | Audio feedback for loss, resource shortage, maintenance, or weak random-event results must remain low-pressure and must not use crisis alarms, countdowns, or punitive failure sounds. | — | — | — | NO ADR |
+| `TR-townui-001` | `design/gdd/town-management-ui.md` | Town Management UI must run inside the Main Loop UI Town Management container and must not create a separate global navigation stack or bypass Home return rules. | ADR-0001, ADR-0002, ADR-0008, ADR-0007, ADR-0010 | — | — | NO STORY |
+| `TR-townui-002` | `design/gdd/town-management-ui.md` | Town Overview must show town grid, funds, AP summary, daily maintenance summary, active construction or upgrade projects, build/upgrade entry points, and facility bonus summary. | ADR-0001, ADR-0008, ADR-0007 | — | — | NO STORY |
+| `TR-townui-003` | `design/gdd/town-management-ui.md` | Build and upgrade confirmation must use authoritative TownBuilding legality, Economy budget preview, and Time construction duration data; UI must not define facility effects, costs, maintenance formulas, or completion timing. | ADR-0008, ADR-0007, ADR-0002, ADR-0010 | — | — | NO STORY |
+| `TR-townui-004` | `design/gdd/town-management-ui.md` | budget_preview_complete must be true before enabling build or upgrade confirmation: current funds, after funds, cost, build time, and maintenance delta must all be visible. | ADR-0007, ADR-0008, ADR-0010 | — | — | NO STORY |
+| `TR-townui-005` | `design/gdd/town-management-ui.md` | construction_active_decision_count must remain at or below construction_decision_budget_max for a build or upgrade flow. | ADR-0001, ADR-0010 | — | — | NO STORY |
+| `TR-townui-006` | `design/gdd/town-management-ui.md` | Town Management UI must expose stable anchors for onboarding/tutorial: town entry, grid area, facility detail, build button, upgrade button, budget preview, maintenance summary, and bonus summary. | ADR-0001, ADR-0002 | — | — | NO STORY |
+| `TR-townui-007` | `design/gdd/town-management-ui.md` | maintenance_pressure_state is UI-only presentation classification and must not be persisted or consumed as authoritative economy or town-building state. | ADR-0007, ADR-0010 | — | — | NO STORY |
+| `TR-tutorial-001` | `design/gdd/tutorial-and-hint-system.md` | Tutorial and Hint system may show explanatory hints only from authoritative read-only payloads and stable UI anchors; it must not define new gameplay rules, tasks, rewards, recommendations, or optimal routes. | ADR-0001, ADR-0002, ADR-0010 | — | — | NO STORY |
+| `TR-tutorial-002` | `design/gdd/tutorial-and-hint-system.md` | Automatic hint eligibility requires anchor_available, payload_available, onboarding_weight, context_relevance, novelty_weight, user_preference_weight, and cooldown_weight. | ADR-0001, ADR-0002 | — | — | NO STORY |
+| `TR-tutorial-003` | `design/gdd/tutorial-and-hint-system.md` | Core feedback from match, training, town, economy, reputation, achievement, or random event flows must take priority over automatic hints; hints must defer, suppress, or display non-focus UI only. | ADR-0001, ADR-0002, ADR-0010 | — | — | NO STORY |
+| `TR-tutorial-004` | `design/gdd/tutorial-and-hint-system.md` | seen_hint_records, hint_cooldown_state, user hint preferences, and help index unlock state must persist across save/load without repeated hint spam. | ADR-0003 | — | — | NO STORY |
+| `TR-tutorial-005` | `design/gdd/tutorial-and-hint-system.md` | `hint_record_key = stable_digest(canonical_join([hint_id, anchor_id, payload_source_id, hint_version], "|"))` and duplicate key submission must be idempotent no-op. | ADR-0010 | — | — | NO STORY |
+| `TR-tutorial-006` | `design/gdd/tutorial-and-hint-system.md` | Closing, hiding, or ignoring a hint must affect only hint display state and must never cause resource loss, growth loss, delayed unlocks, or gameplay penalties. | ADR-0001, ADR-0010 | — | — | NO STORY |
+| `TR-tutorial-007` | `design/gdd/tutorial-and-hint-system.md` | If a required UI anchor or authoritative payload is missing or version-incompatible, the hint must be suppressed or replaced by a generic help entry; the system must not guess rule meaning. | ADR-0001, ADR-0010 | — | — | NO STORY |
 
-1. `ADR-0001` — Scene Management & Autoload Architecture
-2. `ADR-0004` — Data-Driven Configuration
-3. `ADR-0002` — Event / Signal Architecture + TimeManager
-4. `ADR-0003` — Save / Load Persistence
-5. `ADR-0005` — Player Data Model
-6. `ADR-0006` — Match Simulation Architecture
-7. `ADR-0007` — Economy Transaction Framework
-8. `ADR-0008` — Town Grid & Facility System
-9. `ADR-0009` — League Competition Structure
+## Uncovered Requirements (Priority Fix List)
 
-## Gate Interpretation
+### Blocking contract risks before related implementation
 
-- Foundation layer has **zero gaps**.
-- Core layer has **zero gaps**.
-- The two partial items are not gate blockers, but must become story acceptance criteria before implementation.
-- `docs/architecture/tr-registry.yaml` remains the canonical per-requirement registry; this file is the gate-facing traceability summary.
+| Item | Source | Current RTM state | Suggested action |
+|------|--------|-------------------|------------------|
+| Skill/Trait settlement key implementation | `TR-skill-001` | `NO STORY`; registry now matches ADR-0010: `rule_version` is metadata only and must not enter key source. | Add settlement-key regression tests in the Skill/Trait epic before implementation completion. |
+| Skill/Trait dual-ledger implementation | `TR-save-013`, `TR-skill-008` | `NO STORY`; registry now includes evaluated + processed settlement ledgers. | Add save/restore and duplicate-delivery regression tests in the Save/Skill stories. |
+| Match formal fallback and forfeit packet | `TR-match-016` | `NO STORY`; ADR coverage is partial and implementation fan-out spans Match, League, Economy, Time, and UI. | Create a contract-focused story before implementing formal fallback. |
+| Pre-match skill/trait snapshot | `TR-match-017`, `TR-skill-006` | `NO STORY`; ADR coverage is partial and UI must consume snapshot truth only. | Create Match/UI stories with explicit no-recompute acceptance criteria. |
+| Reputation/Achievement implementation chain | `TR-reputation-001`–`TR-reputation-006` | `NO STORY`; ADR coverage exists through ADR-0011. | Schedule Alpha stories; not an MVP blocker. |
+
+### Newly registered future-system gaps counted in the 201 active TR rows
+
+| System | TR IDs | Current architecture state | Suggested action |
+|--------|--------|----------------------------|------------------|
+| Random Event | `TR-random-001`–`TR-random-008` | Registered in TR registry; still `NO ADR` and `NO STORY` for RandomEventManager authority, event settlement de-duplication, and save/load durability. | Extend ADR-0010 or create a lightweight Random Event settlement ADR before Beta implementation. |
+| Audio | `TR-audio-001`–`TR-audio-006` | Registered in TR registry; still `NO ADR` and `NO STORY` for AudioSystem event consumption and settings persistence ownership. | Add a lightweight Audio architecture decision before Beta audio/settings implementation. |
+| Town Management UI | `TR-townui-001`–`TR-townui-007` | Registered in TR registry; ADR coverage is partial through scene/event/town/economy/payload decisions, but no stories exist. | Create Alpha UI stories when this interface enters implementation. |
+| Tutorial & Hint | `TR-tutorial-001`–`TR-tutorial-007` | Registered in TR registry; ADR coverage is partial through scene/event/save/payload decisions, but no stories exist. | Create Alpha/Polish stories when tutorial and help work begins. |
+
+### Foundation / Core full-chain gaps
+
+- `TR-gameconcept-001` — Dual-core loop: 培养→比赛→反馈→再培养 — status: NO STORY.
+- `TR-gameconcept-002` — Three resource types: 经费, 运动点数(AP), 研究点数(RP) — status: NO STORY.
+- `TR-gameconcept-003` — 8 game states spanning Planning through SeasonStart — status: NO STORY.
+- `TR-gameconcept-004` — Three-layer time cycles: action windows → stages → seasons — status: NO STORY.
+- `TR-gameconcept-005` — `core_progress = (player_power_growth_index + competition_achievement_index) / 2` — status: NO STORY.
+- `TR-gameconcept-006` — `decision_pressure = (1 - remaining_action_windows / max) × urgency_multiplier` — status: NO STORY.
+- `TR-gameconcept-007` — `retention_drive = next_key_node_visible × (1 - season_completion) × content_promise_strength` — status: NO STORY.
+- `TR-save-013` — Skill/trait durable state persists `candidate_progress_record`, `trait_cooldown_state`, `pending_skill_trait_feedback`, `feedback_ack`, `identity_history`, `migration_record`, and processed settlement keys — status: NO STORY.
+- `TR-save-014` — Save/load restores durable settlement outcomes only and never replays half-resolved skill/trait evaluation state — status: NO STORY.
+- `TR-match-016` — Formal match fallback resolves through recommended lineup → out-of-position fill → `forfeit_result_packet` — status: NO STORY.
+- `TR-match-017` — `pre_match_skill_trait_snapshot` is a locked read-only match input consumed by MatchPerfUI and never recomputed in UI — status: NO STORY.
+- `TR-skill-001` — 技能/特质系统必须使用由 settlement_id、player_id、consumer_scope、rule_id、rule_version 组成的稳定 settlement_key 去重，避免同一结算被重复消费。 — status: NO STORY.
+- `TR-skill-002` — 技能解锁判定必须基于 accumulated_skill_points、skill_unlock_threshold、family_slot_available 与 settlement_key_not_processed 的组合条件，并且已拥有技能不可重复解锁。 — status: NO STORY.
+- `TR-skill-003` — 技能升级必须按 level_thresholds 顺序消耗 available_upgrade_progress，直到命中 level_cap 或剩余进度不足以下一阈值。 — status: NO STORY.
+- `TR-skill-004` — 候选技能进度必须持久化 candidate_progress_record，并通过 candidate_progress_ratio 映射 sprouting、forming、near_unlock 等可见阶段。 — status: NO STORY.
+- `TR-skill-005` — 特质冷却必须由 trait_cooldown_state 作为唯一耐久状态来源，避免 UI 或消费方重算冷却真值。 — status: NO STORY.
+- `TR-skill-006` — 比赛前技能/特质快照必须以 `pre_match_skill_trait_snapshot` 作为只读输入提供给比赛表现与主循环 UI，展示层不得重算技能触发或强度真值。 — status: NO STORY.
+- `TR-skill-007` — 待确认反馈必须以 `pending_skill_trait_feedback` 与 `feedback_ack` 分离建模，并在存档中保持可恢复的一致状态。 — status: NO STORY.
+- `TR-skill-008` — 技能/特质系统必须持久化 `identity_history`、`skill_trait_migration_record` 与 `processed_settlement_keys`，以支持回放安全、迁移兼容与身份演化追踪。 — status: NO STORY.
+
+### Feature / Presentation / Polish gaps
+
+- `TR-league-001` — MVP 2-tier league chain, extensible to N via config — status: NO STORY.
+- `TR-league-002` — 8-12 teams, double round-robin (home/away) — status: NO STORY.
+- `TR-league-003` — Points: win=3, draw=1, loss=0 — status: NO STORY.
+- `TR-league-004` — 4-level tiebreaker: points→GD→goals scored→team_id — status: NO STORY.
+- `TR-league-005` — Promotion/relegation: top N up, bottom N down — status: NO STORY.
+- `TR-league-006` — `matches_per_team = 2×(team_count-1)` via circle method — status: NO STORY.
+- `TR-league-007` — 4 season states: PRE_SEASON→IN_PROGRESS→SETTLEMENT→COMPLETED — status: NO STORY.
+- `TR-league-008` — Standings update O(1) per match — status: NO STORY.
+- `TR-league-009` — Season history capped at configurable retention — status: NO STORY.
+- `TR-league-010` — `match_id` correlation between schedule and `match_completed` event — status: NO STORY.
+- `TR-league-011` — Season settlement on `time_season_ended`: finalize, promote/relegate, emit completed — status: NO STORY.
+- `TR-league-012` — Circle method requires even `team_count`; odd must be rejected — status: NO STORY.
+- `TR-league-013` — `season_win_rate = wins / played` — status: NO STORY.
+- `TR-league-014` — Duplicate `match_id` submission rejected (`is_completed` flag) — status: NO STORY.
+- `TR-mainui-001` — `max_navigation_depth_from_home ≤ 3` — status: NO STORY.
+- `TR-mainui-002` — 5 MVP screens within single-click from Home — status: NO STORY.
+- `TR-mainui-003` — `ui_event_priority_order`: 比赛>阶段结算>里程碑>一般变化 — status: NO STORY.
+- `TR-mainui-004` — `ui_refresh_trigger = time_advanced OR system_state_changed OR player_action_completed` — status: NO STORY.
+- `TR-mainui-005` — Visual containers: top bar, main content, bottom tabs — consistent across screens — status: NO STORY.
+- `TR-mainui-006` — `entry_available = system_state_allows AND navigation_context_allows` — status: NO STORY.
+- `TR-mainui-007` — `screen_transition_duration_ms ∈ [150, 400]` — status: NO STORY.
+- `TR-mainui-008` — `home_info_density ≤ 8 key fields` — status: NO STORY.
+- `TR-mainui-009` — Match Live: player cannot leave without explicit warning — status: NO STORY.
+- `TR-mainui-010` — Automatic support and post-match feedback surfaces consume authoritative payloads only and never recompute unlock, trigger, or settlement truth — status: NO STORY.
+- `TR-playerui-001` — Roster row: name, position, rating, tier, status, growth — max 7 fields — status: NO STORY.
+- `TR-playerui-002` — Default sort by rating desc; re-sort by name/position resets to page 1 — status: NO STORY.
+- `TR-playerui-003` — Detail sections: identity→attributes→growth→status→actions, fixed order — status: NO STORY.
+- `TR-playerui-004` — `attribute_visual`: unified 1-100 fill bar, capped marked distinctly — status: NO STORY.
+- `TR-playerui-005` — `growth_visible = recent_growth AND amount ≥ threshold (0.1)` — status: NO STORY.
+- `TR-playerui-006` — Pagination with `page_size ∈ [10, 25]`; virtual scroll for 50+ players — status: NO STORY.
+- `TR-playerui-007` — Empty filter result shows “无匹配球员” — status: NO STORY.
+- `TR-playerui-008` — Training button disabled with reason when AP unavailable — status: NO STORY.
+- `TR-playerui-009` — All interactive elements have stable IDs for onboarding anchoring — status: NO STORY.
+- `TR-playerui-010` — Empty roster shows guide text; training/match entries naturally disabled — status: NO STORY.
+- `TR-playerui-011` — Player Detail consumes candidate visibility stage, blocked reason, feedback ack, and identity history as read-only payload fields — status: NO STORY.
+- `TR-matchui-001` — 3 UI containers: Match Pre, Match Live, Match Result — status: NO STORY.
+- `TR-matchui-002` — Pre-match: opponent, home/away, round, rankings, lineup, tactics, confirm — status: NO STORY.
+- `TR-matchui-003` — Opponent strength labels: ≥+10优势, ±10相当, ≤-10略强 — status: NO STORY.
+- `TR-matchui-004` — Live match: real-time score, half indicator, event timeline, clock — status: NO STORY.
+- `TR-matchui-005` — Event weights: goal=HIGH, shot=MEDIUM, push/defense/stamina=LOW — status: NO STORY.
+- `TR-matchui-006` — `event_interval = max(500ms, base_interval / intensity_factor)` — status: NO STORY.
+- `TR-matchui-007` — Post-match order: score→reasons→timeline→performances→league→confirm — status: NO STORY.
+- `TR-matchui-008` — Score change animations queue; no events lost — status: NO STORY.
+- `TR-matchui-009` — Halftime transition with clear separator — status: NO STORY.
+- `TR-matchui-010` — Match exit warning during live match — status: NO STORY.
+- `TR-matchui-011` — 0-0 halftime: show summary, adjustment still available — status: NO STORY.
+- `TR-reputation-001` — 声望增长必须按 `reputation_gain = floor((base_reputation_source + bonus_reputation_source) × source_weight × stage_multiplier)` 结算，并由权威系统统一产出结果。 — status: NO STORY.
+- `TR-reputation-002` — 声望等级进度必须按当前阈值与下一阈值计算 `reputation_progress_ratio`，供 UI 直接消费而非本地推导。 — status: NO STORY.
+- `TR-reputation-003` — 成就完成判定必须满足 `achievement_condition_satisfied AND NOT achievement_already_unlocked`，且同一成就不可重复解锁。 — status: NO STORY.
+- `TR-reputation-004` — 声望与成就奖励必须定义明确的结算归属、去重键与消费顺序，避免跨系统重复发奖或重复广播。 — status: NO STORY.
+- `TR-reputation-005` — 声望等级、进度、已解锁成就与待展示奖励必须作为可存档耐久状态恢复，避免读档后重复触发一次性奖励。 — status: NO STORY.
+- `TR-reputation-006` — 展示层必须消费权威声望/成就 payload，不得自行推导成就完成、奖励归属或等级提升真值。 — status: NO STORY.
+- `TR-onboard-001` — 10-step flow, MVP 7 steps: Home→Roster→Training→Match Pre/Live/Halftime/Result→Loop — status: NO STORY.
+- `TR-onboard-002` — `tip_core_text ≤ 25 chars`; `tip_optional_detail ≤ 80 chars` — status: NO STORY.
+- `TR-onboard-003` — No modal dialogs — highlights with text annotations only — status: NO STORY.
+- `TR-onboard-004` — `highlight_visible = screen_matches AND NOT interacting_with_other_ui` — status: NO STORY.
+- `TR-onboard-005` — `step_advance = action_matches_target OR skipped` — context-following — status: NO STORY.
+- `TR-onboard-006` — `onboarding_done` flag persisted in save — status: NO STORY.
+- `TR-onboard-007` — Onboarding state persists across save/load — resume from last completed + 1 — status: NO STORY.
+- `TR-onboard-008` — Skip all at any step, no confirmation dialog — status: NO STORY.
+- `TR-onboard-009` — Missing UI anchor → degrade to text-only hint — status: NO STORY.
+- `TR-onboard-010` — All anchor references use stable IDs from UI systems — status: NO STORY.
+- `TR-random-001`–`TR-random-008` — Random Event authority, durable state, event settlement key, read-only payload, formulas, and reputation-safe no-op contracts — status: NO ADR / NO STORY.
+- `TR-audio-001`–`TR-audio-006` — Audio event consumption, eligibility, mixing, settings persistence, prioritization, and low-pressure feedback contracts — status: NO ADR / NO STORY.
+- `TR-townui-001`–`TR-townui-007` — Town Management UI navigation, overview, budget preview, decision budget, anchors, and UI-only pressure classification — status: NO STORY.
+- `TR-tutorial-001`–`TR-tutorial-007` — Tutorial/Hint read-only payload, eligibility, priority, persistence, de-dup, and safe suppression contracts — status: NO STORY.
+
+## Interpretation
+
+- Verdict: CONCERNS, not FAIL. The implemented MVP-facing chains have no missing automated test paths, and the largest gap class is unscheduled future work rather than broken evidence.
+- Proceed with convergence while carrying warnings for newly registered future-system gaps only; implemented wording-drift items are tracked as cleanup, not blockers.
+- Do not start implementation for Random Event settlement, Audio settings persistence, Skill/Trait settlement keys, or Match fallback packets until the corresponding ADR/story acceptance criteria are aligned.
+
+## History
+
+| Date | Full Chain % | Notes |
+|------|-------------:|-------|
+| 2026-06-03 | 44.8% | Registry cleanup added Random Event, Audio, Town Management UI, and Tutorial/Hint TR entries; full-chain count remains 90. |
+| 2026-06-03 | 52.0% | First full RTM including Story/Test columns after Control Manifest refresh to ADR-0011. |

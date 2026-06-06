@@ -27,7 +27,7 @@
 
 参考那些让人感到"经营有方"而非"财务焦虑"的游戏：Football Manager 中在预算内签下合适球员的满足感，Stardew Valley 中第一季精打细算后在第二季看到农场扩张的成就感。经济管理系统必须让"钱"成为玩家规划和成长的工具，而不是惩罚和压力的来源。
 
-## Detailed Design
+## Detailed Rules
 
 ### Core Rules
 
@@ -51,7 +51,7 @@
 - 特殊事件/成就奖励（Alpha/Beta 阶段接入）
 
 **规则 6 — 运动点数来源**: 运动点数通过以下途径获得:
-- 每日自然恢复（固定值 + 设施加成，由时间与赛季推进系统触发每日结算）
+- 每日自然恢复（MVP 固定基础值，由时间与赛季推进系统触发每日结算；设施 AP 加成为 Alpha 预留）
 - 休息/恢复行动（玩家主动选择跳过训练日换取额外恢复——这是"取舍"设计的关键体现）
 - 赛季间歇期全恢复（赛季结束后自动回满）
 
@@ -64,7 +64,9 @@
 - 阶段结算（阶段性奖金、成就奖励）
 - 赛季结算（赛季末排名奖金、研究基金发放、下赛季资源重置规则）
 
-**规则 10 — MVP 目标**: MVP 阶段的经济系统目标是验证"有限的经费和运动点数迫使玩家在培养、最小建设和比赛之间做有意义的取舍"这一核心假设。MVP 包含小镇建设系统的最小切片，经济系统必须支持建造/升级扣费、每日维护费、设施 AP 恢复加成和球场收入倍率。MVP 不需要实现研究点数的完整解锁树。经费和运动点数在界面可见并在结算中变化；研究点数在后台正常累积（接口预留），但不显示在 MVP UI 中（研究点数消费出口在 Alpha 阶段接入解锁树后开放，届时再加入 UI 展示）。
+**规则 10 — MVP 目标**: MVP 阶段的经济系统目标是验证"有限的经费和运动点数迫使玩家在培养、最小建设和比赛之间做有意义的取舍"这一核心假设。MVP 包含小镇建设系统的最小可见支撑切片，经济系统必须支持建造/升级扣费、每日维护费和设施维护费结算；设施 AP 恢复加成与球场收入倍率在 MVP 固定为 0/1.00，只作为 Alpha 预留。MVP 不需要实现研究点数的完整解锁树。经费和运动点数在界面可见并在结算中变化；研究点数在后台正常累积（接口预留），但不显示在 MVP UI 中（研究点数消费出口在 Alpha 阶段接入解锁树后开放，届时再加入 UI 展示）。
+
+**规则 11 — 软停滞保护**: 维护费和低胜率可以让玩家进入低现金压力状态，但不得把玩家推进到需要重开档才能恢复的长期停滞。MVP 阶段的最低恢复路径由正式比赛节点和赛季结算共同承担：`match_day_ap_safety_grant` 保证不可跳过的正式比赛不会因 AP 不足死锁，负场 `post_match_funds` 至少覆盖一次最低训练经费，赛季垫底仍产生 `season_bonus_funds`，若赛季结算后经费仍低于最低常规经费操作成本，则 `season_recovery_floor_grant` 只补足到该最低操作成本。该保护不等于免成本经营，也不抵消维护费；它只禁止“无破产提示但实际已不可恢复”的隐性失败状态。
 
 ### States and Transitions
 
@@ -91,9 +93,9 @@
 | **时间与赛季推进系统** (Hard 上游) | 结算信号（每日/赛后/阶段/赛季）、赛季阶段标识 | 资源状态（正常/预警/达上限——影响赛季推进是否允许继续） | 每个结算节点 |
 | **存档与读档系统** (Hard 上游) | 存档/读档指令 | 三种资源的当前值、流水记录、预警状态 | 存档时全量保存；读档时全量恢复 |
 | **运动员培养系统** (Hard 上游·消费方) | 训练资源消耗请求（训练类型 → 消耗 X 经费 + Y 运动点数） | 资源是否充足（允许/拒绝训练）、实际扣除量 | 玩家发起训练时（Budget Preview） + 每日结算时（批量确认） |
-| **比赛竞技系统** (Hard 上游·产出方) | 比赛结果 → 奖励口径（胜负/排名/评分 → 奖金基数、研究点数转换率） | 资源是否充足（运动点数不足则无法参赛）、实际奖励入账 | 赛后结算 |
+| **比赛竞技系统** (Hard 上游·产出方) | 比赛结果 → 奖励口径（胜负/排名/评分 → 奖金基数、研究点数转换率） | 资源是否充足；不可跳过正式比赛节点可通过 `match_day_ap_safety_grant` 补足最低开赛 AP；实际奖励入账 | 赛后结算 |
 | **联赛与赛事结构系统** (Hard 上游·产出方) | 联赛层级系数、赛季排名奖金表、赛季研究基金额度 | 赛季末资源入账确认 | 赛季结算 |
-| **小镇建设系统** (Hard 双向) | 经济→建设: 资源充足性检查、经费扣除；建设→经济: `stadium_revenue_multiplier`（注入 `post_match_funds`）、`facility_total_maintenance`（注入 `daily_maintenance_cost`）、`facility_ap_bonus`（注入 `daily_ap_recovery`） | 经济系统消费建设系统产出的倍率和费用；建设系统消费经济系统的资源验证和结算 | 赛后结算（收入倍率）、每日结算（维护费、AP 恢复）、建造/升级确认（资源扣除） |
+| **小镇建设系统** (Hard 双向) | 经济→建设: 资源充足性检查、经费扣除；建设→经济: `facility_total_maintenance`（注入 `daily_maintenance_cost`）；`facility_ap_bonus` 与 `stadium_revenue_multiplier` 在 MVP 固定为 0/1.00 或只读预留 | 经济系统在 MVP 只硬消费建设系统产出的维护费；建设系统消费经济系统的资源验证和结算 | 每日结算（维护费）、建造/升级确认（资源扣除）；AP 恢复和收入倍率若在 Alpha 启用需先修订双方 GDD |
 | **主循环 UI 框架** (Hard 下游·展示方) | 资源显示请求、结算摘要展示请求 | 经费和运动点数的当前值、变化量、预警状态、结算摘要（研究点数在 MVP 阶段不在 UI 展示，Alpha 阶段接入） | 主界面渲染、结算动画触发 |
 | **声望与成就系统** (Soft 下游·Alpha 阶段) | 里程碑达成信号 → 资源奖励请求 | 奖励入账确认 | Alpha 阶段接入（MVP 以固定里程碑代替） |
 
@@ -112,14 +114,14 @@ The `daily_ap_recovery` formula is defined as:
 | Variable | Symbol | Type | Range | Description |
 |----------|--------|------|-------|-------------|
 | 基础恢复量 | `base_ap_recovery` | int | 4–6 | 每日自然恢复的运动点数，Tier 1 默认=5 |
-| 设施加成 | `facility_ap_bonus` | int | 0–3 | 建设系统提供的额外恢复；MVP 最小建设切片中允许为非零，只要其来源严格受小镇建设系统权威公式约束 |
+| 设施加成 | `facility_ap_bonus` | int | MVP 固定 0；Alpha 预留 0–3 | 建设系统 AP 恢复加成；MVP 阶段不得作为正式恢复来源，Alpha 启用前必须修订小镇建设系统硬消费合同 |
 | 运动点数上限 | `action_points_max` | int | 100 | 硬上限，由 Tuning Knobs 定义 |
 
 Recovery with cap:
 
 `action_points_new = min(action_points_max, action_points_current + daily_ap_recovery)`
 
-**Output Range:** 恢复增量 4–9 点/日；结算后总值 0–100。
+**Output Range:** MVP 恢复增量 4–6 点/日；Alpha 若启用设施 AP 加成则为 4–9 点/日。结算后总值 0–100。
 **Example:** 若 `action_points_current = 2`, `base_ap_recovery = 5`, `facility_ap_bonus = 0`, `action_points_max = 100`, 则 `action_points_new = min(100, 2+5) = 7`。
 
 **Design rationale:** R=5 + 训练消耗=1AP + 比赛消耗=3AP → 玩家每天可做"3次训练+留够比赛"或"5次训练+跳过比赛"。AP 使用率自然落在 70-80%，对齐数值系统的 `action_point_use_rate_target`（0.70-0.90）。
@@ -140,12 +142,12 @@ Three sub-formulas converting match results into the three resources:
 | 基础研究点数 | `base_match_research` | int | 10–20 | Tier 1 单场研究基数，默认=15 |
 | 比赛结果倍率 | `match_result_multiplier` | float | 0.4–1.0 | 胜=1.0, 平=0.6, 负=0.4 |
 | 联赛层级倍率 | `league_tier_multiplier` | float | 1.0–1.5 | Tier 1=1.0, Tier 2=1.3（收入增长部分被成本增长抵消） |
-| 球场收入倍率 | `stadium_revenue_multiplier` | float | 1.00–1.40 | 由小镇建设系统（球场等级）提供，无球场时 = 1.00 |
+| 球场收入倍率 | `stadium_revenue_multiplier` | float | MVP 固定 1.00；Alpha 预留 1.00–1.40 | 小镇建设系统球场收入倍率；MVP 阶段不得放大赛后经费，Alpha 启用前必须修订双方 GDD |
 | 战术评分比 | `tactical_rating_ratio` | float | 0.3–1.0 | 比赛系统输出的战术执行评分 / 满分 |
 | 比赛AP消耗 | `match_ap_cost` | int | 3 | 每场比赛固定消耗（由 Tuning Knobs 定义） |
 
-**Output Range:** 经费 100–630/场；研究点数 3–30/场。
-**Example:** Tier 1 联赛，胜场，球场 Lv.3（`stadium_revenue_multiplier = 1.24`）：`post_match_funds = 250 × 1.0 × 1.0 × 1.24 = 310`；`post_match_research = 15 × 0.8 × 1.0 = 12`。负场：`post_match_funds = 250 × 1.0 × 0.4 = 100`（覆盖最低训练成本，防止贫困螺旋）。
+**Output Range:** MVP 经费 100–450/场；Alpha 若启用球场收入倍率则为 100–630/场。研究点数 3–30/场。
+**Example:** Tier 1 联赛，胜场，MVP 球场收入倍率固定为 `stadium_revenue_multiplier = 1.00`：`post_match_funds = 250 × 1.0 × 1.0 × 1.00 = 250`；`post_match_research = 15 × 0.8 × 1.0 = 12`。负场：`post_match_funds = 250 × 1.0 × 0.4 × 1.00 = 100`（覆盖最低训练成本，防止贫困螺旋）。
 
 ### 3. 赛季结算奖励
 
@@ -167,7 +169,30 @@ Three sub-formulas converting match results into the three resources:
 
 **Design rationale:** 赛季奖金占年收入 25-35%，日常比赛收入占 65-75%。研究基金固定发放（不与排名挂钩），保证即使赛季表现差，研究进度也不停滞——对齐"低压力"支柱。
 
-### 4. 资源预警阈值
+### 4. 赛季软停滞恢复地板
+
+The `season_recovery_floor_grant` formula is defined as:
+
+`season_recovery_floor_grant = max(0, minimum_regular_funds_action_cost - funds_after_season_bonus)`
+
+It is evaluated once per season settlement after `season_bonus_funds` has been applied.
+
+**Variables:**
+
+| Variable | Symbol | Type | Range | Description |
+|----------|--------|------|-------|-------------|
+| 赛季奖金后经费 | `funds_after_season_bonus` | int | ≥0 | 应用赛季奖金和同节点支出后的经费余额 |
+| 最低常规经费操作成本 | `minimum_regular_funds_action_cost` | int | 80–120 | MVP 中至少一种常规经费消耗操作的最低成本，默认=100；通常对应最低训练经费成本 |
+
+**Output Range:** 0–120 经费/赛季结算。该值不是收入奖励，只是恢复地板补差。
+
+**Example:** 玩家因全 Lv.5 设施维护与全负场进入赛季末 `funds_after_season_bonus = 40`，`minimum_regular_funds_action_cost = 100`，则 `season_recovery_floor_grant = max(0, 100 - 40) = 60`，赛季结算后经费为 100，玩家至少能执行一次最低常规经费操作。若 `funds_after_season_bonus = 500`，则 grant = 0。
+
+**Worst-case MVP recovery sample:** 以 Tier 1、比赛间隔 3 天、四设施全 Lv.5 为压力样本：`daily_maintenance_cost = 25 + 31 = 56`，三天维护费为 168；负场收入为 `250 × 1.0 × 0.4 × 1.00 = 100`，因此全负场周期净额为 `100 - 168 = -68`。单靠负场无法维持正现金流，但正式比赛节点不会因 AP 死锁而中断，赛季垫底奖金至少为 `1000 × 0.5 × 1.0 = 500`；若赛季结算后余额仍低于 100，`season_recovery_floor_grant` 补足到 100。该样本证明玩家在最差低胜率维护压力下最多等待到下一次赛季结算即可恢复到至少一次常规经费操作，而不是进入不可恢复状态。
+
+**Design rationale:** 恢复地板只在赛季结算后检查，且只补到最低操作成本，不创造可囤积收入。它保留连续维护费和低胜率造成的经营压力，同时为低压力长期成长支柱提供硬安全网。
+
+### 5. 资源预警阈值
 
 `warning_active = (action_points_current / max(1, action_points_max) ≤ warning_ratio) OR (funds_current ≤ funds_warning_absolute)`
 
@@ -183,7 +208,7 @@ Three sub-formulas converting match results into the three resources:
 
 **Design note:** 经费无硬上限，不能用比率判定预警，改用绝对阈值。MVP 阶段研究点数暂不纳入预警（Alpha 阶段接入解锁树后再加）。
 
-### 5. 预算预览
+### 6. 预算预览
 
 `action_affordable = (funds_current ≥ proposed_funds_cost) AND (action_points_current ≥ proposed_ap_cost) AND (research_points_current ≥ proposed_rp_cost)`
 
@@ -201,7 +226,7 @@ Three sub-formulas converting match results into the three resources:
 **Output Range:** `action_affordable` 布尔值。
 **Example:** 训练请求消耗 100经费 + 1AP。若 `funds_current = 250`, `action_points_current = 6`，则 `action_affordable = true`。UI 显示"当前 250 → 操作后 150"。若经费不足，按钮灰化并标明"经费不足（需 100，当前 80）"。
 
-### 6. 标准化训练成本
+### 7. 标准化训练成本
 
 Consumed by the player development system's `player_development_roi` formula.
 
@@ -218,13 +243,13 @@ Consumed by the player development system's `player_development_roi` formula.
 **Output Range:** ≥0。
 **Example:** 训练消耗 100经费 + 1AP，`ap_to_funds_weight = 50`，则 `standardized_training_cost = 100 + (1 × 50) = 150`。
 
-### 7. 流水完整性（QA专用）
+### 8. 流水完整性（QA专用）
 
 `settlement_valid = (resource_post == clamp(resource_pre + Σincome - Σexpense, resource_min, resource_max))`
 
 非 gameplay 公式，QA 自动化测试使用。验证每次结算后 `收入 − 支出 = 余额变化`（含钳制修正）。
 
-### 8. 休息行动 AP 恢复
+### 9. 休息行动 AP 恢复
 
 The `rest_ap_recovery` formula is defined as:
 
@@ -241,7 +266,7 @@ The `rest_ap_recovery` formula is defined as:
 
 **Design rationale:** 休息行动是"取舍"设计的关键体现——玩家放弃训练收益换取额外 AP。调参范围为 2-5：低于 2 则取舍无意义，高于 5 则休息成为主导策略。
 
-### 9. 每日维护费
+### 10. 每日维护费
 
 The `daily_maintenance_cost` formula is defined as:
 
@@ -284,11 +309,12 @@ The `daily_maintenance_cost` formula is defined as:
 - **If 读档后资源值与存档时不一致**: 存档与读档系统保证资源值完整恢复。若发生版本迁移导致资源语义变化（如新增资源类型），新资源以初始默认值填充，已有资源值保持不变。迁移规则由存档系统拥有。
 - **If 训练消耗请求的资源量为 0 或负数**: 视为无效请求，拒绝执行。不产生流水记录。负数消耗不得被解释为"反向增加资源"。
 - **If MVP 阶段研究点数持续累积但无可消费出口**: 这是预期行为——研究点数在 Alpha 阶段接入解锁树后才成为完整经济循环。MVP 阶段研究点数在后台正常累积（接口和存储逻辑完整），但不显示在 MVP UI 中。不对"无法消费"做额外提示或惩罚。Alpha 阶段接入解锁树后，历史累积的 RP 可正常使用。
+- **If 玩家因维护费与低胜率组合进入连续多日经费归零状态**: 正式比赛节点仍按时间系统推进；不可跳过比赛若 AP 不足，由 `match_day_ap_safety_grant` 补足最低开赛 AP；负场仍按 `post_match_funds` 入账。若赛季结算应用 `season_bonus_funds` 后经费仍低于 `minimum_regular_funds_action_cost`，经济系统执行一次 `season_recovery_floor_grant` 补足差额。该 grant 只在赛季结算后生效，不在每日或赛后结算中补差。
 - **If 赛季末结算时玩家经费大量累积（超过 3x 月净收入）**: 系统正常入账，但结算摘要中附带提示"当前经费充足，可考虑投资训练或建设"。MVP 阶段经费无硬上限，不强制消费或丢弃溢出——提示仅为软引导。
 - **If 玩家连续多日不消耗任何运动点数**: 运动点数停留在上限，每日恢复全部丢弃。系统不提示"你浪费了恢复"——低压力设计不应催促玩家行动。但连续多日不活动可能触发时间系统的闲置提示（由时间系统拥有）。
 - **If 训练消耗的 AP 同时被多个球员的并行训练请求占用**: 经济系统按请求提交顺序串行检查。第一笔训练消耗后余额更新，第二笔训练基于新余额重新检查。若第二笔余额不足则拒绝，并提示"运动点数不足"。
 - **If 比赛系统产出异常高的战术评分比（如 >1.0）**: `tactical_rating_ratio` 钳制到 `[0.3, 1.0]`，超出范围的值视同边界值。研究点数结算不受异常输入阻塞。
-- **If 设施加成 `facility_ap_bonus` 在 MVP 阶段被非零值调用**: 只要该数值来自小镇建设系统权威结算的最小建设切片效果，经济系统必须按公式正常计算；若来源未登记、超出建设系统允许范围，视为异常输入并拒绝静默放行。
+- **If 设施加成 `facility_ap_bonus` 在 MVP 阶段被非零值调用**: 视为配置错误或 Alpha 预留误接入；经济系统不得把该值作为正式每日 AP 恢复来源。只有在本 GDD 与小镇建设系统 GDD 均升级 Alpha 合同后，才可按 0–3 范围消费该字段。
 - **If 赛季最后一轮比赛获胜后触发晋级（升级或降级）**: 该场比赛的 `post_match_funds` 使用球队**赛前所在层级**的 `league_tier_multiplier`（即比赛发生时的层级），而非晋级后的新层级。例如：Tier 2 球队在最后一轮获胜并升入 Tier 1，该场收入仍按 Tier 2 的 `league_tier_multiplier = 1.3` 结算。新层级倍率从下赛季首场比赛开始生效。赛季末奖金（`season_bonus_funds`）同理使用结算赛季的层级。
 
 ## Dependencies
@@ -309,7 +335,7 @@ The `daily_maintenance_cost` formula is defined as:
 | System | Type | What this system provides | Key interface |
 |---|---|---|---|
 | `design/gdd/main-loop-ui-framework.md` | Hard | 经费和运动点数的当前值、变化量、预警状态、结算摘要；研究点数在 Alpha 阶段接入 UI | 主界面渲染资源条和结算动画 |
-| 小镇建设系统 | Hard (双向) | 经济→建设: 资源充足性检查、经费扣除、维护费扣缴；建设→经济: `stadium_revenue_multiplier`（`post_match_funds` 第 4 因子）、`facility_total_maintenance`（叠加 `daily_maintenance_cost`）、`facility_ap_bonus`（叠加 `daily_ap_recovery`） | 双向接口: 经济系统消费建设系统产出的倍率和费用；建设系统依赖经济系统的资源验证与结算 |
+| 小镇建设系统 | Hard (双向) | 经济→建设: 资源充足性检查、经费扣除、维护费扣缴；建设→经济: `facility_total_maintenance`（叠加 `daily_maintenance_cost`）；`facility_ap_bonus` 与 `stadium_revenue_multiplier` 在 MVP 固定为 0/1.00 或只读预留 | 双向接口: 经济系统在 MVP 只硬消费建设维护费；建设系统依赖经济系统的资源验证与结算 |
 | 声望与成就系统 | Soft (Alpha) | 里程碑达成 → 资源奖励入账 | Alpha 阶段接入（MVP 以固定里程碑代替） |
 | 随机事件系统 | Soft (Beta) | 事件驱动的资源变化请求入口 | Beta 阶段接入 |
 | `design/gdd/onboarding-system.md` | Soft | 引导需解释资源摘要区中经费和运动点数的真实含义与用途 | 引导系统消费经济系统的资源查询接口用于引导文案 |
@@ -321,7 +347,7 @@ The `daily_maintenance_cost` formula is defined as:
 
 1. 经济管理系统对上游系统的依赖体现在"消费它们的输出但不在本系统内重新定义它们的语义"——比赛系统定义什么是"赢"，经济系统定义赢了值多少钱。
 2. 任何下游系统不得直接修改三种资源的当前值——所有资源变化必须通过经济系统定义的标准化变更接口（Budget Preview → Settlement）。
-3. 当小镇建设系统、声望与成就系统、随机事件系统 GDD 完成后，本节对应的 Soft 条目应升级为 Hard，并在其 GDD 的 Dependencies 中反向声明对本系统的依赖。
+3. 小镇建设系统在 MVP 阶段对经济系统的硬回传仅包含建造/升级扣费与 `facility_total_maintenance`；`facility_ap_bonus` 和 `stadium_revenue_multiplier` 若在 Alpha 启用，必须先同步修订本 GDD 与小镇建设系统 GDD。声望与成就系统、随机事件系统 GDD 完成后，本节对应的 Soft 条目应升级为 Hard，并在其 GDD 的 Dependencies 中反向声明对本系统的依赖。
 4. 如果某个系统只展示资源余额而不发起消耗或收入请求，则它属于软依赖；如果会改变资源值，则属于硬依赖。
 5. MVP 阶段，主循环 UI 框架是经济系统最关键的展示消费方——它必须正确展示经费和运动点数的当前值、结算摘要和预警状态。研究点数在后台累积但不在 MVP UI 中显示（Alpha 阶段接入解锁树后开放），否则玩家无法感知经济系统的存在。
 
@@ -330,10 +356,11 @@ The `daily_maintenance_cost` formula is defined as:
 | 调参项 | 控制内容 | 安全范围 | 调高风险 | 调低风险 | 主要影响 |
 |---|---|---|---|---|---|
 | `base_ap_recovery` | 每日运动点数自然恢复量 | 4–6 | AP 过于充裕，取舍意义减弱 | AP 长期不足，玩家感到行动受限 | 每日行动节奏、AP 使用率 |
-| `facility_ap_bonus` | 建设系统提供的额外 AP 恢复 | 0–3 | 后期 AP 压力消失过早 | 设施升级反馈不足 | 建设回报感（MVP=0） |
+| `facility_ap_bonus` | 建设系统提供的额外 AP 恢复 | MVP 固定 0；Alpha 0–3 | 后期 AP 压力消失过早 | 设施升级反馈不足 | Alpha 建设回报感（MVP 不启用） |
 | `base_match_funds` | Tier 1 单场比赛经费基数 | 200–300 | 经费通胀，训练/建设支出变得无感 | 经费压力过大，负场无法维持运营 | 比赛回报感、经营压力 |
 | `match_result_multiplier` | 胜/平/负的奖励倍率 | 胜 0.8–1.2, 平 0.5–0.7, 负 0.2–0.4 | 胜场奖励过高，平/负无意义 | 胜负差异过小，比赛结果不痛不痒 | 比赛重要性、风险回报平衡 |
 | `base_season_bonus` | Tier 1 赛季末奖金基数 | 800–1200 | 赛季末突然暴富，日常收入贬值 | 赛季结算无满足感 | 赛季成就感、长期规划动力 |
+| `minimum_regular_funds_action_cost` | 赛季软停滞恢复地板的目标余额 | 80–120 | 低胜率惩罚过轻，玩家可依赖地板反复消费 | 恢复后仍无法执行任何常规经费操作 | 软停滞恢复、安全网强度 |
 | `base_season_research` | 赛季末研究基金基数 | 80–120 | 研究解锁过快 | 研究进度通胀，解锁树瞬间耗尽 | 研究节奏、解锁期待感 |
 | `base_match_research` | 单场研究点数基数 | 10–20 | 研究点数短期爆仓 | 研究点数几乎不增长 | 研究获取节奏 |
 | `tactical_rating_ratio` 范围 | 战术评分比钳制范围 | 0.3–1.0 | 战术差也能获取高研究点（反直觉） | 好战术与差战术无区分度 | 研究点数获取与战术表现关联 |
@@ -364,7 +391,7 @@ The `daily_maintenance_cost` formula is defined as:
 - **GIVEN** 时间系统发出每日结算信号，**WHEN** 结算完成，**THEN** 运动点数按 `daily_ap_recovery` 公式恢复，恢复量正确计入，不超过 `action_points_max`；结算摘要显示"今日恢复 X 运动点数"。
 - **GIVEN** 一场比赛终场确认且比赛系统输出奖励口径，**WHEN** 赛后结算完成，**THEN** 经费按 `post_match_funds` 公式正确入账；结算摘要显示胜负结果和对应奖励金额。研究点数在后台按 `post_match_research` 公式累积（不在 MVP 结算摘要中显示）。
 - **GIVEN** 比赛结果为负场，**WHEN** 赛后结算完成，**THEN** 入账经费 ≥ 最低训练成本（防止贫困螺旋）；AP 消耗被正确扣除。
-- **GIVEN** 时间系统发出赛季结算信号且联赛系统输出排名/晋级标签，**WHEN** 赛季结算完成，**THEN** 经费按 `season_bonus_funds` 公式正确入账；结算摘要显示赛季成绩和奖金明细。研究点数在后台按 `season_bonus_research` 公式累积（固定发放，与排名无关；不在 MVP 结算摘要中显示）。
+- **GIVEN** 时间系统发出赛季结算信号且联赛系统输出排名/晋级标签，**WHEN** 赛季结算完成，**THEN** 经费按 `season_bonus_funds` 公式正确入账；若赛季奖金后经费仍低于 `minimum_regular_funds_action_cost`，则按 `season_recovery_floor_grant` 补足到该成本；结算摘要显示赛季成绩、奖金明细和恢复地板补差。研究点数在后台按 `season_bonus_research` 公式累积（固定发放，与排名无关；不在 MVP 结算摘要中显示）。
 - **GIVEN** 任一资源在结算后 ≤ 预警阈值，**WHEN** 结算完成，**THEN** UI 对该资源显示黄色警告；**GIVEN** 该资源在后续结算中恢复到阈值以上，**WHEN** 结算完成，**THEN** 黄色警告移除。
 - **GIVEN** 任一资源达到上限且结算产生额外增加，**WHEN** 结算完成，**THEN** 该资源停留在上限值，超出部分丢弃，结算摘要中标注"已达上限"。
 - **GIVEN** 资源归零（如经费=0），**WHEN** 玩家尝试任何需要消耗该资源的行动，**THEN** 该行动被阻止，UI 显示"资源耗尽"标记。
@@ -378,6 +405,7 @@ The `daily_maintenance_cost` formula is defined as:
 - **GIVEN** 下游系统提交的资源消耗量为 0 或负数，**WHEN** 结算系统验证，**THEN** 该请求被拒绝执行，不产生流水记录，不改变任何资源值。
 - **GIVEN** 下游系统绕过 Budget Preview 直接提交超过余额的消耗请求，**WHEN** 结算系统验证，**THEN** 该笔消耗被拒绝，记录异常日志，资源值不变，不产生负余额。
 - **GIVEN** MVP 版本仅实现本 GDD 定义的最小经济闭环，**WHEN** QA 从新档连续游玩一个标准会话（至少 3 个比赛日），**THEN** 必须验证以下全部条件成立：(a) 三种资源在每次结算后数值变化正确；(b) 每次结算产生可见的结算摘要；(c) 至少一次因资源不足导致操作被阻止；(d) 运动点数每日恢复量正确；(e) 休息行动使运动点数按 `rest_ap_recovery` 增长。
+- **GIVEN** Tier 1 玩家处于四设施全 Lv.5、`base_maintenance_cost = 25`、`facility_total_maintenance = 31`、比赛间隔 3 天、连续负场且经费被维护费扣至 0，**WHEN** QA 继续按 MVP 合法流程推进到赛季结算，**THEN** 每个负场周期可按 `100 - (56 × 3) = -68` 手工核算为亏损；赛季垫底奖金至少按 `1000 × 0.5 × 1.0 = 500` 入账；若赛季奖金后经费仍低于 `minimum_regular_funds_action_cost = 100`，`season_recovery_floor_grant` 必须补足到 100，使玩家无需重开档或外部注入即可再次执行至少一种常规经费消耗操作。
 
 ## Open Questions
 

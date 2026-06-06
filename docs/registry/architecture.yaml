@@ -30,7 +30,7 @@
 #   Superseded entries:     Grep pattern="status: superseded"
 
 version: 1
-last_updated: "2026-05-17"
+last_updated: "2026-06-03"
 
 # ─── STATE OWNERSHIP ─────────────────────────────────────────────────────────
 # Who is the authoritative owner of each piece of shared game state.
@@ -162,6 +162,26 @@ state_ownership:
     referenced_by:
       - docs/architecture/adr-0009-league-competition-structure.md
     added: 2026-05-17
+
+  - state: reputation_state
+    status: active
+    owner_system: ReputationAchievementManager
+    adr: docs/architecture/adr-0011-reputation-and-achievement-recognition-framework.md
+    interface: "ReputationAchievementManager.build_reputation_view_payload() → Dictionary[String, Variant] (read-only) and serialize_reputation_state() for SaveManager durability. External systems may read reputation_total, reputation_level, reputation_progress_ratio, pending_reward_count through authoritative payloads only."
+    write_access: ReputationAchievementManager-only
+    referenced_by:
+      - docs/architecture/adr-0011-reputation-and-achievement-recognition-framework.md
+    added: 2026-06-03
+
+  - state: achievement_state
+    status: active
+    owner_system: ReputationAchievementManager
+    adr: docs/architecture/adr-0011-reputation-and-achievement-recognition-framework.md
+    interface: "ReputationAchievementManager.build_achievement_view_payload() → Dictionary[String, Variant] (read-only) and serialize_reputation_state() for SaveManager durability. External systems may read unlocked_achievement_ids, pending_reputation_rewards, granted_reputation_reward_records, evaluated_reputation_settlement_keys, and processed_reputation_settlement_keys through authoritative contracts only."
+    write_access: ReputationAchievementManager-only
+    referenced_by:
+      - docs/architecture/adr-0011-reputation-and-achievement-recognition-framework.md
+    added: 2026-06-03
 
 # Example:
 #   - state: player_health
@@ -337,6 +357,22 @@ interfaces:
     referenced_by:
       - docs/architecture/adr-0009-league-competition-structure.md
     added: 2026-05-17
+
+  - contract: reputation_recognition_payloads
+    status: active
+    pattern: direct_call
+    producer: ReputationAchievementManager
+    consumers:
+      - MainLoopUI
+      - PlayerMgmtUI
+      - MatchPerfUI
+      - Onboarding
+      - SaveManager
+    adr: docs/architecture/adr-0011-reputation-and-achievement-recognition-framework.md
+    signal_signature: "ReputationAchievementManager.build_reputation_view_payload() / build_achievement_view_payload() return authoritative Dictionary[String, Variant] snapshots. SaveManager consumes serialize_reputation_state(). Consumers render or persist only; they never recompute completion, claimability, progress truth, or settlement de-duplication."
+    referenced_by:
+      - docs/architecture/adr-0011-reputation-and-achievement-recognition-framework.md
+    added: 2026-06-03
 
 # Example:
 #   - contract: damage_delivery
@@ -523,6 +559,20 @@ forbidden_patterns:
     why: "Direct standings writes bypass the match_id deduplication check, break the single-writer-per-state ownership model, and would create untraceable ranking manipulation. Standings are a deterministic projection of match results — bypassing the match→standings pipeline breaks auditability."
     adr: docs/architecture/adr-0009-league-competition-structure.md
     added: 2026-05-17
+
+  - pattern: local_reputation_truth_recomputation
+    status: active
+    description: "UI and external systems must not locally recompute reputation progress, achievement completion, reward claimability, or recognition settlement truth. They must consume authoritative payloads from ReputationAchievementManager only."
+    why: "Local recomputation would reintroduce drift between UI, save/load, and durable settlement state, especially under Godot 4.6 dual-focus UI behavior and reload paths. The accepted architecture requires a single writer and read-only consumers for long-term recognition truth."
+    adr: docs/architecture/adr-0011-reputation-and-achievement-recognition-framework.md
+    added: 2026-06-03
+
+  - pattern: rule_version_in_reputation_settlement_key
+    status: active
+    description: "Stable reputation settlement keys must not include rule_version. The key source is limited to deterministic scalar identity such as settlement_id, reward_scope, and reward_id; rule_version is metadata only."
+    why: "Including rule_version in the stable key source would break idempotency across migrations and metadata revisions, causing duplicate reward delivery or divergent durable state. ADR-0011 aligns this rule with ADR-0010's stable settlement-key contract."
+    adr: docs/architecture/adr-0011-reputation-and-achievement-recognition-framework.md
+    added: 2026-06-03
 
 # Example:
 #   - pattern: autoload_singleton_coupling

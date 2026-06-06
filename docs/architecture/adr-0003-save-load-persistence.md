@@ -81,16 +81,18 @@ extends Resource
 @export var ui_screen_id: String = ""
 @export var ui_stack_depth: int = 0
 
-# System state blobs — each is a Dictionary serialized by the owning system
-@export var time_state: Dictionary = {}
-@export var player_state: Dictionary = {}
-@export var match_state: Dictionary = {}
-@export var economy_state: Dictionary = {}
-@export var town_state: Dictionary = {}
-@export var league_state: Dictionary = {}
+# System state blobs — each is a typed dictionary serialized by the owning system.
+# Owning systems may impose stricter internal contracts; skill/trait state uses
+# shallow typed records and sorted arrays per ADR-0010.
+@export var time_state: Dictionary[String, Variant] = {}
+@export var player_state: Dictionary[String, Variant] = {}
+@export var match_state: Dictionary[String, Variant] = {}
+@export var economy_state: Dictionary[String, Variant] = {}
+@export var town_state: Dictionary[String, Variant] = {}
+@export var league_state: Dictionary[String, Variant] = {}
 
 # Metadata — displayed in save/load UI
-@export var metadata: Dictionary = {}  # {town_name, season, league_tier, team_rating, integrity_hash, ...}
+@export var metadata: Dictionary[String, Variant] = {}  # {town_name, season, league_tier, team_rating, integrity_hash, ...}
 ```
 
 **Rationale**: `.tres` provides type-safe serialization (`@export var`), editor visibility for debugging, and native nested Resource handling. JSON was rejected because it requires manual type coercion for every field and gains no benefit for a single-player local save.
@@ -207,15 +209,28 @@ func _migrate(snapshot: SaveSnapshot, from_version: int) -> SaveSnapshot:
 
 ### Part E: Save Integrity
 
-SaveSnapshot carries an `integrity_hash` in `metadata`, computed from the serialized gameplay state. On load, SaveManager recomputes and compares it as a best-effort corruption detection step. A mismatch is treated as probable save corruption: report the slot to the player and offer recovery or deletion rather than silently loading.
+SaveSnapshot carries an `integrity_digest` in `metadata`, computed from a stable canonical serialization of the persisted gameplay state. On load, SaveManager recomputes and compares it as a best-effort corruption detection step. A mismatch is treated as probable save corruption: report the slot to the player and offer recovery or deletion rather than silently loading.
+
+Save integrity must be computed from a canonical serialized representation of the snapshot payload. Runtime `hash(Dictionary)` is not a stable persistence checksum and must not be used as the authoritative integrity digest.
+
+```gdscript
+func build_snapshot_integrity_digest(snapshot_payload: Dictionary[String, Variant]) -> String:
+    var canonical_json: String = _to_canonical_json(snapshot_payload)
+    return canonical_json.sha256_text()
+```
 
 ```gdscript
 func _verify_integrity(snapshot: SaveSnapshot) -> bool:
-    var stored_hash: int = snapshot.metadata.get("integrity_hash", 0)
-    var computed_hash: int = hash(snapshot.time_state) ^ hash(snapshot.player_state) ^ \
-        hash(snapshot.economy_state) ^ hash(snapshot.town_state) ^ \
-        hash(snapshot.league_state) ^ hash(snapshot.match_state)
-    return stored_hash == computed_hash
+    var stored_digest: String = String(snapshot.metadata.get("integrity_digest", ""))
+    var canonical_state: String = _canonical_serialize_state({
+        "time_state": snapshot.time_state,
+        "player_state": snapshot.player_state,
+        "economy_state": snapshot.economy_state,
+        "town_state": snapshot.town_state,
+        "league_state": snapshot.league_state,
+        "match_state": snapshot.match_state,
+    })
+    return stored_digest == _stable_digest(canonical_state)
 ```
 
 ### Part F: Error Recovery
@@ -298,9 +313,9 @@ func _slot_path(slot: int) -> String:
 
 ### Negative
 
-- `.tres` files are binary in practice — not human-readable for player troubleshooting
+- `.tres` files are engine-facing text resources — visible to developers, but not designed as player-facing troubleshooting artifacts
 - Registration is opt-in — a Core system that forgets to call `register_system()` will silently not be saved
-- Hash-based integrity checking is best-effort rather than cryptographic; collisions are possible, so this mechanism is for practical corruption detection, not tamper-proof guarantees
+- Digest-based integrity checking is best-effort rather than cryptographic; collisions are possible, so this mechanism is for practical corruption detection, not tamper-proof guarantees
 - No incremental/partial save — the entire snapshot is written each time
 
 ### Risks
@@ -325,7 +340,9 @@ func _slot_path(slot: int) -> String:
 | `time-and-season-progression-system.md` | Edge Case: "存档读取时当前状态停在关键节点中途" | TimeManager.get_state() captured atomically in save; restore goes to exact phase |
 | `player-development-system.md` | AC: "已确认的训练成长不得在读档后丢失，也不得重复结算" | PlayerDevelopment.serialize() captures confirmed training results; deserialize() restores exact attribute values |
 | `economy-management-system.md` | Rule 2: "任何下游系统不得直接修改三种资源的当前值" | EconomyManager.serialize() captures authoritative balances; all resource changes go through execute_transaction() |
-| `match-competition-system.md` | Edge Case: "比赛中途异常退出后的恢复规则" | MatchCompetition.serialize() captures current match state; on load, if phase was Match In Progress, match resumes from last stable event |
+| `match-competition-system.md` | Edge Case: "比赛中途异常退出后的恢复规则" | MatchCompetition.serialize() stores durable pre-match or settled result state only; on load, Match In Progress restores to the Entry/pre-match stable node without replaying partial match events |
+
+Match In Progress is not a stable restore point. Loading a save never reconstructs half-resolved match simulation state and never replays unfinished settlement evaluation.
 
 ## Performance Implications
 

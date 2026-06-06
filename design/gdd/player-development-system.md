@@ -1,8 +1,8 @@
 # 足球小镇：运动员培养系统
 
-> **Status**: Designed
+> **Status**: Approved
 > **Author**: 用户 + Claude
-> **Last Updated**: 2026-05-31
+> **Last Updated**: 2026-06-03
 > **Implements Pillar**: 轻度足球经营、像素小镇养成、低压力长期成长
 > **Source**:
 > - `design/gdd/game-concept.md`
@@ -49,7 +49,7 @@
    - 传奇胚子：极少数高上限对象，培养周期更长、资源要求更高，但可以成为终局核心。
 8. 本系统必须把“投入产出性价比”做成显性策略取舍，而不是隐藏数值：普通球员应更容易快速练成可用战力，高潜力球员则需要更长周期和更多资源才能兑现优势。
 9. 单次训练必须同时声明三件事：训练目标、时间消耗、资源消耗。训练不得绕过时间系统的统一行动窗口，也不得绕过数值系统的共享成长递减规则。
-10. 单次训练的实际收益必须建立在共享 `attribute_growth` 之上，再叠加本系统拥有的训练效率、训练项目匹配度、球员当前状态等修正来源。培养系统可以决定“谁练得更值”，但不能改写共享成长公式本体。
+10. 单次训练的实际收益必须建立在共享 `attribute_growth` 之上，再叠加本系统拥有的训练效率、训练项目匹配度、球员当前状态等修正来源。Alpha 阶段若技能与特性系统已启用，培养系统只能消费其训练结算前提供的技能训练 read model：`skill_training_modifier_milli` 与 `skill_training_multiplier_milli`。该 read model 只能包含技能系统拥有的训练场景效果；特性在 Alpha 阶段只提供 `trait_effect_summary_ids` 或解释摘要，不进入训练数值倍率。培养系统不得混入属性、战术、设施、状态或比赛层修正，也不得逐项重算技能效果、解锁资格、候选进度或特性触发条件。培养系统可以决定“谁练得更值”，但不能改写共享成长公式本体。
 11. 训练必须是有方向的，而不是平均给所有属性灌值。每个训练项目至少应指定一个主成长属性，并可选择性带动少量副属性成长。
 12. 球员状态必须影响培养结果，但这种影响应服务低压力体验，而不是制造高压惩罚。疲劳、心情、健康或比赛负荷可以降低训练收益或提高恢复需求，但不应轻易让玩家长期报废一个培养对象。
 13. 本系统必须允许玩家基于球队阶段做不同培养选择，例如：
@@ -84,8 +84,8 @@
 | 存档与读档系统 | 需要持久化的球员长期成长状态、训练结果和培养里程碑 | 稳定保存节点、权威持久化边界、恢复语义 | 存档系统定义如何保存/恢复；培养系统定义哪些球员数据属于长期权威状态 |
 | 比赛竞技系统 | 球员当前能力、状态标签、培养倾向和可用阵容价值 | 比赛表现、出场负荷、赛后成长机会、状态反馈 | 培养系统定义长期成长；比赛系统定义比赛如何反向影响培养结果 |
 | 经济管理系统 | 招募与训练对资源的消耗入口、不同球员层级的投入压力 | 经费、研究点数、运动点数的实际供给与结算口径 | 经济系统定义资源从哪来；培养系统定义资源花在谁身上、值不值 |
-| 小镇建设系统 | 读取 MVP 最小建设切片提供的 `facility_training_multiplier`（组合了训练场、青训营年轻球员加成、训练场↔青训营邻接加成）作为 `training_actual_gain` 第 4 因子 | `facility_training_multiplier`（float, 1.0–1.75, 无设施时 = 1.0）；球员年龄用于判定 `youth_training_bonus` 是否适用 | 建设系统组合并公布 `facility_training_multiplier`；培养系统在每次训练结算时消费它。招募潜力下限、伤病概率和伤病恢复输出不属于 MVP 培养硬依赖，Alpha 接入时再修订 |
-| 技能与特性系统 | 球员成长阶段、培养方向、可解锁技能/特性的前置成长条件 | 技能内容、特性效果、差异化成长结果 | 培养系统定义何时具备学习资格；技能系统定义学到什么、效果是什么 |
+| 小镇建设系统 | 读取 MVP 最小可见支撑切片提供的 `facility_training_multiplier`（训练场倍率 × 青训营年轻球员轻量加成；不含邻接乘区）作为 `training_actual_gain` 第 4 因子 | `facility_training_multiplier`（float, 1.0–1.35, 无设施时 = 1.0）；球员年龄用于判定 `youth_training_bonus` 是否适用 | 建设系统组合并公布 `facility_training_multiplier`；培养系统在每次训练结算时消费它。招募潜力下限、伤病概率、伤病恢复和所有邻接输出不属于 MVP 培养硬依赖，Alpha 接入时再修订 |
+| 技能与特性系统 | 训练结算稳定事实、球员成长阶段、培养方向、可解锁技能/特性的前置成长条件 | 技能/特性只读训练修正、技能内容、特性效果、差异化成长结果 | 培养系统定义并输出 `training_focus_hit`、`training_focus_partial`、`training_focus_miss`、`training_completed`、`training_stability_score_milli` 等已确认训练事实；技能系统定义学到什么、效果是什么，并只通过聚合 read model 回流训练倍率 |
 | 随机事件系统 | 球员培养中的长期对象、状态承载体和事件影响目标 | 临时事件、情绪波动、特殊训练机会或成长分支 | 事件系统定义发生什么变化；培养系统定义这些变化如何落到球员成长状态 |
 | 主循环 UI 框架 | 球员成长信息、培养入口、短中长期反馈语义 | 展示方式、提醒优先级、入口布局 | 培养系统定义信息含义；UI 系统定义如何让玩家看懂和操作 |
 | 球员管理 UI | 球员列表、详情字段、培养进度、成长反馈的真实语义 | 实际列表页、详情页、筛选排序和训练入口交互 | 培养系统定义显示什么信息；球员管理 UI 定义如何呈现这些信息 |
@@ -117,7 +117,7 @@
 
 `training_actual_gain` 的公式定义如下：
 
-`training_actual_gain = min(potential_cap - current_attribute, attribute_growth(raw_growth_input, current_attribute, potential_cap, decay_factor) × fatigue_adjusted_training_efficiency × training_focus_match_multiplier × facility_training_multiplier)`
+`training_actual_gain = min(potential_cap - current_attribute, attribute_growth(raw_growth_input, current_attribute, potential_cap, decay_factor) × fatigue_adjusted_training_efficiency × training_focus_match_multiplier × facility_training_multiplier × skill_training_multiplier)`
 
 **Variables:**
 
@@ -129,13 +129,34 @@
 | 衰减因子 | `decay_factor` | float | 0.8–1.8 | 继承数值系统的成长递减强度，默认 1.2。不得在本系统中覆盖范围 |
 | 状态修正后的训练效率 | `fatigue_adjusted_training_efficiency` | float | 0.5–1.8 | 经过状态修正后的有效训练效率 |
 | 训练匹配倍率 | `training_focus_match_multiplier` | float | 0.7–1.3 | 当前训练项目与球员定位、成长方向的匹配程度 |
-| 设施训练倍率 | `facility_training_multiplier` | float | 1.0–1.75 | 由小镇建设系统组合提供的设施侧训练倍率（`training_efficiency_multiplier × youth_training_bonus × adj_tr_youth_multiplier`）。无设施时 = 1.0；MVP 最大值 = 1.725（训练场 Lv.5 × 青训营自身 Lv.5 × 邻接 Lv.5+5）。上限 1.75 保留取整余量供扩展 |
+| 设施训练倍率 | `facility_training_multiplier` | float | 1.0–1.35 | 由小镇建设系统组合提供的 MVP 设施侧训练倍率（`training_efficiency_multiplier × youth_training_bonus`）。无设施时 = 1.0；MVP 不含 `adj_tr_youth_multiplier` 或其他邻接乘区，超过 1.35 视为配置错误 |
+| 技能训练倍率 | `skill_training_multiplier` | float | 1.0–1.35 | Alpha 阶段由技能与特性系统只读 `skill_training_multiplier_milli` 转换而来：`skill_training_multiplier_milli / 1000`；系统未启用或无适用训练效果时 = 1.0。该倍率只包含技能训练场景数值效果，特性只提供解释摘要，不进入训练数值倍率；本系统不得重算技能/特性条件 |
 | 单次训练实际成长 | `training_actual_gain` | float | 0–(`potential_cap - current_attribute`) | 单次训练最终能落到目标属性上的实际成长量 |
 
 **Output Range:** 0 到剩余可成长空间；当 `current_attribute = potential_cap` 时输出必须为 0。  
-**Example:** 若 `raw_growth_input = 3.0`、`current_attribute = 50`、`potential_cap = 80`、`decay_factor = 1.2`、`fatigue_adjusted_training_efficiency = 1.1`、`training_focus_match_multiplier = 1.2`、`facility_training_multiplier = 1.15`，且共享 `attribute_growth(...) = 1.5`，则 `training_actual_gain = min(30, 1.5 × 1.1 × 1.2 × 1.15) = min(30, 2.277) = 2.277`。
+**Example:** 若 `raw_growth_input = 3.0`、`current_attribute = 50`、`potential_cap = 80`、`decay_factor = 1.2`、`fatigue_adjusted_training_efficiency = 1.1`、`training_focus_match_multiplier = 1.2`、`facility_training_multiplier = 1.15`、`skill_training_multiplier_milli = 1050`，则 `skill_training_multiplier = 1.05`；若共享 `attribute_growth(...) = 1.5`，则 `training_actual_gain = min(30, 1.5 × 1.1 × 1.2 × 1.15 × 1.05) = min(30, 2.39085) = 2.39085`。
 
-### 3. 球员分层潜力区间映射
+### 3. 技能/特性训练事实输出
+
+`training_completion_rate_milli = floor((completed_training_sessions × 1000) / max(1, planned_training_sessions))`
+
+`training_stability_score_milli = 2000 when training_completion_rate_milli >= 850 AND overfatigue_training_sessions = 0; else 1000 when training_completion_rate_milli >= 700; else 0`
+
+**定义：** 每次训练结算完成后，本系统必须为技能与特性系统输出稳定 `skill_trait_settlement_input.confirmed_facts[]`。最小事实集合包括：训练完成事实 `training_completed`、训练方向命中事实 `training_focus_hit` / `training_focus_partial` / `training_focus_miss` 三选一、目标属性成长事实 `training_attribute_gain_confirmed`。赛季收口时，本系统必须按本节公式输出用于普通球员可靠身份路径的赛季聚合 `training_stability_score_milli`。这些事实只描述已确认训练结果，不包含 UI 预览或玩家未确认的训练安排。
+
+**Variables:**
+
+| Variable | Symbol | Type | Range | Description |
+|----------|--------|------|-------|-------------|
+| 已完成训练次数 | `completed_training_sessions` | int | ≥ 0 | 当前赛季该球员已确认完成并写入长期成长的训练次数 |
+| 计划训练次数 | `planned_training_sessions` | int | ≥ 0 | 当前赛季该球员被安排并到达结算的训练次数；为 0 时分母按 1 处理 |
+| 训练完成率定点值 | `training_completion_rate_milli` | int | 0–1000 | 训练完成率的千分定点表示 |
+| 过劳训练次数 | `overfatigue_training_sessions` | int | ≥ 0 | 当前赛季训练后进入高疲劳或恢复中状态的次数 |
+| 训练稳定性分 | `training_stability_score_milli` | int | 0 / 1000 / 2000 | 提供给技能与特性系统可靠轮换赛季评分的训练侧稳定性输入；与技能系统口径一致 |
+
+**Output Contract:** `confirmed_facts[]` 必须按 `fact_order ASC, source_event_id ASC, fact_type ASC` 排序；`fact_type` 使用稳定代码名；`fact_point_value` 必须来自技能与特性系统固定计点表或本节稳定性分，不得由 UI 或实现期临时估算。
+
+### 4. 球员分层潜力区间映射
 
 `player_tier_potential_band` 的公式定义如下：
 
@@ -268,11 +289,12 @@
 | 主循环 UI 框架 | Hard | 培养入口、球员成长摘要、训练反馈语义 | 必须声明主循环中的培养反馈直接来自本系统定义的成长语义 |
 | 球员管理 UI | Hard | 球员列表字段、详情页字段、训练入口、成长反馈内容 | 必须声明 UI 展示字段与本系统中的训练效率、潜力、状态和定位一致 |
 | 比赛表现 UI | Soft | 培养结果被比赛消费后的赛前/赛后可视化字段 | 必须声明比赛表现 UI 如何显示培养带来的能力变化 |
+| 音频系统 | Soft | 训练完成、成长反馈和球员状态变化的轻量音频触发语义 | 必须声明音频只为已确认训练结算和成长展示节点提供短促反馈，不反向影响训练公式、成长速度或状态语义 |
 | 新手引导系统 | Hard | 首次训练、成长反馈、球员差异化概念 | 必须声明哪些培养概念是 MVP 新手必须理解的 |
 | 教程与提示系统 | Soft | 训练效率、潜力分层、状态影响、ROI 取舍等解释口径 | 必须声明提示内容引用培养系统规则，而不是另写一套说明 |
 | 存档与读档系统 | Hard | 已确认训练结果、球员长期属性、潜力层级、培养里程碑 | 必须声明哪些培养字段属于长期权威数据并会被持久化 |
 | 经济管理系统 | Hard | 训练与招募带来的资源消耗入口、不同层级球员的投资压力 | 必须声明不同球员培养路线如何消耗经费、运动点数等资源 |
-| 小镇建设系统 | Hard | 消费 MVP 最小建设切片提供的 `facility_training_multiplier`（训练场、青训营年轻球员加成、邻接加成的组合设施倍率）作为 `training_actual_gain` 公式第 4 因子 | 设施倍率由小镇建设系统组合并公布；培养系统在训练结算时消费，不得直接修改设施加成。招募潜力下限与伤病相关设施输出在 Alpha 接入前不作为本系统 MVP 验收前置 |
+| 小镇建设系统 | Hard | 消费 MVP 最小可见支撑切片提供的 `facility_training_multiplier`（训练场倍率 × 青训营年轻球员轻量加成；不含邻接乘区）作为 `training_actual_gain` 公式第 4 因子 | 设施倍率由小镇建设系统组合并公布，MVP 范围 1.0–1.35；培养系统在训练结算时消费，不得直接修改设施加成。招募潜力下限、邻接加成与伤病相关设施输出在 Alpha 接入前不作为本系统 MVP 验收前置 |
 
 ### Dependency Rules
 
@@ -343,6 +365,7 @@
 - **GIVEN** 玩家完成一次训练结算，**WHEN** QA 检查球员长期状态，**THEN** 本次训练结果立即写入该球员的权威成长状态，并等待最近稳定节点持久化；结果不得仅停留在临时显示层。
 - **GIVEN** 玩家读档恢复到一个已完成训练的稳定节点，**WHEN** QA 检查对应球员的属性和培养状态，**THEN** 已确认的训练成长不得丢失，也不得重复结算。
 - **GIVEN** `facility_training_multiplier = 1.0`（无任何设施），**WHEN** QA 执行训练结算，**THEN** `training_actual_gain` 结果与 Formula 2 在倍率=1.0 时的手工计算结果一致——无设施时训练不被错误压低或放大。
+- **GIVEN** 技能与特性系统返回训练 read model `skill_training_modifier_milli = 50` 且 `skill_training_multiplier_milli = 1050`，**WHEN** QA 执行训练结算，**THEN** `skill_training_multiplier = 1.05` 并参与 `training_actual_gain` 手工计算；该倍率不得包含特性解释摘要、属性、战术、设施、状态或比赛层修正，本系统不得逐项重算技能效果。训练完成后输出给技能与特性系统的 `confirmed_facts[]` 必须包含训练完成、训练方向命中/部分/未命中三选一、目标属性成长确认和 `training_stability_score_milli`，并按 `fact_order ASC, source_event_id ASC, fact_type ASC` 排序。
 
 ### 成长里程碑
 
