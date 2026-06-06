@@ -68,6 +68,11 @@ func get_hint_text() -> String:
 	return _hint_label.text if _hint_label != null else ""
 
 
+## Returns the visible target copy for tests and accessibility checks.
+func get_target_text() -> String:
+	return _target_label.text if _target_label != null else ""
+
+
 func _setup_ui() -> void:
 	add_theme_constant_override("content_margin_left", 10)
 	add_theme_constant_override("content_margin_top", 8)
@@ -186,18 +191,18 @@ func _copy_for_step() -> String:
 
 func _target_for_step() -> String:
 	if not _anchor_available:
-		return "提示：当前页面没有可高亮按钮，请按文字继续。"
+		return "提示：当前页面没有高亮目标，请按上方提示继续。"
 	match _current_step:
 		STEP_HOME:
-			return "目标：球员 / 训练"
+			return "目标：查看球员"
 		STEP_ROSTER:
-			return "目标：RosterList"
+			return "目标：球员列表中的任意球员"
 		STEP_TRAINING:
-			return "目标：TrainingConfirmButton"
+			return "目标：确认训练"
 		STEP_PRE_MATCH:
-			return "目标：PreMatchStartButton"
+			return "目标：开始比赛"
 		STEP_RESULT:
-			return "目标：ResultConfirmButton"
+			return "目标：确认结果并返回"
 	return ""
 
 

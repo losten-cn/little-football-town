@@ -107,7 +107,7 @@ func _setup_ui() -> void:
 
 	_return_home_button = Button.new()
 	_return_home_button.name = "ReturnHomeButton"
-	_return_home_button.text = "返回 Home"
+	_return_home_button.text = "返回主页"
 	_return_home_button.focus_mode = Control.FOCUS_ALL
 	_return_home_button.pressed.connect(_on_return_home_pressed)
 	_root_box.add_child(_return_home_button)
@@ -324,13 +324,14 @@ func _training_entry_text() -> String:
 
 
 func _format_roster_row(player: Dictionary) -> String:
+	var typed_player: Dictionary[String, Variant] = _to_string_variant_dictionary(player)
 	return "%s | %s | 评分 %s | %s | %s | %s" % [
-		str(player.get("name", "未知球员")),
-		str(player.get("position", player.get("primary_position", "?"))),
-		str(player.get("rating", player.get("positional_overall_rating", "?"))),
-		str(player.get("development_tier", player.get("tier", "-"))),
-		str(player.get("status_tag", player.get("status", "正常"))),
-		str(player.get("recent_growth", player.get("growth_summary", "成长待同步"))),
+		str(typed_player.get("name", "未知球员")),
+		str(typed_player.get("position", typed_player.get("primary_position", "?"))),
+		str(typed_player.get("rating", typed_player.get("positional_overall_rating", "?"))),
+		str(typed_player.get("development_tier", typed_player.get("tier", "-"))),
+		_resolve_status_summary(typed_player),
+		_resolve_growth_summary(typed_player),
 	]
 
 
@@ -341,9 +342,9 @@ func _format_player_detail(player: Dictionary[String, Variant]) -> String:
 		str(player.get("name", "未知球员")),
 		str(player.get("position", player.get("primary_position", "?"))),
 		str(player.get("development_tier", player.get("tier", "-"))),
-		str(player.get("attributes_summary", player.get("attributes", "属性待同步"))),
-		str(player.get("growth_summary", "成长待同步")),
-		str(player.get("status_summary", player.get("status", "状态待同步"))),
+		_resolve_attribute_summary(player),
+		_resolve_growth_summary(player),
+		_resolve_status_summary(player),
 		_training_entry_text(),
 	]
 
@@ -353,14 +354,70 @@ func _format_training_option(option: Dictionary) -> String:
 	return "%s%s — %s" % [
 		marker,
 		str(option.get("name", option.get("training_name", "训练项目"))),
-		str(option.get("summary", option.get("expected_gain_summary", "效果待同步"))),
+		str(option.get("summary", option.get("expected_gain_summary", "预计收益稍后显示"))),
 	]
 
 
 func _format_training_result() -> String:
 	if _last_training_result.is_empty():
-		return "训练结果待同步"
+		return "完成训练后会在这里显示结果"
 	return str(_last_training_result.get("summary", _last_training_result.get("result_summary", "训练已完成")))
+
+
+func _resolve_attribute_summary(player: Dictionary[String, Variant]) -> String:
+	var explicit_summary: String = str(player.get("attributes_summary", ""))
+	if not explicit_summary.is_empty():
+		return explicit_summary
+	return _build_attribute_summary_from_dictionary(player.get("attributes", {}))
+
+
+func _resolve_growth_summary(player: Dictionary[String, Variant]) -> String:
+	var explicit_summary: String = str(player.get("growth_summary", ""))
+	if not explicit_summary.is_empty():
+		return explicit_summary
+	var recent_growth: String = str(player.get("recent_growth", ""))
+	if not recent_growth.is_empty():
+		return recent_growth
+	return "最近暂无训练记录"
+
+
+func _resolve_status_summary(player: Dictionary[String, Variant]) -> String:
+	var explicit_summary: String = str(player.get("status_summary", ""))
+	if not explicit_summary.is_empty():
+		return explicit_summary
+	var status_tag: String = str(player.get("status_tag", ""))
+	if not status_tag.is_empty():
+		return status_tag
+	var status: String = str(player.get("status", ""))
+	if not status.is_empty():
+		return status
+	return "暂无状态变化"
+
+
+func _build_attribute_summary_from_dictionary(value: Variant) -> String:
+	if not (value is Dictionary):
+		return "五维数据整理中"
+	var attributes: Dictionary = value as Dictionary
+	var labels: Dictionary[String, String] = {
+		"SPD": "速度",
+		"PWR": "力量",
+		"TEC": "技术",
+		"INT": "智力",
+		"STA": "体能",
+	}
+	var parts: Array[String] = []
+	for key: String in ["SPD", "PWR", "TEC", "INT", "STA"]:
+		if not attributes.has(key):
+			continue
+		var attribute_value: Variant = attributes[key]
+		if attribute_value is Dictionary:
+			var attribute_dictionary: Dictionary = attribute_value as Dictionary
+			parts.append("%s %s/%s" % [labels[key], str(attribute_dictionary.get("current", "?")), str(attribute_dictionary.get("potential", "?"))])
+		else:
+			parts.append("%s %s" % [labels[key], str(attribute_value)])
+	if parts.is_empty():
+		return "五维数据整理中"
+	return "｜".join(parts)
 
 
 func _compare_players_by_rating_desc(left: Dictionary, right: Dictionary) -> bool:

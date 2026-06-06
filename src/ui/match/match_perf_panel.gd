@@ -107,12 +107,12 @@ func _setup_ui() -> void:
 	_live_exit_warning = Label.new()
 	_live_exit_warning.name = "LiveExitWarning"
 	_live_exit_warning.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_live_exit_warning.text = "比赛进行中，离开不会中止权威比赛状态。"
+	_live_exit_warning.text = "比赛进行中，如需离开请先完成本场比赛。"
 	_root_box.add_child(_live_exit_warning)
 
 	_halftime_adjust_button = Button.new()
 	_halftime_adjust_button.name = "HalftimeAdjustButton"
-	_halftime_adjust_button.text = "中场调整（占位）"
+	_halftime_adjust_button.text = "中场调整即将开放"
 	_halftime_adjust_button.focus_mode = Control.FOCUS_ALL
 	_halftime_adjust_button.disabled = true
 	_root_box.add_child(_halftime_adjust_button)
@@ -124,7 +124,7 @@ func _setup_ui() -> void:
 
 	_result_confirm_button = Button.new()
 	_result_confirm_button.name = "ResultConfirmButton"
-	_result_confirm_button.text = "确认并返回 Home"
+	_result_confirm_button.text = "返回主界面"
 	_result_confirm_button.focus_mode = Control.FOCUS_ALL
 	_result_confirm_button.pressed.connect(_on_result_confirm_pressed)
 	_root_box.add_child(_result_confirm_button)
@@ -179,7 +179,7 @@ func _refresh() -> void:
 
 
 func _mount_pre_match() -> void:
-	_title_label.text = "赛前"
+	_title_label.text = "比赛准备"
 	_summary_label.text = _format_pre_match_summary()
 	_pre_match_start_button.visible = true
 	_pre_match_start_button.text = "开始比赛"
@@ -189,7 +189,7 @@ func _mount_pre_match() -> void:
 
 
 func _mount_live() -> void:
-	_title_label.text = "比赛中"
+	_title_label.text = "比赛直播"
 	_summary_label.text = _format_live_summary()
 	_live_timeline.visible = true
 	_live_exit_warning.visible = true
@@ -198,7 +198,7 @@ func _mount_live() -> void:
 
 
 func _mount_result() -> void:
-	_title_label.text = "比赛结果"
+	_title_label.text = "比赛结束"
 	_summary_label.text = _format_result_summary()
 	_mount_timeline()
 	_live_timeline.visible = true
@@ -211,12 +211,12 @@ func _mount_timeline() -> void:
 	_clear_children(_live_timeline)
 	if _timeline.is_empty():
 		var empty_label: Label = Label.new()
-		empty_label.text = "关键事件待同步"
+		empty_label.text = _timeline_empty_text()
 		_live_timeline.add_child(empty_label)
 		return
-	for event_text: String in _timeline:
+	for index: int in range(_timeline.size() - 1, -1, -1):
 		var event_label: Label = Label.new()
-		event_label.text = event_text
+		event_label.text = _timeline[index]
 		event_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_live_timeline.add_child(event_label)
 
