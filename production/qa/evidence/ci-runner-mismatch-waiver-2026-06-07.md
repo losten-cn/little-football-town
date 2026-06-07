@@ -1,22 +1,22 @@
 # CI Runner Mismatch Waiver — Production Gate — 2026-06-07
 
-**Status**: Waived / tracked for Pre-Production → Production gate  
+**Status**: Resolved locally / remote CI not claimed  
 **Gate**: Production gate readiness  
-**Classification**: Infrastructure warning, not product behavior blocker  
+**Classification**: Historical infrastructure warning, no longer a local standard-baseline blocker  
 **Owner**: QA / DevOps / Tools  
 
 ## Summary
 
-The current project-standard CI-like runner path reports false negatives for existing `SceneTree`-based tests because `tests/test_script_runner.gd` expects test scripts that instantiate as `Node`.
+The prior project-standard CI-like runner path reported false negatives for existing `SceneTree`-based tests because `tests/test_script_runner.gd` expects test scripts that instantiate as `Node`.
 
-This waiver allows the Pre-Production → Production gate to pass with warnings because:
+This risk is now resolved for local standard-baseline evidence because the active workflow policy routes tests by base class:
 
-- The failure mode is a known runner/base-class mismatch.
-- It is not an assertion failure in product behavior.
-- Compatible execution previously passed all known automated test assets.
+- `extends Node` tests run through `res://tests/test_script_runner.gd`.
+- `extends SceneTree` tests run directly via `--script res://...`.
+- A local full-baseline rerun using that same routing passed all known automated test assets.
 - Focused UI route tests and MVP visual walkthrough pass after the player-experience focused revision.
 
-This waiver does **not** claim the standard CI-like baseline is green.
+This evidence does **not** claim that remote GitHub Actions has run green on the current branch; it only closes the local standard-baseline mismatch that previously required a waiver.
 
 ## Observed Prior CI-like Runner Result
 
@@ -31,18 +31,25 @@ ERROR: Test script must extend Node: res://...
 - 37 existing tests extend `SceneTree` and are designed to run directly via Godot `--script`.
 - Running those direct `SceneTree` scripts through the Node-only runner produces false-negative infrastructure failures.
 
-## Compatible Baseline Evidence
+## Standard Split-Runner Baseline Evidence
 
-The compatible policy is:
+The standard local policy now matches `.github/workflows/tests.yml` routing:
 
 - `extends Node` tests: run through `res://tests/test_script_runner.gd`.
 - `extends SceneTree` tests: run directly via `--script res://...`.
 
-Previously observed result:
+Previously observed compatible result:
 
 ```text
 COMPATIBLE_AUTOMATED_TEST_BASELINE_SUMMARY passed=69 failed=0 total=69 elapsed=18.26s modes={'node_runner': 32, 'direct_scene_tree': 37}
 COMPATIBLE_AUTOMATED_TEST_BASELINE_PASS
+```
+
+Current local standard split-runner result:
+
+```text
+STANDARD_AUTOMATED_TEST_BASELINE_SUMMARY node=32 scenetree=37 passed=69 failed=0 total=69 elapsed=19.00s
+STANDARD_AUTOMATED_TEST_BASELINE_PASS
 ```
 
 ## Focused Gate Rerun Evidence
@@ -65,20 +72,21 @@ MVP_VISUAL_WALKTHROUGH_PASS
 
 ## Waiver Decision
 
-- **Waiver**: Approved for this Pre-Production → Production gate.
-- **Reason**: The mismatch is a test infrastructure execution-mode issue, not a product behavior failure, and gate-critical UI route evidence is green.
-- **Restriction**: Do not claim the standard CI-like runner baseline is green until this mismatch is fixed or the official CI policy supports both Node and SceneTree tests.
+- **Original waiver**: Approved for this Pre-Production → Production gate.
+- **Current local status**: Resolved by using the same Node/SceneTree split-runner policy recorded in `.github/workflows/tests.yml`.
+- **Reason**: The mismatch was a test infrastructure execution-mode issue, not a product behavior failure, and the local standard split-runner baseline now passes 69/69.
+- **Restriction**: Do not claim remote GitHub Actions green status until the workflow has actually run and produced passing checks for the current branch.
 
 ## Required Follow-up
 
-Before claiming standard automated baseline green in CI:
+Before claiming remote CI green:
 
-1. Update the test execution workflow to route `Node` and `SceneTree` scripts through compatible modes, or migrate tests to a single standard base class.
-2. Re-run the full automated suite through the official workflow.
-3. Replace this waiver with a passing CI evidence file.
+1. Run or observe the GitHub Actions workflow for the current branch.
+2. Confirm the workflow uses Node/SceneTree split routing and reports zero failures.
+3. Archive that remote CI evidence if a future gate requires remote-check proof.
 
 ## Gate Impact
 
-- **Production gate blocker?** No, waived/tracked for this gate.
-- **Carry-forward warning?** Yes.
-- **Blocks future claim of standard CI-like green baseline?** Yes, until fixed or policy updated.
+- **Production gate blocker?** No.
+- **Carry-forward local baseline warning?** No; local standard split-runner baseline passed 69/69.
+- **Remote CI claim available?** No; remote GitHub Actions green status is not claimed by this local evidence.

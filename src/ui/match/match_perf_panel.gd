@@ -4,6 +4,12 @@ extends Control
 const ROUTE_MATCH_PRE: String = "match_pre"
 const ROUTE_MATCH_LIVE: String = "match_live"
 const ROUTE_MATCH_RESULT: String = "match_result"
+const UI_COLOR_TEXT := Color("3A2A1A")
+const UI_COLOR_MUTED := Color("6D5A3A")
+const UI_COLOR_ACCENT := Color("C76A00")
+const UI_COLOR_WARNING := Color("8A4A00")
+const UI_COLOR_SURFACE := Color("F5DDA8")
+const UI_COLOR_BORDER := Color("C58A3A")
 
 var _current_route: String = ROUTE_MATCH_PRE
 var _time_payload: Dictionary[String, Variant] = {}
@@ -91,21 +97,26 @@ func _setup_ui() -> void:
 	_title_label = Label.new()
 	_title_label.name = "MatchPerfTitle"
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_title_label.add_theme_color_override("font_color", UI_COLOR_ACCENT)
+	_title_label.add_theme_font_size_override("font_size", 18)
 	_root_box.add_child(_title_label)
 
 	_summary_label = Label.new()
 	_summary_label.name = "MatchSummary"
 	_summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_summary_label.add_theme_color_override("font_color", UI_COLOR_TEXT)
 	_root_box.add_child(_summary_label)
 
 	_disable_reason_label = Label.new()
 	_disable_reason_label.name = "MatchDisableReason"
 	_disable_reason_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_disable_reason_label.add_theme_color_override("font_color", UI_COLOR_WARNING)
 	_root_box.add_child(_disable_reason_label)
 
 	_pre_match_start_button = Button.new()
 	_pre_match_start_button.name = "PreMatchStartButton"
 	_pre_match_start_button.focus_mode = Control.FOCUS_ALL
+	_apply_town_button_style(_pre_match_start_button, true)
 	_pre_match_start_button.pressed.connect(_on_pre_match_start_pressed)
 	_root_box.add_child(_pre_match_start_button)
 
@@ -118,6 +129,7 @@ func _setup_ui() -> void:
 	_live_exit_warning.name = "LiveExitWarning"
 	_live_exit_warning.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_live_exit_warning.text = _localized_text("MATCH_LIVE_EXIT_WARNING", "比赛进行中，如需离开请先完成本场比赛。")
+	_live_exit_warning.add_theme_color_override("font_color", UI_COLOR_MUTED)
 	_root_box.add_child(_live_exit_warning)
 
 	_halftime_adjust_button = Button.new()
@@ -125,17 +137,20 @@ func _setup_ui() -> void:
 	_halftime_adjust_button.text = _localized_text("MATCH_HALFTIME_SOON", "中场调整将在后续版本开放")
 	_halftime_adjust_button.focus_mode = Control.FOCUS_ALL
 	_halftime_adjust_button.disabled = true
+	_apply_town_button_style(_halftime_adjust_button, false)
 	_root_box.add_child(_halftime_adjust_button)
 
 	_league_impact_summary = Label.new()
 	_league_impact_summary.name = "LeagueImpactSummary"
 	_league_impact_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_league_impact_summary.add_theme_color_override("font_color", UI_COLOR_TEXT)
 	_root_box.add_child(_league_impact_summary)
 
 	_result_confirm_button = Button.new()
 	_result_confirm_button.name = "ResultConfirmButton"
 	_result_confirm_button.text = _localized_text("MATCH_RESULT_RETURN_HOME", "返回主界面")
 	_result_confirm_button.focus_mode = Control.FOCUS_ALL
+	_apply_town_button_style(_result_confirm_button, true)
 	_result_confirm_button.pressed.connect(_on_result_confirm_pressed)
 	_root_box.add_child(_result_confirm_button)
 
@@ -267,7 +282,7 @@ func _match_disable_reason() -> String:
 func _format_pre_match_summary() -> String:
 	return _localized_text(
 		"MATCH_PRE_SUMMARY_READABILITY_FORMAT",
-		"联赛第%s轮\n%s %s\n赛前判断：%s\n阵容状态：%s\n当前战术：%s\n下一步：%s"
+		"赛前检查｜联赛第%s轮\n对阵：%s %s\n是否适合开赛：%s\n阵容状态：%s\n当前战术：%s\n下一步：%s"
 	) % [
 		str(_time_payload.get("round", _time_payload.get("current_round", _localized_text("MATCH_ROUND_PENDING", "本轮")))),
 		_player_facing_venue(str(_time_payload.get("home_away", _time_payload.get("venue", "")))),
@@ -282,11 +297,12 @@ func _format_pre_match_summary() -> String:
 func _format_live_summary() -> String:
 	return _localized_text(
 		"MATCH_LIVE_SUMMARY_READABILITY_FORMAT",
-		"比分：%s\n时间：%s\n阶段：%s\n局势：%s\n当前操作：%s"
+		"比分：%s\n时间：%s｜阶段：%s\n刚刚重点：%s\n这意味着：%s\n当前操作：%s"
 	) % [
 		str(_time_payload.get("score_display", _result_score_text())),
 		_match_time_text(),
 		_match_phase_text(),
+		_live_current_focus_text(),
 		_live_outlook_text(),
 		_live_next_step_text(),
 	]
@@ -295,12 +311,13 @@ func _format_live_summary() -> String:
 func _format_result_summary() -> String:
 	return _localized_text(
 		"MATCH_RESULT_SUMMARY_READABILITY_FORMAT",
-		"终场比分：%s\n结果：%s\n结果解读：%s\n表现摘要：%s"
+		"终场比分：%s\n结果：%s\n结果解读：%s\n表现摘要：%s\n下一步：%s"
 	) % [
 		_result_score_text(),
 		_player_facing_result_text(),
 		_result_reason_text(),
 		_result_player_performance_text(),
+		_result_next_step_text(),
 	]
 
 
@@ -339,14 +356,13 @@ func _timeline_empty_text() -> String:
 
 func _format_timeline_event(payload: Dictionary[String, Variant]) -> String:
 	var event_data: Dictionary[String, Variant] = _to_string_variant_dictionary(payload.get("event_data", {}))
+	var event_category: String = str(payload.get("event_category", event_data.get("category", payload.get("event_type", ""))))
+	var side: String = str(event_data.get("side", payload.get("side", "")))
 	var minute: String = str(payload.get("minute", payload.get("match_minute", event_data.get("minute", payload.get("time", "--")))))
 	var summary: String = str(payload.get("summary", event_data.get("summary", "")))
 	if summary.is_empty():
-		summary = _player_facing_event_category_text(
-			str(payload.get("event_category", event_data.get("category", payload.get("event_type", "")))),
-			str(event_data.get("side", payload.get("side", "")))
-		)
-	return _localized_text("MATCH_TIMELINE_EVENT_FORMAT", "%s' %s") % [minute, summary]
+		summary = _player_facing_event_category_text(event_category, side)
+	return _localized_text("MATCH_TIMELINE_EVENT_FORMAT", "%s' %s｜影响：%s") % [minute, summary, _event_impact_text(event_category, summary)]
 
 
 func _match_time_text() -> String:
@@ -407,6 +423,12 @@ func _pre_match_next_step_text() -> String:
 	if not _can_start_match():
 		return _localized_text("MATCH_PRE_NEXT_STEP_BLOCKED_FORMAT", "先处理：%s") % _match_disable_reason()
 	return _localized_text("MATCH_PRE_NEXT_STEP_READY", "确认信息后即可开始比赛")
+
+
+func _live_current_focus_text() -> String:
+	if _timeline.is_empty():
+		return _localized_text("MATCH_LIVE_FOCUS_WAITING", "等待第一条关键事件。")
+	return _timeline[_timeline.size() - 1]
 
 
 func _live_outlook_text() -> String:
@@ -506,6 +528,25 @@ func _player_team_side() -> String:
 	return "home"
 
 
+func _event_impact_text(event_category: String, summary: String) -> String:
+	match event_category:
+		"goal_scored":
+			return _localized_text("MATCH_EVENT_IMPACT_GOAL", "比分或士气出现直接转折。")
+		"shot_on_goal":
+			return _localized_text("MATCH_EVENT_IMPACT_SHOT", "机会已经出现，下一步看能否转化。")
+		"key_defense":
+			return _localized_text("MATCH_EVENT_IMPACT_DEFENSE", "防守撑住了当前局面。")
+		"stamina_decline":
+			return _localized_text("MATCH_EVENT_IMPACT_STAMINA", "体能会影响后续回合质量。")
+		"tactical_adaptation":
+			return _localized_text("MATCH_EVENT_IMPACT_TACTIC", "比赛节奏开始变化。")
+	if summary.contains("进球"):
+		return _localized_text("MATCH_EVENT_IMPACT_GOAL", "比分或士气出现直接转折。")
+	if summary.contains("射门"):
+		return _localized_text("MATCH_EVENT_IMPACT_SHOT", "机会已经出现，下一步看能否转化。")
+	return _localized_text("MATCH_EVENT_IMPACT_DEFAULT", "这是赛后解读会引用的线索。")
+
+
 func _player_facing_event_category_text(event_category: String, side: String) -> String:
 	var side_text: String = _player_facing_event_side_text(side)
 	match event_category:
@@ -566,6 +607,25 @@ func _player_facing_lineup_summary(lineup_summary: String) -> String:
 	if lineup_summary == "阵容不合法" or lineup_summary.contains("阵容不合法"):
 		return _localized_text("MATCH_DISABLED_LINEUP_INCOMPLETE", "阵容不完整——至少需要 7 名球员和 1 名守门员")
 	return lineup_summary
+
+
+func _town_button_style(is_primary: bool) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = UI_COLOR_ACCENT if is_primary else UI_COLOR_SURFACE
+	style.border_color = UI_COLOR_BORDER
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(5)
+	style.set_content_margin_all(6.0)
+	return style
+
+
+func _apply_town_button_style(button: Button, is_primary: bool) -> void:
+	button.add_theme_stylebox_override("normal", _town_button_style(is_primary))
+	button.add_theme_stylebox_override("hover", _town_button_style(true))
+	button.add_theme_stylebox_override("pressed", _town_button_style(true))
+	button.add_theme_stylebox_override("disabled", _town_button_style(false))
+	button.add_theme_color_override("font_color", Color.WHITE if is_primary else UI_COLOR_TEXT)
+	button.add_theme_color_override("font_disabled_color", UI_COLOR_MUTED)
 
 
 func _localized_text(key: String, fallback: String) -> String:

@@ -1,8 +1,30 @@
 # Active Session State
 
-Task: Production gate player experience focused revision verified
+Task: Training request bridge verified with local baseline green
 Date: 2026-06-07
-Pipeline: Pre-Production → Production gate preparation — player experience route and focused display-layer revision pass with warnings; AI-agent surrogate playtest is accepted as this gate's playtest compliance substitute while external-human validation remains optional future evidence
+Pipeline: Production — MVP route convergence evidence archived; A/B/C/D/E warnings reduced; training_requested now bridges to authoritative PlayerDevelopment.train() through runtime coordinator; local standard Node/SceneTree split-runner baseline passed 70/70; Match Live/Halftime command depth deferred; AI-agent surrogate playtest remains accepted gate compliance while external-human validation and remote GitHub Actions green status are not claimed
+
+## Session Extract — Training request bridge 2026-06-07
+
+- Minimum wiring completed: UI `training_requested` now has a production `src` consumer through `TrainingRequestCoordinator` in `Hud.tscn`.
+- Authority preserved: request resolves through `TrainingCatalogConfig` → `PlayerDevelopment.train()` → `EconomyManager` / `TimeManager`; UI remains display/request layer.
+- UI delivery stabilized: `MainLoopShell` caches roster/training read models for late-mounted `PlayerMgmtPanel`; `PlayerMgmtPanel` detaches old dynamic rows before queue-free so repeated refreshes keep stable node names.
+- Verification passed: `TRAINING_REQUEST_BRIDGE_TEST_PASS`, `L2_PLAYABLE_LOOP_PANELS_TEST_PASS`, `MAIN_LOOP_SHELL_NAVIGATION_TEST_PASS`, `WHAT_NEXT_GUIDANCE_TEST_PASS`, `MVP_VISUAL_WALKTHROUGH_PASS`, and local standard split-runner baseline `node=33 scenetree=37 passed=70 failed=0 total=70 elapsed=20.43s`.
+- Carry-forward warning: runtime seed players and starting resources remain MVP composition-root seed data; move to fuller new-game/save bootstrap later if scope expands. Tests/visual walkthrough prepare TimeManager state explicitly rather than letting the HUD coordinator reset time authority.
+- Explicit non-claims: external-human participant validation and remote GitHub Actions green status are not claimed.
+- Next recommended: keep this bridge closed as the minimum wiring slice; do not expand training depth until a dedicated Production story approves content/bootstrap scope.
+
+## Session Extract — Production convergence evidence and warning reclassification 2026-06-07
+
+- Evidence written: `production/qa/evidence/production-gate-convergence-2026-06-07.md`.
+- Baseline updated: `production/qa/evidence/production-gate-player-experience-baseline-2026-06-06.md` now separates warnings into reduced, carried-forward, and deferred buckets.
+- Reduced warning slices: A roster/player decision clarity, B training ROI/tradeoff readability, C Match Pre/Live/Result feedback readability, D warm town-light visual baseline, and E focused UI regression guardrails.
+- Deferred warning: real Match Live / Halftime command depth remains out of current scope because it may require new tactical command semantics, UI-to-simulation contracts, or save/event schema implications.
+- Guardrails kept: frozen route topology, no route ID changes, no `ScreenManager` changes, no save/event schema changes, no gameplay authority changes, and UI remains display/request layer.
+- Evidence markers retained: `L2_PLAYABLE_LOOP_PANELS_TEST_PASS`, `MVP_VISUAL_WALKTHROUGH_PASS`, `MAIN_LOOP_SHELL_NAVIGATION_TEST_PASS`, `WHAT_NEXT_GUIDANCE_TEST_PASS`, compatible automated baseline 69/69, and local standard split-runner baseline 69/69.
+- Explicit non-claims: external-human participant validation is not claimed; remote GitHub Actions green status is not claimed by the local standard split-runner evidence.
+- CI baseline update: `production/qa/evidence/ci-runner-mismatch-waiver-2026-06-07.md` now records the prior SceneTree runner mismatch as locally resolved by the Node/SceneTree split-runner policy; remote CI proof remains future evidence if required.
+- Next recommended: continue Production with warnings carried forward; do not expand Match Live/Halftime into real command depth until a dedicated gameplay/technical story approves the contract.
 
 ## Session Extract — Production gate focused display revision 2026-06-07
 

@@ -35,18 +35,7 @@ func _run() -> void:
 	await _capture("04_training", "training")
 
 	await _press_button_and_wait("TrainingConfirmButton", "确认训练")
-	_emit_event("training_completed", {
-		"player_id": "2",
-		"training_id": "finishing",
-		"summary": "High 完成射门训练，近期成长 +2",
-		"attribute_changes": {"finishing": 1},
-	})
-	await _capture("05_training_result", "training")
-
-	_emit_event("player_action_completed", {
-		"player_id": "2",
-		"summary": "High 完成训练，球队状态已更新",
-	})
+	await _capture("05_training_result", "home")
 	await _capture("06_home_after_training", "home")
 
 	_emit_match_ready_payloads(false)
@@ -115,6 +104,13 @@ func _teardown_hud() -> void:
 
 
 func _emit_planning_payloads() -> void:
+	_call_autoload("TimeManager", "apply_snapshot", [{
+		"state": "Planning",
+		"current_phase_time_budget": 2,
+		"reserved_time": 0,
+		"consumed_time": 0,
+		"standard_window_size": 1,
+	}])
 	_emit_event("time_advanced", {
 		"date_display": "Week 1",
 		"phase": "PLANNING",
@@ -144,7 +140,7 @@ func _emit_player_payloads() -> void:
 	_emit_event("training_options_updated", {
 		"training_available": true,
 		"options": [
-			{"training_id": "finishing", "name": "射门训练", "summary": "提升终结效率", "available": true},
+			{"training_id": "finishing", "name": "射门训练", "summary": "提升终结效率", "cost_summary": "经费 100｜运动点数 1", "risk_summary": "占用本轮训练机会", "payoff_summary": "下一场射门机会更容易转化", "available": true},
 		],
 	})
 

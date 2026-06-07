@@ -37,19 +37,29 @@ func test_l2_player_panel_mounts_roster_detail_training_and_requests_training() 
 	EventBus.emit("training_options_updated", {
 		"training_available": true,
 		"options": [
-			{"training_id": "finishing", "name": "射门训练", "summary": "权威预览", "available": true},
+			{"training_id": "finishing", "name": "射门训练", "summary": "权威预览", "cost_summary": "经费 100｜运动点数 1", "risk_summary": "占用本轮训练机会", "payoff_summary": "下一场射门机会更容易转化", "available": true},
 		],
 	})
 	_expect(_find_control("RosterList") != null, "RosterList stable node should exist")
 	var roster_row: Button = _find_button("RosterRow_2")
 	_expect(roster_row != null, "highest-rated player should sort first and expose row id")
+	_expect(roster_row != null and roster_row.text.contains("关注："), "roster row should explain why to inspect the player")
+	_expect(roster_row != null and roster_row.text.contains("下一步："), "roster row should show a next-step decision cue")
 	_press_button("RosterRow_2")
 	_expect(_shell.call("get_current_route") == "player_detail", "roster row should request player_detail route")
 	_expect(_find_control("PlayerDetailSummary") != null, "PlayerDetailSummary stable node should exist")
+	_expect(_find_label_text("PlayerDetailSummary").contains("现在怎么用："), "player detail should explain current usage")
+	_expect(_find_label_text("PlayerDetailSummary").contains("训练判断："), "player detail should explain training decision")
 	_press_button("TrainingEntryButton")
 	_expect(_shell.call("get_current_route") == "training", "training entry should request training route")
 	_expect(_find_control("TrainingOptionList") != null, "TrainingOptionList stable node should exist")
 	_expect(_find_button("TrainingConfirmButton") != null, "TrainingConfirmButton stable node should exist")
+	var training_decision: String = _find_label_text("TrainingResultSummary")
+	_expect(training_decision.contains("当前选择：射门训练"), "training decision should show selected option")
+	_expect(training_decision.contains("成本：经费 100｜运动点数 1"), "training decision should show authoritative cost")
+	_expect(training_decision.contains("收益：权威预览"), "training decision should show authoritative benefit")
+	_expect(training_decision.contains("风险/取舍：占用本轮训练机会"), "training decision should show tradeoff")
+	_expect(training_decision.contains("回报时机：下一场射门机会更容易转化"), "training decision should show payoff timing")
 
 
 func test_l2_match_panel_mounts_prematch_live_result_and_returns_home() -> void:
@@ -71,6 +81,8 @@ func test_l2_match_panel_mounts_prematch_live_result_and_returns_home() -> void:
 	EventBus.emit("screen_requested", {"screen_id": "match_pre"})
 	_expect(_shell.call("get_current_route") == "match_pre", "match_pre should mount through shell")
 	_expect(_find_control("MatchPerfPanel") != null, "MatchPerfPanel should be mounted")
+	_expect(_find_label_text("MatchSummary").contains("赛前检查"), "pre-match summary should present a checklist frame")
+	_expect(_find_label_text("MatchSummary").contains("是否适合开赛"), "pre-match summary should explain readiness")
 	_expect(_find_button("PreMatchStartButton") != null, "PreMatchStartButton stable node should exist")
 	_press_button("PreMatchStartButton")
 	_expect(_shell.call("get_current_route") == "match_pre", "system-disabled pre-match start should stay on match_pre")
@@ -80,7 +92,9 @@ func test_l2_match_panel_mounts_prematch_live_result_and_returns_home() -> void:
 	_expect(_find_control("LiveTimeline") != null, "LiveTimeline stable node should exist")
 	_expect(_find_control("LiveExitWarning") != null, "LiveExitWarning stable node should exist")
 	_expect(_find_button("HalftimeAdjustButton") != null, "HalftimeAdjustButton stable node should exist")
-	EventBus.emit("match_event_occurred", {"minute": 45, "summary": "0-0 中场"})
+	EventBus.emit("match_event_occurred", {"minute": 45, "event_category": "tactical_adaptation", "summary": "0-0 中场"})
+	_expect(_find_label_text("MatchSummary").contains("刚刚重点"), "live summary should explain the current focus")
+	_expect(_find_first_timeline_text().contains("影响："), "timeline events should explain impact")
 	EventBus.emit("match_completed", {
 		"match_id": "league_r01_m01",
 		"result": "home_win",
@@ -90,6 +104,7 @@ func test_l2_match_panel_mounts_prematch_live_result_and_returns_home() -> void:
 	})
 	EventBus.emit("league_standings_updated", {"summary": "积分榜已更新"})
 	_expect(_shell.call("get_current_route") == "match_result", "match_completed should route to match_result")
+	_expect(_find_label_text("MatchSummary").contains("下一步："), "result summary should point to next action")
 	_expect(_find_button("ResultConfirmButton") != null, "ResultConfirmButton stable node should exist")
 	_expect(_find_control("LeagueImpactSummary") != null, "LeagueImpactSummary stable node should exist")
 	_press_button("ResultConfirmButton")
@@ -129,6 +144,25 @@ func _find_control(control_name: String) -> Control:
 	if _hud == null:
 		return null
 	return _find_node_by_name(_hud, control_name) as Control
+
+
+func _find_label_text(label_name: String) -> String:
+	var control: Control = _find_control(label_name)
+	if control is Label:
+		return (control as Label).text
+	return ""
+
+
+func _find_first_timeline_text() -> String:
+	var timeline: Control = _find_control("LiveTimeline")
+	if timeline == null:
+		return ""
+	var children: Array[Node] = timeline.get_children()
+	for index: int in range(children.size() - 1, -1, -1):
+		var child: Node = children[index]
+		if child is Label and not child.is_queued_for_deletion():
+			return (child as Label).text
+	return ""
 
 
 func _find_node_by_name(root: Node, node_name: String) -> Node:

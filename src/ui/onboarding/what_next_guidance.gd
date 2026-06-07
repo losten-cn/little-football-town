@@ -7,6 +7,10 @@ const STEP_TRAINING: String = "training"
 const STEP_PRE_MATCH: String = "match_pre"
 const STEP_RESULT: String = "match_result"
 const STEP_DONE: String = "done"
+const UI_COLOR_SURFACE := Color("F5DDA8")
+const UI_COLOR_BORDER := Color("C58A3A")
+const UI_COLOR_TEXT := Color("3A2A1A")
+const UI_COLOR_MUTED := Color("6D5A3A")
 
 var _current_route: String = STEP_HOME
 var _current_step: String = STEP_HOME
@@ -74,6 +78,7 @@ func get_target_text() -> String:
 
 
 func _setup_ui() -> void:
+	add_theme_stylebox_override("panel", _guidance_panel_style())
 	add_theme_constant_override("content_margin_left", 10)
 	add_theme_constant_override("content_margin_top", 8)
 	add_theme_constant_override("content_margin_right", 10)
@@ -87,17 +92,20 @@ func _setup_ui() -> void:
 	_hint_label = Label.new()
 	_hint_label.name = "WhatNextHintText"
 	_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_hint_label.add_theme_color_override("font_color", UI_COLOR_TEXT)
 	_box.add_child(_hint_label)
 
 	_target_label = Label.new()
 	_target_label.name = "WhatNextTarget"
 	_target_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_target_label.add_theme_color_override("font_color", UI_COLOR_MUTED)
 	_box.add_child(_target_label)
 
 	_dismiss_button = Button.new()
 	_dismiss_button.name = "WhatNextDismissButton"
 	_dismiss_button.text = _localized_text("WHAT_NEXT_DISMISS", "知道了")
 	_dismiss_button.focus_mode = Control.FOCUS_ALL
+	_apply_guidance_button_style(_dismiss_button)
 	_dismiss_button.pressed.connect(_on_dismiss_pressed)
 	_box.add_child(_dismiss_button)
 
@@ -213,6 +221,33 @@ func _can_enter_match() -> bool:
 func _on_dismiss_pressed() -> void:
 	_dismissed = true
 	_refresh()
+
+
+func _guidance_panel_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = UI_COLOR_SURFACE
+	style.border_color = UI_COLOR_BORDER
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(5)
+	style.set_content_margin_all(6.0)
+	return style
+
+
+func _guidance_button_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("FFF2D2")
+	style.border_color = UI_COLOR_BORDER
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(4)
+	style.set_content_margin_all(5.0)
+	return style
+
+
+func _apply_guidance_button_style(button: Button) -> void:
+	button.add_theme_stylebox_override("normal", _guidance_button_style())
+	button.add_theme_stylebox_override("hover", _guidance_button_style())
+	button.add_theme_stylebox_override("pressed", _guidance_button_style())
+	button.add_theme_color_override("font_color", UI_COLOR_TEXT)
 
 
 func _localized_text(key: String, fallback: String) -> String:

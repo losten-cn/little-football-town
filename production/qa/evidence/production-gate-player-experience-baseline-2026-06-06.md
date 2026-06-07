@@ -24,7 +24,7 @@ Remaining issues are warnings or separately scoped compliance/infrastructure ite
 | Focused UI route regression | PASS | `MAIN_LOOP_SHELL_NAVIGATION_TEST_PASS`, `L2_PLAYABLE_LOOP_PANELS_TEST_PASS`, `WHAT_NEXT_GUIDANCE_TEST_PASS` |
 | UX sign-off | PASS WITH WARNINGS | `production/qa/evidence/ux-review-production-gate-2026-06-06.md` rereviewed after focused revision |
 | Compatible full automated baseline | PASS | Earlier compatible mode passed 69/69 |
-| CI-like project-standard runner baseline | WARNING / INFRA | Prior false-negative runner mismatch remains infrastructure debt unless fixed or waived separately |
+| Local standard split-runner baseline | PASS | Current local Node/SceneTree split-routing baseline passed 69/69; remote GitHub Actions green status is not claimed |
 | QA gate opinion | PASS WITH WARNINGS | Product behavior evidence is acceptable; no new route blocker observed |
 
 ## Focused Revision Summary
@@ -101,7 +101,7 @@ L2_PLAYABLE_LOOP_PANELS_TEST_PASS
 MVP_VISUAL_WALKTHROUGH_PASS
 ```
 
-### Compatible Full Baseline
+### Automated Baseline
 
 Earlier compatible full baseline policy:
 
@@ -115,18 +115,14 @@ COMPATIBLE_AUTOMATED_TEST_BASELINE_SUMMARY passed=69 failed=0 total=69 elapsed=1
 COMPATIBLE_AUTOMATED_TEST_BASELINE_PASS
 ```
 
-QA interpretation: the automated test assets themselves are green under their compatible execution modes.
-
-### CI-like Project-Standard Runner Baseline
-
-The prior project-standard CI-like execution path reported false-negative infrastructure failures for SceneTree-based tests:
+A current local standard split-runner rerun used the same Node/SceneTree routing recorded in `.github/workflows/tests.yml` and passed:
 
 ```text
-AUTOMATED_TEST_BASELINE_SUMMARY passed=32 failed=37 total=69
-ERROR: Test script must extend Node: res://...
+STANDARD_AUTOMATED_TEST_BASELINE_SUMMARY node=32 scenetree=37 passed=69 failed=0 total=69 elapsed=19.00s
+STANDARD_AUTOMATED_TEST_BASELINE_PASS
 ```
 
-QA interpretation: this is a test infrastructure mismatch, not evidence of product behavior failures. It should be fixed or formally waived/tracked before claiming the standard CI-like baseline is green, but it no longer blocks the player-experience route verdict under this evidence package.
+QA interpretation: the automated test assets are green under the current local standard split-runner policy. This closes the local SceneTree-vs-Node runner mismatch as a player-experience baseline warning, but it does not claim remote GitHub Actions green status for the current branch.
 
 ## UX Sign-off Summary
 
@@ -160,17 +156,30 @@ Earlier concerns have been reduced:
 
 ## Remaining Warnings / Polish Backlog
 
-These are non-blocking for the current gate:
+These are non-blocking for the current gate. The 2026-06-07 Production convergence pass is archived in `production/qa/evidence/production-gate-convergence-2026-06-07.md`.
 
-- Low-fidelity placeholder visual presentation.
+### Reduced by first Production convergence batch
+
+- Roster/player next-action clarity — roster rows now explain attention reason, usage, and next step in the walked MVP path.
+- Player Detail training judgment — detail view now explains current usage, training rationale, impact, payoff timing, and recommended action.
+- Training ROI/tradeoff readability — training view now shows selected option, cost, benefit, risk/tradeoff, payoff timing, next step, and result.
+- Match Pre / Live / Result readability — match screens now show checklist framing, current focus, impact language, result interpretation, and next-step guidance.
+- Warm town-light UI baseline — global UI styling now favors warm/light town panels and deep-brown text; dark treatment is reserved for local high-tension match contexts.
+
+### Carried forward as Production warnings
+
+- Low-fidelity placeholder visual presentation and final pixel-art production quality.
 - Roster sorting/filtering depth.
-- Player Detail emotional attachment and deeper attribute presentation.
-- Training ROI/tradeoff depth.
-- Match Live / Halftime command depth and emotional match feel.
+- Player emotional attachment and deeper attribute presentation.
+- Match Live moment-to-moment emotion and information hierarchy beyond the current readable baseline.
 - Full localization key coverage beyond the reviewed route.
 - Onboarding persistence / cooldowns / replay / analytics / anchor registry.
 - Strict external-human participant validation, if a future gate owner requires it separately from the accepted AI-agent surrogate playtest substitute.
 - CI-like test-runner infrastructure mismatch unless fixed or waived in gate-readiness documentation.
+
+### Deferred warning, not current scope
+
+- Match Live / Halftime command depth. Real halftime commands should wait for a dedicated gameplay/technical story because they may require new tactical command semantics, UI-to-simulation contracts, or save/event schema implications.
 
 ## Recommended Gate Decision
 

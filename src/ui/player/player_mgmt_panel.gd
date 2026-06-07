@@ -4,6 +4,11 @@ extends Control
 const ROUTE_ROSTER: String = "roster"
 const ROUTE_PLAYER_DETAIL: String = "player_detail"
 const ROUTE_TRAINING: String = "training"
+const UI_COLOR_TEXT := Color("3A2A1A")
+const UI_COLOR_MUTED := Color("6D5A3A")
+const UI_COLOR_ACCENT := Color("C76A00")
+const UI_COLOR_SURFACE := Color("F5DDA8")
+const UI_COLOR_BORDER := Color("C58A3A")
 
 var _current_route: String = ROUTE_ROSTER
 var _roster_payload: Dictionary[String, Variant] = {}
@@ -87,6 +92,8 @@ func _setup_ui() -> void:
 	_title_label = Label.new()
 	_title_label.name = "PlayerMgmtTitle"
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_title_label.add_theme_color_override("font_color", UI_COLOR_ACCENT)
+	_title_label.add_theme_font_size_override("font_size", 18)
 	_root_box.add_child(_title_label)
 
 	_roster_list = VBoxContainer.new()
@@ -97,6 +104,7 @@ func _setup_ui() -> void:
 	_detail_summary = Label.new()
 	_detail_summary.name = "PlayerDetailSummary"
 	_detail_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_detail_summary.add_theme_color_override("font_color", UI_COLOR_TEXT)
 	_root_box.add_child(_detail_summary)
 
 	_training_option_list = VBoxContainer.new()
@@ -107,18 +115,21 @@ func _setup_ui() -> void:
 	_training_confirm_button = Button.new()
 	_training_confirm_button.name = "TrainingConfirmButton"
 	_training_confirm_button.focus_mode = Control.FOCUS_ALL
+	_apply_town_button_style(_training_confirm_button, true)
 	_training_confirm_button.pressed.connect(_on_training_confirm_pressed)
 	_root_box.add_child(_training_confirm_button)
 
 	_training_result_summary = Label.new()
 	_training_result_summary.name = "TrainingResultSummary"
 	_training_result_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_training_result_summary.add_theme_color_override("font_color", UI_COLOR_MUTED)
 	_root_box.add_child(_training_result_summary)
 
 	_return_home_button = Button.new()
 	_return_home_button.name = "ReturnHomeButton"
 	_return_home_button.text = _localized_text("PLAYER_RETURN_HOME", "返回主页")
 	_return_home_button.focus_mode = Control.FOCUS_ALL
+	_apply_town_button_style(_return_home_button, false)
 	_return_home_button.pressed.connect(_on_return_home_pressed)
 	_root_box.add_child(_return_home_button)
 
@@ -189,6 +200,7 @@ func _mount_roster() -> void:
 		var row_button: Button = Button.new()
 		row_button.name = "RosterRow_%s" % str(player.get("id", "unknown"))
 		row_button.focus_mode = Control.FOCUS_ALL
+		_apply_town_button_style(row_button, false)
 		row_button.text = _format_roster_row(player)
 		row_button.pressed.connect(_on_roster_row_pressed.bind(player))
 		_roster_list.add_child(row_button)
@@ -231,6 +243,7 @@ func _mount_training_options() -> void:
 		var option_button: Button = Button.new()
 		option_button.name = "TrainingOption_%s" % option_id
 		option_button.focus_mode = Control.FOCUS_ALL
+		_apply_town_button_style(option_button, option_id == _selected_training_id)
 		option_button.text = _format_training_option(option)
 		option_button.disabled = not bool(option.get("available", true))
 		option_button.pressed.connect(_on_training_option_pressed.bind(option_id))
@@ -335,13 +348,14 @@ func _training_entry_text() -> String:
 
 func _format_roster_row(player: Dictionary) -> String:
 	var typed_player: Dictionary[String, Variant] = _to_string_variant_dictionary(player)
-	return _localized_text("PLAYER_ROSTER_ROW_FORMAT", "%s｜%s｜评分 %s｜%s｜%s｜%s") % [
+	return _localized_text("PLAYER_ROSTER_ROW_FORMAT", "%s｜%s｜评分 %s｜%s\n关注：%s｜用途：%s｜下一步：%s") % [
 		str(typed_player.get("name", _localized_text("PLAYER_UNKNOWN", "未知球员"))),
 		str(typed_player.get("position", typed_player.get("primary_position", "?"))),
 		str(typed_player.get("rating", typed_player.get("positional_overall_rating", "?"))),
 		str(typed_player.get("development_tier", typed_player.get("tier", "-"))),
-		_resolve_status_summary(typed_player),
-		_resolve_growth_summary(typed_player),
+		_resolve_roster_attention_reason(typed_player),
+		_resolve_player_role_summary(typed_player),
+		_resolve_roster_next_step(typed_player),
 	]
 
 
@@ -349,10 +363,12 @@ func _format_player_detail(player: Dictionary[String, Variant]) -> String:
 	if player.is_empty():
 		return _localized_text("PLAYER_DETAIL_NONE", "未选择球员")
 	var reference_option: Dictionary[String, Variant] = _resolve_reference_training_option()
-	return _localized_text("PLAYER_DETAIL_FORMAT", "身份：%s｜%s｜%s\n技术特点：%s\n近期成长：%s\n当前状态：%s\n为什么现在练：%s\n训练会影响：%s\n什么时候更值：%s\n推荐行动：%s") % [
+	return _localized_text("PLAYER_DETAIL_FORMAT", "身份：%s｜%s｜%s\n现在怎么用：%s\n关注原因：%s\n技术特点：%s\n近期成长：%s\n当前状态：%s\n训练判断：%s\n训练会影响：%s\n什么时候更值：%s\n推荐行动：%s") % [
 		str(player.get("name", _localized_text("PLAYER_UNKNOWN", "未知球员"))),
 		str(player.get("position", player.get("primary_position", "?"))),
 		str(player.get("development_tier", player.get("tier", "-"))),
+		_resolve_player_role_summary(player),
+		_resolve_roster_attention_reason(player),
 		_resolve_attribute_summary(player),
 		_resolve_growth_summary(player),
 		_resolve_status_summary(player),
@@ -373,9 +389,19 @@ func _format_training_option(option: Dictionary) -> String:
 
 
 func _format_training_result() -> String:
-	if _last_training_result.is_empty():
-		return _localized_text("PLAYER_TRAINING_RESULT_PENDING", "完成训练后会在这里显示结果")
-	return str(_last_training_result.get("summary", _last_training_result.get("result_summary", _localized_text("PLAYER_TRAINING_DONE", "训练已完成，近期状态已更新"))))
+	var selected_option: Dictionary[String, Variant] = _resolve_selected_training_option()
+	var result_summary: String = _localized_text("PLAYER_TRAINING_RESULT_PENDING", "完成训练后会在这里显示结果")
+	if not _last_training_result.is_empty():
+		result_summary = str(_last_training_result.get("summary", _last_training_result.get("result_summary", _localized_text("PLAYER_TRAINING_DONE", "训练已完成，近期状态已更新"))))
+	return _localized_text("PLAYER_TRAINING_DECISION_FORMAT", "当前选择：%s\n成本：%s\n收益：%s\n风险/取舍：%s\n回报时机：%s\n下一步：%s\n结果：%s") % [
+		_resolve_training_option_name(selected_option),
+		_resolve_training_cost_summary(selected_option),
+		_resolve_training_impact_summary(selected_option),
+		_resolve_training_risk_summary(selected_option),
+		_resolve_training_payoff_summary(_resolve_selected_player(), selected_option),
+		_resolve_training_next_step_summary(selected_option),
+		result_summary,
+	]
 
 
 func _resolve_attribute_summary(player: Dictionary[String, Variant]) -> String:
@@ -406,6 +432,41 @@ func _resolve_status_summary(player: Dictionary[String, Variant]) -> String:
 	if not status.is_empty():
 		return status
 	return _localized_text("PLAYER_STATUS_GOOD", "状态：良好")
+
+
+func _resolve_roster_attention_reason(player: Dictionary[String, Variant]) -> String:
+	var explicit_reason: String = str(player.get("recommendation_reason", player.get("attention_reason", "")))
+	if not explicit_reason.is_empty():
+		return explicit_reason
+	var rating: float = float(player.get("rating", player.get("positional_overall_rating", 0.0)))
+	if rating >= 70.0:
+		return _localized_text("PLAYER_ATTENTION_HIGH_RATING", "当前评分靠前，适合优先检查首发价值。")
+	var growth_summary: String = _resolve_growth_summary(player)
+	if growth_summary.contains("+"):
+		return _localized_text("PLAYER_ATTENTION_GROWING", "近期有成长记录，适合继续观察训练回报。")
+	return _localized_text("PLAYER_ATTENTION_DEFAULT", "先看他的状态与位置，决定是否纳入下一次训练。")
+
+
+func _resolve_player_role_summary(player: Dictionary[String, Variant]) -> String:
+	var explicit_role: String = str(player.get("role_summary", player.get("usage_summary", "")))
+	if not explicit_role.is_empty():
+		return explicit_role
+	var position: String = str(player.get("position", player.get("primary_position", "?")))
+	var rating: float = float(player.get("rating", player.get("positional_overall_rating", 0.0)))
+	if rating >= 70.0:
+		return _localized_text("PLAYER_ROLE_STARTER_FORMAT", "%s 主力候选，优先确认能否稳定出场。") % position
+	if rating >= 55.0:
+		return _localized_text("PLAYER_ROLE_ROTATION_FORMAT", "%s 轮换候选，适合用训练补齐短板。") % position
+	return _localized_text("PLAYER_ROLE_DEVELOPMENT_FORMAT", "%s 培养候选，先看成长窗口再决定投入。") % position
+
+
+func _resolve_roster_next_step(player: Dictionary[String, Variant]) -> String:
+	var explicit_step: String = str(player.get("next_step_summary", ""))
+	if not explicit_step.is_empty():
+		return explicit_step
+	if _resolve_status_summary(player).contains("可训练"):
+		return _localized_text("PLAYER_NEXT_STEP_TRAIN", "进入详情后安排训练。")
+	return _localized_text("PLAYER_NEXT_STEP_DETAIL", "进入详情确认状态。")
 
 
 func _training_confirm_text() -> String:
@@ -455,6 +516,46 @@ func _resolve_training_impact_summary(option: Dictionary[String, Variant]) -> St
 	return _localized_text("PLAYER_TRAINING_IMPACT_DEFAULT", "会影响本轮训练反馈和下一场赛前判断。")
 
 
+func _resolve_training_option_name(option: Dictionary[String, Variant]) -> String:
+	if option.is_empty():
+		return _localized_text("PLAYER_TRAINING_OPTION_PENDING", "先选择一个训练项目")
+	return str(option.get("name", option.get("training_name", _localized_text("PLAYER_TRAINING_OPTION", "训练项目"))))
+
+
+func _resolve_training_cost_summary(option: Dictionary[String, Variant]) -> String:
+	var explicit_cost: String = str(option.get("cost_summary", option.get("cost", "")))
+	if not explicit_cost.is_empty():
+		return explicit_cost
+	var parts: Array[String] = []
+	if option.has("funds_cost"):
+		parts.append(_localized_text("PLAYER_TRAINING_FUNDS_COST_FORMAT", "经费 %s") % str(option.get("funds_cost")))
+	if option.has("ap_cost") or option.has("action_points_cost"):
+		parts.append(_localized_text("PLAYER_TRAINING_AP_COST_FORMAT", "运动点数 %s") % str(option.get("ap_cost", option.get("action_points_cost", ""))))
+	if option.has("time_cost"):
+		parts.append(_localized_text("PLAYER_TRAINING_TIME_COST_FORMAT", "时间 %s") % str(option.get("time_cost")))
+	if not parts.is_empty():
+		return "｜".join(parts)
+	return _localized_text("PLAYER_TRAINING_COST_DEFAULT", "占用本轮一次训练机会，不编造额外数值成本。")
+
+
+func _resolve_training_risk_summary(option: Dictionary[String, Variant]) -> String:
+	var explicit_risk: String = str(option.get("risk_summary", option.get("risk", option.get("tradeoff_summary", ""))))
+	if not explicit_risk.is_empty():
+		return explicit_risk
+	if not bool(option.get("available", true)):
+		return str(option.get("disable_reason", _localized_text("PLAYER_TRAINING_RISK_DISABLED", "当前条件不足，暂不建议执行。")))
+	return _localized_text("PLAYER_TRAINING_RISK_DEFAULT", "会消耗本轮训练安排，其他球员本轮暂时得不到这次关注。")
+
+
+func _resolve_training_next_step_summary(option: Dictionary[String, Variant]) -> String:
+	var explicit_step: String = str(option.get("next_step_summary", ""))
+	if not explicit_step.is_empty():
+		return explicit_step
+	if option.is_empty():
+		return _localized_text("PLAYER_TRAINING_NEXT_STEP_PICK", "先选择一个训练项目。")
+	return _localized_text("PLAYER_TRAINING_NEXT_STEP_CONFIRM", "确认训练后回到主页，看下一场比赛如何承接这次安排。")
+
+
 func _resolve_training_payoff_summary(player: Dictionary[String, Variant], option: Dictionary[String, Variant]) -> String:
 	var payoff_summary: String = str(option.get("payoff_summary", option.get("match_payoff_summary", player.get("training_payoff_summary", ""))))
 	if not payoff_summary.is_empty():
@@ -492,6 +593,25 @@ func _compare_players_by_rating_desc(left: Dictionary, right: Dictionary) -> boo
 	return float(left.get("rating", left.get("positional_overall_rating", 0.0))) > float(right.get("rating", right.get("positional_overall_rating", 0.0)))
 
 
+func _town_button_style(is_primary: bool) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = UI_COLOR_ACCENT if is_primary else UI_COLOR_SURFACE
+	style.border_color = UI_COLOR_BORDER
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(5)
+	style.set_content_margin_all(6.0)
+	return style
+
+
+func _apply_town_button_style(button: Button, is_primary: bool) -> void:
+	button.add_theme_stylebox_override("normal", _town_button_style(is_primary))
+	button.add_theme_stylebox_override("hover", _town_button_style(true))
+	button.add_theme_stylebox_override("pressed", _town_button_style(true))
+	button.add_theme_stylebox_override("disabled", _town_button_style(false))
+	button.add_theme_color_override("font_color", Color.WHITE if is_primary else UI_COLOR_TEXT)
+	button.add_theme_color_override("font_disabled_color", UI_COLOR_MUTED)
+
+
 func _localized_text(key: String, fallback: String) -> String:
 	var localized := tr(key)
 	return fallback if localized == key else localized
@@ -499,6 +619,7 @@ func _localized_text(key: String, fallback: String) -> String:
 
 func _clear_children(parent: Node) -> void:
 	for child: Node in parent.get_children():
+		parent.remove_child(child)
 		child.queue_free()
 
 

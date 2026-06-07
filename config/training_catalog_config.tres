@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="TrainingCatalogConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/config/training_catalog_config.gd" id="1_training_catalog_config"]
+
+[resource]
+script = ExtResource("1_training_catalog_config")
+projects = Array[Dictionary]([{
+"action_points_cost": 1,
+"facility_training_multiplier": 1.0,
+"focus_match_multiplier": 1.1,
+"funds_cost": 100,
+"name": "射门训练",
+"payoff_summary": "下一场射门机会更容易转化",
+"primary_attribute": "TEC",
+"project_id": "finishing",
+"raw_growth_input": 4.0,
+"risk_summary": "占用本轮训练机会",
+"summary": "提升终结效率",
+"time_cost": 1.0
+}, {
+"action_points_cost": 1,
+"facility_training_multiplier": 1.0,
+"focus_match_multiplier": 1.0,
+"funds_cost": 80,
+"name": "体能训练",
+"payoff_summary": "后续比赛更能保持状态",
+"primary_attribute": "STA",
+"project_id": "stamina",
+"raw_growth_input": 3.0,
+"risk_summary": "本轮会少一次其他专项训练机会",
+"summary": "提升持续跑动与恢复基础",
+"time_cost": 1.0
+}, {
+"action_points_cost": 1,
+"facility_training_multiplier": 1.0,
+"focus_match_multiplier": 1.0,
+"funds_cost": 90,
+"name": "控球训练",
+"payoff_summary": "中场组织与控球质量更稳定",
+"primary_attribute": "INT",
+"project_id": "control",
+"raw_growth_input": 3.5,
+"risk_summary": "短期不会直接改变比赛结果",
+"summary": "提升阅读比赛和处理球能力",
+"time_cost": 1.0
+}])

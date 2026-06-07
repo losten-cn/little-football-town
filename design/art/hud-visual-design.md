@@ -14,9 +14,20 @@
 
 HUD 视觉必须服务已批准的 **严格 MVP HUD**：玩家在 3 秒内读懂时间、资源、行动能力、下一场比赛状态，以及两个核心入口。视觉目标不是做一个功能密集的运营面板，而是做一个稳定、低噪声、可快速扫读的状态条系统。
 
-整体风格保持像素风深色底板 + 足球橙强调色，但强调只给真正需要注意的状态：菜单焦点、比赛就绪、禁用原因提示、错误/警告反馈。常态下不使用持续脉冲、不使用滚动 ticker、不使用大面积动画。
+Production 全局基线采用暖亮 town UI：浅暖面板、木质/琥珀边框、深棕正文与足球橙强调色，优先服务“像素小镇养成”的亲和感。深色底板只保留给 Match Live、警告遮罩或局部高紧张状态，不能作为 Home / Roster / Training 的全局基调。强调只给真正需要注意的状态：菜单焦点、比赛就绪、禁用原因提示、错误/警告反馈。常态下不使用持续脉冲、不使用滚动 ticker、不使用大面积动画。
 
-### 1.2 Core Palette
+### 1.2 Production Town-Light Delta Palette
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `town-surface` | `#FFF2D2` | Home / Roster / Training / Result 的默认暖亮面板 |
+| `town-border` | `#C58A3A` | 像素木质边框、卡片分隔、暖色焦点外框 |
+| `town-text` | `#3A2A1A` | 暖亮面板上的正文 |
+| `town-muted` | `#6D5A3A` | 次级说明、训练结果辅助文案 |
+| `town-accent` | `#C76A00` | 主行动、比赛就绪、标题与关键提醒 |
+| `match-dark-local` | `#1A1A2E` | Match Live 局部紧张态背景，不作为全局 UI 基线 |
+
+### 1.3 Core Palette
 
 | Token | Hex | Usage | Contrast (on `#1A1A2E`) |
 |-------|-----|-------|-------------------------|

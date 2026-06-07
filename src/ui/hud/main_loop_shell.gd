@@ -23,6 +23,10 @@ const ROUTE_IDS: Array[String] = [
 const TOP_BAR_HEIGHT: int = 48
 const BOTTOM_BAR_HEIGHT: int = 56
 const TRANSITION_SECONDS: float = 0.2
+const UI_COLOR_TOWN_SURFACE := Color("FFF2D2")
+const UI_COLOR_TOWN_BORDER := Color("C58A3A")
+const UI_COLOR_TOWN_TEXT := Color("3A2A1A")
+const UI_COLOR_TOWN_ACCENT := Color("C76A00")
 
 var _current_route: String = ROUTE_HOME
 var _content_panel: PanelContainer = null
@@ -36,6 +40,8 @@ var _secondary_button: Button = null
 var _last_time_payload: Dictionary[String, Variant] = {}
 var _last_system_payload: Dictionary[String, Variant] = {}
 var _last_player_action_payload: Dictionary[String, Variant] = {}
+var _last_roster_payload: Dictionary[String, Variant] = {}
+var _last_training_payload: Dictionary[String, Variant] = {}
 var _player_panel: Control = null
 var _match_panel: Control = null
 var _guidance_panel: Control = null
@@ -59,6 +65,8 @@ func _exit_tree() -> void:
 	EventBus.unsubscribe("screen_stack_reset", _on_screen_changed)
 	EventBus.unsubscribe("time_advanced", _on_time_advanced)
 	EventBus.unsubscribe("system_state_changed", _on_system_state_changed)
+	EventBus.unsubscribe("roster_updated", _on_roster_updated)
+	EventBus.unsubscribe("training_options_updated", _on_training_options_updated)
 	EventBus.unsubscribe("player_action_completed", _on_player_action_completed)
 	EventBus.unsubscribe("training_cancelled", _on_return_home_requested)
 	EventBus.unsubscribe("roster_cancelled", _on_return_home_requested)
@@ -116,6 +124,7 @@ func _setup_container() -> void:
 	_content_panel.name = "shell_main_content"
 	_content_panel.unique_name_in_owner = true
 	_content_panel.mouse_filter = Control.MOUSE_FILTER_PASS
+	_content_panel.add_theme_stylebox_override("panel", _town_panel_style())
 	_content_panel.anchor_left = 0.0
 	_content_panel.anchor_top = 0.0
 	_content_panel.anchor_right = 1.0
@@ -145,34 +154,69 @@ func _setup_container() -> void:
 	_title_label.name = "RouteTitle"
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_title_label.add_theme_color_override("font_color", UI_COLOR_TOWN_ACCENT)
+	_title_label.add_theme_font_size_override("font_size", 20)
 	_content_box.add_child(_title_label)
 
 	_summary_label = Label.new()
 	_summary_label.name = "RouteSummary"
 	_summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_summary_label.add_theme_color_override("font_color", UI_COLOR_TOWN_TEXT)
 	_content_box.add_child(_summary_label)
 
 	_disable_reason_label = Label.new()
 	_disable_reason_label.name = "DisableReason"
 	_disable_reason_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_disable_reason_label.add_theme_color_override("font_color", UI_COLOR_TOWN_ACCENT)
 	_disable_reason_label.visible = false
 	_content_box.add_child(_disable_reason_label)
 
 	_primary_button = Button.new()
 	_primary_button.name = "PrimaryAction"
 	_primary_button.focus_mode = Control.FOCUS_ALL
+	_apply_town_button_style(_primary_button, true)
 	_primary_button.pressed.connect(_on_primary_action_pressed)
 	_content_box.add_child(_primary_button)
 
 	_secondary_button = Button.new()
 	_secondary_button.name = "SecondaryAction"
 	_secondary_button.focus_mode = Control.FOCUS_ALL
+	_apply_town_button_style(_secondary_button, false)
 	_secondary_button.pressed.connect(_on_secondary_action_pressed)
 	_content_box.add_child(_secondary_button)
 
 	_guidance_panel = WhatNextGuidanceScript.new() as Control
 	_guidance_panel.name = "WhatNextGuidance"
 	_content_box.add_child(_guidance_panel)
+
+
+func _town_panel_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = UI_COLOR_TOWN_SURFACE
+	style.border_color = UI_COLOR_TOWN_BORDER
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(8)
+	style.set_content_margin_all(8.0)
+	return style
+
+
+func _town_button_style(is_primary: bool) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = UI_COLOR_TOWN_ACCENT if is_primary else Color("F5DDA8")
+	style.border_color = UI_COLOR_TOWN_BORDER
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(5)
+	style.set_content_margin_all(6.0)
+	return style
+
+
+func _apply_town_button_style(button: Button, is_primary: bool) -> void:
+	button.add_theme_stylebox_override("normal", _town_button_style(is_primary))
+	button.add_theme_stylebox_override("hover", _town_button_style(true))
+	button.add_theme_stylebox_override("pressed", _town_button_style(true))
+	button.add_theme_stylebox_override("disabled", _town_button_style(false))
+	button.add_theme_color_override("font_color", Color.WHITE if is_primary else UI_COLOR_TOWN_TEXT)
+	button.add_theme_color_override("font_disabled_color", UI_COLOR_TOWN_TEXT)
 
 
 func _subscribe_events() -> void:
@@ -182,6 +226,8 @@ func _subscribe_events() -> void:
 	EventBus.subscribe("screen_stack_reset", _on_screen_changed)
 	EventBus.subscribe("time_advanced", _on_time_advanced)
 	EventBus.subscribe("system_state_changed", _on_system_state_changed)
+	EventBus.subscribe("roster_updated", _on_roster_updated)
+	EventBus.subscribe("training_options_updated", _on_training_options_updated)
 	EventBus.subscribe("player_action_completed", _on_player_action_completed)
 	EventBus.subscribe("training_cancelled", _on_return_home_requested)
 	EventBus.subscribe("roster_cancelled", _on_return_home_requested)
@@ -223,6 +269,18 @@ func _on_system_state_changed(_event_name: String, payload: Dictionary) -> void:
 		_match_panel.call("set_system_payload", _last_system_payload)
 	if _current_route == ROUTE_HOME:
 		_mount_home()
+
+
+func _on_roster_updated(_event_name: String, payload: Dictionary) -> void:
+	_last_roster_payload = _to_string_variant_dictionary(payload)
+	if _player_panel != null:
+		_player_panel.call("set_roster_payload", _last_roster_payload)
+
+
+func _on_training_options_updated(_event_name: String, payload: Dictionary) -> void:
+	_last_training_payload = _to_string_variant_dictionary(payload)
+	if _player_panel != null:
+		_player_panel.call("set_training_payload", _last_training_payload)
 
 
 func _on_player_action_completed(_event_name: String, payload: Dictionary) -> void:
@@ -269,6 +327,9 @@ func _mount_player_panel(route_id: String) -> void:
 	_set_shell_chrome_visible(false)
 	_ensure_player_panel()
 	_set_l2_panels_visible(true, false)
+	if _last_roster_payload.is_empty() or _last_training_payload.is_empty():
+		_request_training_read_models()
+	_sync_player_panel_payloads()
 	_player_panel.call("set_route", route_id)
 
 
@@ -303,6 +364,21 @@ func _ensure_player_panel() -> void:
 	_player_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_player_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_content_box.add_child(_player_panel)
+
+
+func _sync_player_panel_payloads() -> void:
+	if _player_panel == null:
+		return
+	if not _last_roster_payload.is_empty():
+		_player_panel.call("set_roster_payload", _last_roster_payload)
+	if not _last_training_payload.is_empty():
+		_player_panel.call("set_training_payload", _last_training_payload)
+
+
+func _request_training_read_models() -> void:
+	var coordinator: Node = get_parent().get_node_or_null("TrainingRequestCoordinator") if get_parent() != null else null
+	if coordinator != null and coordinator.has_method("publish_training_read_models"):
+		coordinator.call("publish_training_read_models")
 
 
 func _ensure_match_panel() -> void:
