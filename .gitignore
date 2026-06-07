@@ -4,6 +4,7 @@
 .idea/
 *.swp
 *.swo
+*.uid
 *~
 .DS_Store
 Thumbs.db
