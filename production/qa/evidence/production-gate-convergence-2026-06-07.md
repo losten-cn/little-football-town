@@ -118,6 +118,31 @@ Scope notes:
 - Tests and visual walkthrough prepare the TimeManager action window explicitly; the HUD coordinator does not reset time authority.
 - External-human validation and remote GitHub Actions green status are still not claimed.
 
+## Match Start Authority Bridge Addendum
+
+The approved minimum match-entry wiring slice closes the previous direct route gap without expanding Match Live or Halftime command depth.
+
+Evidence:
+
+```text
+MATCH_START_REQUEST_BRIDGE_TEST_PASS
+L2_PLAYABLE_LOOP_PANELS_TEST_PASS
+MAIN_LOOP_SHELL_NAVIGATION_TEST_PASS
+TRAINING_REQUEST_BRIDGE_TEST_PASS
+MATCH_STATE_FLOW_TEST_PASS
+HALFTIME_ADJUSTMENT_TEST_PASS
+MATCH_RESULT_PACKET_TEST_PASS
+MVP_VISUAL_WALKTHROUGH_PASS
+```
+
+Scope notes:
+
+- UI now emits `match_start_requested` instead of directly routing from Match Pre to Match Live.
+- `MatchStartCoordinator` bridges the request to `MatchSimulation.start_formal_match()` with `TimeManager` as the time authority.
+- Only core authorization emits `screen_requested: match_live`; rejection emits `match_start_failed` and keeps the route on Match Pre.
+- Route IDs, `ScreenManager`, save payloads, match simulation depth, and halftime/tactical command scope remain unchanged.
+- The local headless visual walkthrough emitted dummy-renderer null texture errors while still reporting `MVP_VISUAL_WALKTHROUGH_PASS`; this is recorded as environment/screenshot-backend warning, not as a bridge failure.
+
 ## Match Live / Halftime Scope Decision
 
 Do not start a real Match Live / Halftime command-depth slice in this batch.
@@ -142,8 +167,8 @@ If a future sprint chooses to touch this area, the safe minimum slice should sta
 - No route ID changes.
 - No `ScreenManager` changes.
 - No save payload/schema changes.
-- No event payload/schema changes.
-- No gameplay authority changes.
+- No existing event payload/schema changes; only the local `match_start_requested` / `match_start_failed` bridge events were added.
+- Gameplay authority remains in core systems; match entry now goes through `MatchSimulation.start_formal_match()`.
 - UI remains display/request layer.
 - No external-human validation claim is made.
 - No remote GitHub Actions green claim is made.

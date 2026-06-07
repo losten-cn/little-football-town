@@ -4,6 +4,17 @@ Task: Training request bridge verified with local baseline green
 Date: 2026-06-07
 Pipeline: Production — MVP route convergence evidence archived; A/B/C/D/E warnings reduced; training_requested now bridges to authoritative PlayerDevelopment.train() through runtime coordinator; local standard Node/SceneTree split-runner baseline passed 70/70; Match Live/Halftime command depth deferred; AI-agent surrogate playtest remains accepted gate compliance while external-human validation and remote GitHub Actions green status are not claimed
 
+## Session Extract — Match start authority bridge 2026-06-07
+
+- Minimum wiring completed: UI match start now emits `match_start_requested` and no longer routes directly from Match Pre to Match Live.
+- Authority preserved: `MatchStartCoordinator` bridges the request to `MatchSimulation.start_formal_match()` with `TimeManager` as time authority; only core authorization emits `screen_requested: match_live`.
+- Failure path covered: core rejection emits `match_start_failed`, keeps the UI on Match Pre, and displays player-facing reason text.
+- Files changed: `src/core/match_start_coordinator.gd`, `src/ui/match/match_perf_panel.gd`, `src/ui/hud/Hud.tscn`, `tests/integration/ui/match_start_request_bridge_test.gd`, `tests/integration/ui/l2_playable_loop_panels_test.gd`, `tests/integration/ui/mvp_visual_walkthrough_runner.gd`, and `production/qa/evidence/production-gate-convergence-2026-06-07.md`.
+- Verification passed: `MATCH_START_REQUEST_BRIDGE_TEST_PASS`, `L2_PLAYABLE_LOOP_PANELS_TEST_PASS`, `MAIN_LOOP_SHELL_NAVIGATION_TEST_PASS`, `TRAINING_REQUEST_BRIDGE_TEST_PASS`, `MATCH_STATE_FLOW_TEST_PASS`, `HALFTIME_ADJUSTMENT_TEST_PASS`, `MATCH_RESULT_PACKET_TEST_PASS`, and `MVP_VISUAL_WALKTHROUGH_PASS`.
+- Verification warning: headless dummy-renderer visual walkthrough reported null texture screenshot save errors while still outputting `MVP_VISUAL_WALKTHROUGH_PASS`; treat as screenshot-backend warning, not route/bridge failure.
+- Carry-forward warnings unchanged: low-fidelity visuals, external-human validation not claimed, remote GitHub Actions green status not claimed, and real Match Live/Halftime command depth remains deferred.
+- Next recommended: keep this bridge closed; continue Production convergence with warning-backed presentation/evidence slices only, without expanding match command depth.
+
 ## Session Extract — Training request bridge 2026-06-07
 
 - Minimum wiring completed: UI `training_requested` now has a production `src` consumer through `TrainingRequestCoordinator` in `Hud.tscn`.

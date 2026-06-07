@@ -42,6 +42,7 @@ func _exit_tree() -> void:
 	EventBus.unsubscribe("match_event_occurred", _on_match_event_occurred)
 	EventBus.unsubscribe("match_completed", _on_match_completed)
 	EventBus.unsubscribe("league_standings_updated", _on_league_standings_updated)
+	EventBus.unsubscribe("match_start_failed", _on_match_start_failed)
 
 
 ## Sets the mounted MatchPerf route without changing match state.
@@ -160,6 +161,7 @@ func _subscribe_events() -> void:
 	EventBus.subscribe("match_event_occurred", _on_match_event_occurred)
 	EventBus.subscribe("match_completed", _on_match_completed)
 	EventBus.subscribe("league_standings_updated", _on_league_standings_updated)
+	EventBus.subscribe("match_start_failed", _on_match_start_failed)
 
 
 func _on_time_advanced(_event_name: String, payload: Dictionary) -> void:
@@ -180,6 +182,12 @@ func _on_match_completed(_event_name: String, payload: Dictionary) -> void:
 func _on_league_standings_updated(_event_name: String, payload: Dictionary) -> void:
 	_league_payload = _to_string_variant_dictionary(payload)
 	_refresh()
+
+
+func _on_match_start_failed(_event_name: String, payload: Dictionary) -> void:
+	var typed_payload: Dictionary[String, Variant] = _to_string_variant_dictionary(payload)
+	_disable_reason_label.visible = true
+	_disable_reason_label.text = _player_facing_match_start_failure(typed_payload)
 
 
 func _refresh() -> void:
@@ -251,7 +259,11 @@ func _on_pre_match_start_pressed() -> void:
 		_disable_reason_label.visible = true
 		_disable_reason_label.text = _match_disable_reason()
 		return
-	EventBus.emit("screen_requested", {"screen_id": ROUTE_MATCH_LIVE})
+	EventBus.emit("match_start_requested", {
+		"source_screen_id": ROUTE_MATCH_PRE,
+		"target_screen_id": ROUTE_MATCH_LIVE,
+		"match_context": _to_string_variant_dictionary(_time_payload.get("match_context", {})),
+	})
 
 
 func _on_result_confirm_pressed() -> void:
@@ -583,6 +595,23 @@ func _player_facing_disable_reason(reason: String) -> String:
 	if reason == "阵容不合法" or reason.contains("阵容不合法"):
 		return _localized_text("MATCH_DISABLED_LINEUP_INCOMPLETE", "阵容不完整——至少需要 7 名球员和 1 名守门员")
 	return reason
+
+
+func _player_facing_match_start_failure(payload: Dictionary[String, Variant]) -> String:
+	var detail: String = String(payload.get("detail", ""))
+	if not detail.is_empty():
+		return _player_facing_disable_reason(detail)
+	match String(payload.get("reason", "")):
+		"system_state_disabled", "navigation_context_disabled":
+			return _localized_text("MATCH_DISABLED_DEFAULT", "当前不可开始比赛")
+		"formal_match_rejected":
+			return _localized_text("MATCH_START_REJECTED_AUTHORITY", "比赛条件已变化，请返回主界面确认赛程与阵容。")
+		"match_authority_missing":
+			return _localized_text("MATCH_START_AUTHORITY_MISSING", "比赛系统暂未准备好，请稍后再试。")
+		"unsupported_match_route":
+			return _localized_text("MATCH_START_ROUTE_UNSUPPORTED", "当前比赛入口暂不可用。")
+		_:
+			return _localized_text("MATCH_DISABLED_DEFAULT", "当前不可开始比赛")
 
 
 func _player_facing_opponent_name(opponent_name: String) -> String:

@@ -63,6 +63,21 @@ func test_l2_player_panel_mounts_roster_detail_training_and_requests_training() 
 
 
 func test_l2_match_panel_mounts_prematch_live_result_and_returns_home() -> void:
+	TimeManager.apply_snapshot({
+		"state": "Match Trigger",
+		"season_number": 1,
+		"timeline_position": 5,
+		"scheduled_match_position": 5,
+		"schedule_available": true,
+		"schedule_loading": false,
+		"schedule_missing": false,
+		"match_center_available": true,
+		"match_in_progress": false,
+		"opponent_name": "Opponent 1",
+		"next_match_display": "Week 1 vs Opponent 1",
+		"home_team_id": 1,
+		"away_team_id": 2,
+	})
 	EventBus.emit("time_advanced", {
 		"date_display": "Week 1",
 		"phase": "MATCH_TRIGGER",
@@ -125,6 +140,14 @@ func _teardown_hud() -> void:
 		_hud.queue_free()
 	EventBus.clear_all()
 	ScreenManager.reset_to_screen("home")
+	TimeManager.apply_snapshot({
+		"state": "Planning",
+		"timeline_position": 0,
+		"scheduled_match_position": 5,
+		"schedule_available": false,
+		"match_center_available": false,
+		"match_in_progress": false,
+	})
 
 
 func _press_button(button_name: String) -> void:

@@ -146,6 +146,21 @@ func _emit_player_payloads() -> void:
 
 
 func _emit_match_ready_payloads(system_allows_match: bool) -> void:
+	_call_autoload("TimeManager", "apply_snapshot", [{
+		"state": "Match Trigger",
+		"season_number": 1,
+		"timeline_position": 5,
+		"scheduled_match_position": 5,
+		"schedule_available": true,
+		"schedule_loading": false,
+		"schedule_missing": false,
+		"match_center_available": true,
+		"match_in_progress": false,
+		"opponent_name": "Opponent 1",
+		"next_match_display": "Week 1 vs Opponent 1",
+		"home_team_id": 1,
+		"away_team_id": 2,
+	}])
 	_emit_event("time_advanced", {
 		"date_display": "Week 1 Match Day",
 		"phase": "MATCH_TRIGGER",

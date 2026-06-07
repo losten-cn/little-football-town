@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://src/ui/hud/hud.gd" id="1_hud"]
 [ext_resource type="Script" path="res://src/ui/hud/zone_a.gd" id="2_zone_a"]
@@ -12,6 +12,7 @@
 [ext_resource type="Script" path="res://src/ui/components/progress_bar_pixel.gd" id="10_progress_bar_pixel"]
 [ext_resource type="Script" path="res://src/ui/hud/main_loop_shell.gd" id="11_main_loop_shell"]
 [ext_resource type="Script" path="res://src/core/training_request_coordinator.gd" id="12_training_request_coordinator"]
+[ext_resource type="Script" path="res://src/core/match_start_coordinator.gd" id="13_match_start_coordinator"]
 
 [node name="Hud" type="CanvasLayer"]
 layer = 10
@@ -22,6 +23,9 @@ script = ExtResource("11_main_loop_shell")
 
 [node name="TrainingRequestCoordinator" type="Node" parent="."]
 script = ExtResource("12_training_request_coordinator")
+
+[node name="MatchStartCoordinator" type="Node" parent="."]
+script = ExtResource("13_match_start_coordinator")
 
 [node name="ZoneA" type="PanelContainer" parent="."]
 script = ExtResource("2_zone_a")
