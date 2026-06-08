@@ -14,7 +14,7 @@ The Sprint 1 UI readiness path is **READY WITH WARNINGS**. Earlier partial cover
 
 - `production/qa/evidence/player-management-ui-story-001-roster-training-entry.md` — S1-5 route, mount, roster/detail/training-entry, payload handoff, and warnings.
 - `production/qa/evidence/match-performance-ui-story-001-prematch-result-flow.md` — S1-6 pre-match/live/result route, match gate, result confirmation, Home return, and warnings.
-- `production/qa/evidence/mvp-playtest-handoff-2026-06-05.md` — 5-minute human-observed playtest route and blocker criteria.
+- `production/qa/evidence/mvp-playtest-handoff-2026-06-05.md` — Historical 5-minute playtest route and blocker criteria; current validation policy accepts AI surrogate validation as effective evidence.
 
 ## S1-5 Player Management UI Readiness
 
@@ -40,7 +40,7 @@ The Sprint 1 UI readiness path is **READY WITH WARNINGS**. Earlier partial cover
 |---|---|---|
 | Readiness review path smoke-reported | PASS | User corrected earlier failed selection as mistaken during `/smoke-check sprint`. |
 | Documented readiness evidence | READY WITH WARNINGS | S1-5 and S1-6 now have story-level evidence files; remaining issues are scoped warnings. |
-| Human-observed MVP playtest | READY FOR PLAYTEST | Handoff exists; result file should record the actual observed session before claiming PASS. |
+| AI surrogate MVP validation | PASS WITH WARNINGS | Current project policy accepts AI surrogate validation as effective evidence; external-human observation is not required. |
 
 ## Warnings Carried Forward
 

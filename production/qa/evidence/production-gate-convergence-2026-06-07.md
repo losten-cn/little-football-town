@@ -3,7 +3,7 @@
 > Result: PASS WITH WARNINGS / READY TO CONTINUE PRODUCTION CONVERGENCE  
 > Scope: Post-gate Production convergence evidence for MVP route readability, warning reduction, and deferred depth boundaries  
 > Review Mode: lean  
-> Compliance Note: AI-agent expert surrogate playtest evidence is accepted for this Production gate; external-human participant validation is not claimed.
+> Compliance Note: AI-agent expert surrogate playtest evidence is accepted as effective validation evidence for this Production gate under the current project rule; external-human participant validation is not required and is not claimed.
 
 ## Executive Summary
 
@@ -72,7 +72,7 @@ Reviewed route:
 Home → Roster → Player Detail → Training → Home → Match Pre → Match Live → Match Result → Home
 ```
 
-The walkthrough confirms the route remains visible and navigable. It does not claim final visual polish, final art quality, or external-human comprehension validation.
+The walkthrough confirms the route remains visible and navigable. It does not claim final visual polish or final art quality. Under the current project rule, AI surrogate validation is accepted as effective validation evidence, and external-human comprehension validation is not required or claimed.
 
 ## Warning Reclassification
 
@@ -90,7 +90,7 @@ The walkthrough confirms the route remains visible and navigable. It does not cl
 | Match Live / Halftime command depth | Deferred warning | Real command-depth implementation would require tactics/UI command contracts and risks expanding gameplay authority scope. |
 | Full localization key coverage | Carried | Reviewed route copy is acceptable, but full coverage remains a Release/Polish concern. |
 | Onboarding persistence / cooldowns / analytics / anchor registry | Carried | Current guidance is non-blocking and route-helpful; persistence and analytics are future systems. |
-| External-human participant validation | Policy-carried | AI-agent surrogate playtests are accepted for this Production gate; external-human validation is not claimed. |
+| Validation evidence policy | Accepted via AI surrogate | AI-agent surrogate playtests are accepted as effective validation evidence under the current project rule; external-human validation is not required and is not claimed. |
 | CI-like runner mismatch | Locally resolved / remote not claimed | Local standard Node/SceneTree split-runner baseline is green; remote GitHub Actions proof is still future evidence if required. |
 
 ## Training Request Bridge Addendum
@@ -116,7 +116,9 @@ Scope notes:
 - Training project values now come from `TrainingCatalogConfig`, not UI text payloads.
 - Runtime seed players and starting funds/AP remain MVP composition-root seed data and should move behind a fuller new-game/save bootstrap story later.
 - Tests and visual walkthrough prepare the TimeManager action window explicitly; the HUD coordinator does not reset time authority.
-- External-human validation and remote GitHub Actions green status are still not claimed.
+- AI surrogate validation is accepted as effective validation evidence under the current project rule.
+- External-human validation is not required and is not claimed.
+- Remote GitHub Actions green status is still not claimed.
 
 ## Match Start Authority Bridge Addendum
 

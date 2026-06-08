@@ -104,7 +104,7 @@ The following remain accepted warnings only because they stay non-blocking:
 - PlayerDevelopment read-model polish and deeper attributes.
 - Localization coverage/polish outside the reviewed critical route.
 - Onboarding persistence / cooldowns / replay / analytics.
-- Formal external-human participant validation, if a future gate owner requires it separately from the accepted AI-agent surrogate playtest substitute.
+- Formal external-human participant validation is not required under the current project rule; AI-agent surrogate validation is accepted evidence, and this should only be revisited if the user explicitly changes policy.
 
 ## UX Gate Blockers
 
@@ -122,7 +122,7 @@ Previously blocking concerns were reduced as follows:
 
 - Observed issues: none that block comprehension, navigation, recovery, or critical accessibility in the reviewed route.
 - Accepted warnings: low-fidelity visual presentation, shallow training/match agency, deferred halftime command depth, deeper roster/player detail, full localization/accessibility hardening.
-- Follow-up items: keep external-human validation separate if later required; avoid reopening route topology; move next to Production gate-readiness documentation.
+- Follow-up items: external-human validation is not required under the current validation policy and AI-agent surrogate validation is accepted evidence; avoid reopening route topology; move next to Production gate-readiness documentation.
 - Blocking issues: none.
 
 ## Final Verdict

@@ -19,7 +19,7 @@ Remaining issues are warnings or separately scoped compliance/infrastructure ite
 
 | Gate Item | Result | Notes |
 |---|---:|---|
-| Accepted AI-agent surrogate playtest | PASS WITH WARNINGS | `production/qa/evidence/mvp-human-playtest-production-gate-2026-06-06.md`; accepted as Production gate substitute, external-human claim not made |
+| Accepted AI-agent surrogate playtest | PASS WITH WARNINGS | `production/qa/evidence/mvp-human-playtest-production-gate-2026-06-06.md`; accepted as effective validation evidence under the current project rule, external-human claim not made |
 | Visible MVP walkthrough | PASS | `MVP_VISUAL_WALKTHROUGH_PASS`; 12 screenshots reviewed after focused revision |
 | Focused UI route regression | PASS | `MAIN_LOOP_SHELL_NAVIGATION_TEST_PASS`, `L2_PLAYABLE_LOOP_PANELS_TEST_PASS`, `WHAT_NEXT_GUIDANCE_TEST_PASS` |
 | UX sign-off | PASS WITH WARNINGS | `production/qa/evidence/ux-review-production-gate-2026-06-06.md` rereviewed after focused revision |
@@ -174,7 +174,7 @@ These are non-blocking for the current gate. The 2026-06-07 Production convergen
 - Match Live moment-to-moment emotion and information hierarchy beyond the current readable baseline.
 - Full localization key coverage beyond the reviewed route.
 - Onboarding persistence / cooldowns / replay / analytics / anchor registry.
-- Strict external-human participant validation, if a future gate owner requires it separately from the accepted AI-agent surrogate playtest substitute.
+- Strict external-human participant validation is not required under the current validation policy; AI-agent surrogate validation is accepted evidence, and this should only be revisited if the user explicitly changes policy.
 - CI-like test-runner infrastructure mismatch unless fixed or waived in gate-readiness documentation.
 
 ### Deferred warning, not current scope
@@ -193,4 +193,4 @@ Minimum next checklist:
 2. Do not expand roster, training, match, onboarding, or town-building scope before gate close.
 3. Update gate-readiness documentation to reference this revised verdict and UX rereview.
 4. Either fix or explicitly waive/track the CI-like runner mismatch.
-5. Treat external-human playtest as optional/future validation unless gate ownership changes the accepted AI-agent surrogate policy.
+5. Treat external-human playtest as not required under the current validation policy; only revisit it if the user explicitly changes the policy accepting AI-agent surrogate validation.

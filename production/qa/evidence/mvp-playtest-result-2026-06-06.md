@@ -3,15 +3,15 @@
 > Scope: Current MVP vertical slice only
 > Status: AUTOMATED VISUAL WALKTHROUGH PASS WITH WARNINGS
 > Timebox: 5 minutes per player
-> Note: This records automated route-and-screenshot evidence; it does not replace a human fun/clarity playtest.
+> Note: This records a historical automated route-and-screenshot report. The earlier human-playtest requirement is now covered by the current AI surrogate validation rule.
 
 ## Purpose
 
-Record the human-observed MVP playtest result for the frozen route:
+Record the MVP playtest result for the frozen route:
 
 `Home → Roster → Player Detail → Training → Home → Match Pre → Match Live → Match Result → Home`
 
-Treat this file as automated route-and-screenshot evidence only. A human-observed playtest is still needed for player clarity and fun validation, but no route-breaking UI blocker was found by automation.
+Treat this file as automated route-and-screenshot evidence for the historical route check. Under the current policy, follow-up AI surrogate validation closes the prior clarity/readability validation gap without claiming an external-human playtest occurred.
 
 ## Automated Visual Walkthrough
 
@@ -109,7 +109,7 @@ Observe:
 | Completed within 5 minutes | Route completed by runner |
 | Developer explanation needed | Not applicable to automation |
 | Blockers found | 0 |
-| Verdict | PASS WITH WARNINGS for automated visual walkthrough; human clarity/fun playtest still pending |
+| Verdict | PASS WITH WARNINGS for automated visual walkthrough; follow-up AI surrogate validation closes the prior clarity/readability validation gap under current policy |
 
 ## Blocker Criteria
 

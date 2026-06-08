@@ -11,7 +11,7 @@ The Pre-Production → Production gate is ready to advance as **PASS WITH WARNIN
 
 The MVP route topology is frozen and repeatedly verified. Player-experience evidence, UX rereview, and gate-owner accepted AI-agent surrogate playtest evidence now support Production entry with carried warnings. No route-level, UX-critical, or Godot/GDScript technical blocker remains in the accepted gate scope.
 
-This verdict does not claim external-human participant validation and does not claim the standard CI-like runner path is fully green. Those are explicitly carried as separate warning/waiver items.
+This verdict does not claim external-human participant validation. Under the current project rule, accepted AI-agent surrogate validation is effective evidence for this gate, so external-human validation is not required. The standard CI-like runner path is still not fully green and remains an explicit carried warning/waiver item.
 
 ## Required Production Gate Evidence
 
@@ -33,7 +33,7 @@ For this Production gate, the gate owner accepts 3 AI-agent expert surrogate ses
 - 0 route blockers were observed.
 - 0 crashes, softlocks, blank screens, dead-end transitions, or failed Home returns were observed.
 - External-human participant evidence is **not claimed**.
-- External-human validation remains optional future evidence unless a later gate owner changes the policy.
+- AI-agent surrogate validation is accepted as effective evidence; external-human validation is not required under the current project rule.
 
 Critical route:
 
@@ -127,7 +127,7 @@ MVP_VISUAL_WALKTHROUGH_PASS
 | Match Live / Halftime command depth | Match Performance / Design | Later match depth slice | Non-blocking warning. |
 | Full localization key coverage beyond reviewed route | Localization / UI | Localization hardening pass | Non-blocking warning. |
 | Onboarding persistence / cooldowns / replay / analytics / anchor registry | Onboarding / Analytics / UI | Later onboarding/telemetry slice | Non-blocking warning. |
-| External-human participant validation | QA / Producer | Optional future validation or if a later gate owner requires it | Not claimed; not blocking this gate due accepted surrogate substitute. |
+| External-human participant validation | QA / Producer | Not required under current project rule | Closed as required validation path; external-human evidence not claimed. |
 
 ## Out of Scope for Gate Close
 
@@ -137,7 +137,7 @@ Do not reopen these during gate close unless a new blocker appears:
 - Core gameplay authority in PlayerDevelopment, MatchCompetition, EconomyManager, LeagueStructure, or TimeManager.
 - New roster/training/match/town/onboarding systems.
 - Deep visual redesign, full pixel-art production, or full accessibility certification.
-- Reclassifying external-human participant validation as mandatory for this gate after the gate-owner substitute decision.
+- Reclassifying external-human participant validation as mandatory under the current project rule for this gate after the gate-owner substitute decision.
 
 ## Gate Verdict
 

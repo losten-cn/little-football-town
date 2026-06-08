@@ -63,4 +63,4 @@ Current blocker count: 0.
 
 ## Verdict
 
-PASS WITH WARNINGS — the current topology wave is ready for vertical-slice playtest handoff, subject to one short human-observed route sanity pass on the same A/B paths.
+PASS WITH WARNINGS — the current topology wave is ready for vertical-slice playtest handoff; the historical recommendation for one short human-observed route sanity pass on the same A/B paths is superseded by the current AI surrogate validation policy.
