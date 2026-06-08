@@ -363,29 +363,32 @@ func _format_player_detail(player: Dictionary[String, Variant]) -> String:
 	if player.is_empty():
 		return _localized_text("PLAYER_DETAIL_NONE", "未选择球员")
 	var reference_option: Dictionary[String, Variant] = _resolve_reference_training_option()
-	return _localized_text("PLAYER_DETAIL_FORMAT", "身份：%s｜%s｜%s\n现在怎么用：%s\n关注原因：%s\n技术特点：%s\n近期成长：%s\n当前状态：%s\n训练判断：%s\n训练会影响：%s\n什么时候更值：%s\n推荐行动：%s") % [
-		str(player.get("name", _localized_text("PLAYER_UNKNOWN", "未知球员"))),
-		str(player.get("position", player.get("primary_position", "?"))),
-		str(player.get("development_tier", player.get("tier", "-"))),
-		_resolve_player_role_summary(player),
-		_resolve_roster_attention_reason(player),
-		_resolve_attribute_summary(player),
-		_resolve_growth_summary(player),
-		_resolve_status_summary(player),
+	return _localized_text("PLAYER_DETAIL_FORMAT", "本轮判断：%s\n用途：%s\n成本/回报：成本：%s；回报：%s；时机：%s\n下一步：%s\n身份：%s｜%s｜%s\n技术特点：%s\n近期成长：%s\n当前状态：%s") % [
 		_resolve_training_why_summary(player),
+		_resolve_player_role_summary(player),
+		_resolve_training_cost_summary(reference_option),
 		_resolve_training_impact_summary(reference_option),
 		_resolve_training_payoff_summary(player, reference_option),
 		_training_entry_text(),
+		str(player.get("name", _localized_text("PLAYER_UNKNOWN", "未知球员"))),
+		str(player.get("position", player.get("primary_position", "?"))),
+		str(player.get("development_tier", player.get("tier", "-"))),
+		_resolve_attribute_summary(player),
+		_resolve_growth_summary(player),
+		_resolve_status_summary(player),
 	]
 
 
 func _format_training_option(option: Dictionary) -> String:
 	var marker: String = "* " if str(option.get("training_id", option.get("id", ""))) == _selected_training_id else ""
-	return _localized_text("PLAYER_TRAINING_OPTION_FORMAT", "%s%s — %s") % [
+	var option_text: String = _localized_text("PLAYER_TRAINING_OPTION_FORMAT", "%s%s — %s") % [
 		marker,
 		str(option.get("name", option.get("training_name", _localized_text("PLAYER_TRAINING_OPTION", "训练项目")))),
 		str(option.get("summary", option.get("expected_gain_summary", _localized_text("PLAYER_TRAINING_EXPECTED_GAIN", "预计提升本次重点能力")))),
 	]
+	if bool(option.get("available", true)):
+		return option_text
+	return _localized_text("PLAYER_TRAINING_OPTION_DISABLED_FORMAT", "%s｜暂不可用：%s") % [option_text, _resolve_training_disabled_reason(_to_string_variant_dictionary(option))]
 
 
 func _format_training_result() -> String:
@@ -393,11 +396,11 @@ func _format_training_result() -> String:
 	var result_summary: String = _localized_text("PLAYER_TRAINING_RESULT_PENDING", "完成训练后会在这里显示结果")
 	if not _last_training_result.is_empty():
 		result_summary = str(_last_training_result.get("summary", _last_training_result.get("result_summary", _localized_text("PLAYER_TRAINING_DONE", "训练已完成，近期状态已更新"))))
-	return _localized_text("PLAYER_TRAINING_DECISION_FORMAT", "当前选择：%s\n成本：%s\n收益：%s\n风险/取舍：%s\n回报时机：%s\n下一步：%s\n结果：%s") % [
+	return _localized_text("PLAYER_TRAINING_DECISION_FORMAT", "本轮判断：%s\n当前选择：%s\n成本/回报：成本：%s；回报：%s；时机：%s\n下一步：%s\n结果：%s") % [
+		_resolve_training_risk_summary(selected_option),
 		_resolve_training_option_name(selected_option),
 		_resolve_training_cost_summary(selected_option),
 		_resolve_training_impact_summary(selected_option),
-		_resolve_training_risk_summary(selected_option),
 		_resolve_training_payoff_summary(_resolve_selected_player(), selected_option),
 		_resolve_training_next_step_summary(selected_option),
 		result_summary,
@@ -536,6 +539,13 @@ func _resolve_training_cost_summary(option: Dictionary[String, Variant]) -> Stri
 	if not parts.is_empty():
 		return "｜".join(parts)
 	return _localized_text("PLAYER_TRAINING_COST_DEFAULT", "占用本轮一次训练机会，不编造额外数值成本。")
+
+
+func _resolve_training_disabled_reason(option: Dictionary[String, Variant]) -> String:
+	var reason: String = str(option.get("disable_reason", option.get("disabled_reason", option.get("training_disable_reason", ""))))
+	if reason.is_empty():
+		return _localized_text("PLAYER_TRAINING_DISABLED", "训练暂不可用")
+	return reason
 
 
 func _resolve_training_risk_summary(option: Dictionary[String, Variant]) -> String:

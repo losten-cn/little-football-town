@@ -512,7 +512,7 @@ func _home_action_context_summary() -> String:
 func _secondary_home_action_text() -> String:
 	if _can_enter_match():
 		return _localized_text("HOME_SECONDARY_ROSTER_CONFIRM", "先看球员状态")
-	return _localized_text("HOME_SECONDARY_ROSTER", "查看球员")
+	return _localized_text("HOME_SECONDARY_MATCH_PREP", "查看比赛准备")
 
 
 func _home_match_disable_reason_hint() -> String:
@@ -587,7 +587,10 @@ func _on_primary_action_pressed() -> void:
 
 func _on_secondary_action_pressed() -> void:
 	if _current_route == ROUTE_HOME:
-		route_to(ROUTE_ROSTER)
+		if _can_enter_match():
+			route_to(ROUTE_ROSTER)
+			return
+		route_to(ROUTE_MATCH_PRE)
 
 
 func _can_enter_match() -> bool:

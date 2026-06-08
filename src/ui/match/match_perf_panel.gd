@@ -22,6 +22,7 @@ var _root_box: VBoxContainer = null
 var _title_label: Label = null
 var _summary_label: Label = null
 var _pre_match_start_button: Button = null
+var _pre_match_return_home_button: Button = null
 var _live_timeline: VBoxContainer = null
 var _live_exit_warning: Label = null
 var _halftime_adjust_button: Button = null
@@ -121,6 +122,14 @@ func _setup_ui() -> void:
 	_pre_match_start_button.pressed.connect(_on_pre_match_start_pressed)
 	_root_box.add_child(_pre_match_start_button)
 
+	_pre_match_return_home_button = Button.new()
+	_pre_match_return_home_button.name = "PreMatchReturnHomeButton"
+	_pre_match_return_home_button.text = _localized_text("MATCH_PRE_RETURN_HOME", "返回主页")
+	_pre_match_return_home_button.focus_mode = Control.FOCUS_ALL
+	_apply_town_button_style(_pre_match_return_home_button, false)
+	_pre_match_return_home_button.pressed.connect(_on_pre_match_return_home_pressed)
+	_root_box.add_child(_pre_match_return_home_button)
+
 	_live_timeline = VBoxContainer.new()
 	_live_timeline.name = "LiveTimeline"
 	_live_timeline.add_theme_constant_override("separation", 6)
@@ -135,8 +144,8 @@ func _setup_ui() -> void:
 
 	_halftime_adjust_button = Button.new()
 	_halftime_adjust_button.name = "HalftimeAdjustButton"
-	_halftime_adjust_button.text = _localized_text("MATCH_HALFTIME_SOON", "中场调整将在后续版本开放")
-	_halftime_adjust_button.focus_mode = Control.FOCUS_ALL
+	_halftime_adjust_button.text = _localized_text("MATCH_HALFTIME_EXPLANATION", "说明：中场调整将在后续版本开放；本场先继续观看时间线。")
+	_halftime_adjust_button.focus_mode = Control.FOCUS_NONE
 	_halftime_adjust_button.disabled = true
 	_apply_town_button_style(_halftime_adjust_button, false)
 	_root_box.add_child(_halftime_adjust_button)
@@ -194,6 +203,7 @@ func _refresh() -> void:
 	if _root_box == null:
 		return
 	_pre_match_start_button.visible = false
+	_pre_match_return_home_button.visible = false
 	_live_timeline.visible = false
 	_live_exit_warning.visible = false
 	_halftime_adjust_button.visible = false
@@ -217,6 +227,7 @@ func _mount_pre_match() -> void:
 	_pre_match_start_button.visible = true
 	_pre_match_start_button.text = _localized_text("MATCH_PRE_START", "开始比赛")
 	_pre_match_start_button.disabled = not _can_start_match()
+	_pre_match_return_home_button.visible = true
 	_disable_reason_label.visible = not _can_start_match()
 	_disable_reason_label.text = _match_disable_reason()
 
@@ -266,6 +277,10 @@ func _on_pre_match_start_pressed() -> void:
 	})
 
 
+func _on_pre_match_return_home_pressed() -> void:
+	EventBus.emit("screen_requested", {"screen_id": "home"})
+
+
 func _on_result_confirm_pressed() -> void:
 	EventBus.emit("match_result_confirmed", {
 		"match_id": str(_result_payload.get("match_id", "")),
@@ -294,14 +309,15 @@ func _match_disable_reason() -> String:
 func _format_pre_match_summary() -> String:
 	return _localized_text(
 		"MATCH_PRE_SUMMARY_READABILITY_FORMAT",
-		"赛前检查｜联赛第%s轮\n对阵：%s %s\n是否适合开赛：%s\n阵容状态：%s\n当前战术：%s\n下一步：%s"
+		"赛前检查：联赛第%s轮｜%s %s｜阵容：%s｜战术：%s\n是否适合开赛：%s\n判断：%s\n下一步：%s"
 	) % [
 		str(_time_payload.get("round", _time_payload.get("current_round", _localized_text("MATCH_ROUND_PENDING", "本轮")))),
 		_player_facing_venue(str(_time_payload.get("home_away", _time_payload.get("venue", "")))),
 		_player_facing_opponent_name(str(_time_payload.get("opponent_name", ""))),
-		_pre_match_focus_text(),
 		_player_facing_lineup_summary(str(_time_payload.get("lineup_summary", ""))),
 		str(_time_payload.get("tactical_summary", _localized_text("MATCH_TACTIC_DEFAULT", "均衡"))),
+		_pre_match_availability_text(),
+		_pre_match_focus_text(),
 		_pre_match_next_step_text(),
 	]
 
@@ -309,7 +325,7 @@ func _format_pre_match_summary() -> String:
 func _format_live_summary() -> String:
 	return _localized_text(
 		"MATCH_LIVE_SUMMARY_READABILITY_FORMAT",
-		"比分：%s\n时间：%s｜阶段：%s\n刚刚重点：%s\n这意味着：%s\n当前操作：%s"
+		"现场状态：比分 %s｜时间 %s｜阶段 %s\n刚刚重点：%s\n影响：%s\n下一步关注：%s"
 	) % [
 		str(_time_payload.get("score_display", _result_score_text())),
 		_match_time_text(),
@@ -323,34 +339,36 @@ func _format_live_summary() -> String:
 func _format_result_summary() -> String:
 	return _localized_text(
 		"MATCH_RESULT_SUMMARY_READABILITY_FORMAT",
-		"终场比分：%s\n结果：%s\n结果解读：%s\n表现摘要：%s\n下一步：%s"
+		"比赛结果：%s｜%s\n原因：%s\n表现/联赛影响：%s｜%s\n下一步：%s"
 	) % [
 		_result_score_text(),
 		_player_facing_result_text(),
 		_result_reason_text(),
 		_result_player_performance_text(),
+		_league_impact_text(),
 		_result_next_step_text(),
 	]
 
 
 func _format_league_impact() -> String:
-	var impact_summary: String = ""
-	if _league_payload.is_empty():
-		impact_summary = _localized_text("MATCH_LEAGUE_IMPACT_PENDING", "积分榜将在赛后更新")
-	else:
-		impact_summary = str(
-			_league_payload.get(
-				"summary",
-				_league_payload.get(
-					"league_impact_summary",
-					_localized_text("MATCH_LEAGUE_UPDATED", "积分榜已按权威结果更新")
-				)
-			)
-		)
 	return _localized_text(
 		"MATCH_LEAGUE_IMPACT_GUIDANCE_FORMAT",
 		"联赛影响：%s\n接下来：%s"
-	) % [impact_summary, _result_next_step_text()]
+	) % [_league_impact_text(), _result_next_step_text()]
+
+
+func _league_impact_text() -> String:
+	if _league_payload.is_empty():
+		return _localized_text("MATCH_LEAGUE_IMPACT_PENDING", "积分榜将在赛后更新")
+	return str(
+		_league_payload.get(
+			"summary",
+			_league_payload.get(
+				"league_impact_summary",
+				_localized_text("MATCH_LEAGUE_UPDATED", "积分榜已按权威结果更新")
+			)
+		)
+	)
 
 
 func _result_score_text() -> String:
@@ -420,6 +438,12 @@ func _player_facing_result_text() -> String:
 			return _localized_text("MATCH_RESULT_PENDING", "结果整理中")
 		_:
 			return result
+
+
+func _pre_match_availability_text() -> String:
+	if _can_start_match():
+		return _localized_text("MATCH_PRE_AVAILABLE", "适合开赛")
+	return _localized_text("MATCH_PRE_UNAVAILABLE", "暂不适合开赛")
 
 
 func _pre_match_focus_text() -> String:
