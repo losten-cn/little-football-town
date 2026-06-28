@@ -314,7 +314,7 @@ Task: Focused revision before Production entry
 - Next recommended: If continuing cleanup, address match/league contract wording and highest-risk non-formula registry entries; otherwise proceed toward Technical Setup / architecture planning with warnings tracked.
 
 ## Session Extract — GDD tracking cleanup 2026-06-03
-- Files changed: `design/gdd/gdd-cross-review-2026-06-03.md`, `design/gdd/systems-index.md`.
+- Files changed: `design/reviews/gdd-cross-review-2026-06-03.md`, `design/gdd/systems-index.md`.
 - Fixes completed: Renumbered Warning / Flag Items in the 2026-06-03 global review; replaced residual “scoped blocker” scenario and gate wording with scoped warning/flag language; updated Recommended Next GDD from already-approved Audio to `多周目与挑战模式系统`, with `商业化与 DLC 规划系统` as the following not-started item.
 - Notes: No design scope was expanded; this was tracking/report cleanup to match the user-approved convergence posture.
 - Next recommended: Continue scoped warning cleanup only where it reduces implementation ambiguity: sync remaining GDD headers, update `training_actual_gain` in the registry, assign minimal audio settings UI ownership, and add town-building → audio downstream back-reference.
@@ -328,7 +328,7 @@ Task: Focused revision before Production entry
 - Next recommended: Continue status/report cleanup before implementation: fix stale cross-review wording/numbering, sync other GDD headers, update the recommended next GDD, then address registry/audio/town-building warning items as scoped follow-ups.
 
 ## Session Extract — /review-all-gdds 2026-06-03
-- Report written: `design/gdd/gdd-cross-review-2026-06-03.md`.
+- Report written: `design/reviews/gdd-cross-review-2026-06-03.md`.
 - Scope: Full global GDD review after Audio approval and related Alpha/Beta system design additions, covering cross-GDD consistency, holistic design review, and key multi-system scenario walkthroughs.
 - Verdict: PASS WITH WARNINGS — Systems Design may continue toward Technical Setup / architecture planning, with no project-blocking items.
 - Scoped warning/flag: `random-event-system.md` can emit confirmed event facts for reputation/achievement consumption, but `reputation-and-achievement-system.md` does not yet define the receiving contract. Track before implementing that specific cross-feature hook, or explicitly scope it out; do not block global GDD convergence on it.
@@ -338,7 +338,7 @@ Task: Focused revision before Production entry
 - Next recommended: Resolve or scope out Random Event → Reputation/Achievement recognition, then sync status tracking and update the registry before implementation relies on those contracts.
 
 ## Session Extract — /review-all-gdds 2026-06-01
-- Report written: `design/gdd/gdd-cross-review-2026-06-01.md`.
+- Report written: `design/reviews/gdd-cross-review-2026-06-01.md`.
 - Scope: Re-review after blocker-repair and skill/trait patch alignment, covering cross-GDD consistency, holistic design review, and key multi-system scenario walkthroughs.
 - Verdict: PASS WITH CONCERNS — Systems Design may proceed to Technical Setup / architecture planning.
 - Blockers closed: `match_day_ap_safety_grant` now aligns across time, economy, UI, and onboarding; illegal lineup fallback is closed through recommended lineup, out-of-position fill, or `forfeit_result_packet`; town-building MVP outputs are compressed to consumed contracts; skill/trait long-term state is fully carried by save/load; skill/trait UI consumption is closed through snapshot, feedback, candidate visibility, and identity-history contracts.
@@ -348,14 +348,14 @@ Task: Focused revision before Production entry
 - Next recommended: Begin Technical Setup / architecture planning and track the remaining warnings as targeted follow-up work.
 
 ## Session Extract — GDD blocker repair 2026-05-31
-- Source report: `design/gdd/gdd-cross-review-2026-05-31.md` — verdict was FAIL pending blocker fixes.
+- Source report: `design/reviews/gdd-cross-review-2026-05-31.md` — verdict was FAIL pending blocker fixes.
 - Files changed: `design/gdd/systems-index.md`, `design/gdd/town-building-system.md`, `design/gdd/player-development-system.md`, `design/gdd/match-competition-system.md`, `design/gdd/economy-management-system.md`, `design/gdd/main-loop-ui-framework.md`, `design/gdd/time-and-season-progression-system.md`, `design/gdd/league-competition-structure-system.md`, `design/gdd/onboarding-system.md`.
 - Fixes completed: MVP now includes a tightly scoped town-building slice; complete building UI/deep layout remains Alpha; core dependency direction no longer depends on Presentation UI; town-building MVP outputs are limited to consumed contracts; match-day AP deadlock is resolved via `match_day_ap_safety_grant`; illegal lineup fallback resolves through recommended lineup, out-of-position fill, or `forfeit_result_packet`.
 - Notes: No code or tests were run; this was a design-document consistency pass. Remaining review warnings should be split into follow-up tasks rather than bundled into this blocker repair.
 - Next recommended: Re-run `/review-all-gdds`; if PASS or PASS WITH CONCERNS, continue with scoped warning cleanup or Technical Setup planning.
 
 ## Session Extract — /review-all-gdds skill-trait patch 2026-05-31
-- Report written: `design/gdd/gdd-cross-review-2026-05-31-skill-trait-patch.md`.
+- Report written: `design/reviews/gdd-cross-review-2026-05-31-skill-trait-patch.md`.
 - Scope: Full global GDD re-review after the skill-and-trait targeted patch, including cross-GDD consistency, holistic design review, and multi-system scenario walkthrough.
 - Verdict: FAIL — Systems Design should not advance to Technical Setup until blockers are resolved or explicitly accepted.
 - Blockers originally: town-building still competes for primary progression; pre-match attention budget remains overloaded; economic soft-stall recovery is not proven; skill-system long-term state is not fully carried by save/load; skill-system UI consumption contract is incomplete.
@@ -1059,7 +1059,7 @@ Task: Focused revision before Production entry
 - Next: None — player-development epic review notes are now closed
 
 ## Session Extract — /review-all-gdds 2026-05-31
-- Report written: `design/gdd/gdd-cross-review-2026-05-31.md`
+- Report written: `design/reviews/gdd-cross-review-2026-05-31.md`
 - Scope: Cross-GDD consistency, holistic design review, and multi-system scenario walkthrough across concept, systems index, balance, save/load, time/season, player development, match competition, economy, league, town building, main-loop UI, player-management UI, match-performance UI, and onboarding GDDs.
 - Verdict: FAIL — Systems Design should not advance to Technical Setup until blockers are resolved or explicitly accepted.
 - Blockers: `systems-index.md` dependency/MVP boundary drift; town-building outputs without complete downstream consumers; forced match progression lacks legal-state fallback; MVP economy/town-building scope is unstable; match-day AP deadlock risk.
