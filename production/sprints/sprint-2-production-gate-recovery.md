@@ -71,14 +71,26 @@ PGR-02 → PGR-05 → PGR-06 → PGR-07 → PGR-08 → PGR-09 → PGR-10 → PGR
 
 ## Definition of Done
 
-- [ ] PGR-01 至 PGR-12 完成
+- [x] PGR-01 至 PGR-12 完成 — `production/sprint-status.yaml` 已于 2026-06-28 同步到 Sprint 2；PGR-12 已在 Sprint 2 QA plan 写入后标记为 `done`。
 - [x] 至少 3 场 AI-agent 代理观察 vertical slice session 已记录
-- [ ] Creative Director 对 core fun 与 core fantasy 给出 PASS
-- [ ] 关键 UX specs 已通过 /ux-review，或只剩 allowed warnings
-- [ ] 所有 slice-critical prototypes 已补齐 REPORT.md
-- [ ] Onboarding / Home / Town / Match / Result / Return loop 无 S1 / S2 blocker
-- [ ] 已形成可用于重跑 Pre-Production → Production gate 的证据包
-- [ ] 未引入未经批准的新 scope
+- [x] Creative Director 对 core fun 与 core fantasy 给出 PASS — `/gate-check Production` 的 CD-PHASE-GATE 于 2026-06-28 返回 READY。
+- [x] 关键 UX specs 已通过 /ux-review，或只剩 allowed warnings — `production/qa/evidence/ux-review-production-gate-2026-06-06.md` 为 PASS WITH WARNINGS / READY WITH WARNINGS。
+- [x] 所有 slice-critical prototypes 已补齐 REPORT.md — `prototypes/little-football-town-vertical-slice/REPORT.md` 与 `prototypes/training-match-loop-vertical-slice/REPORT.md` 均存在。
+- [x] Onboarding / Home / Town / Match / Result / Return loop 无 S1 / S2 blocker — route sanity、visual walkthrough、AI surrogate validation 与 Production convergence evidence 均未记录 route-level blocker。
+- [x] 已形成可用于重跑 Pre-Production → Production gate 的证据包 — evidence pack、Sprint 2 QA plan、UX review、AI surrogate validation、prototype REPORT 与 route/walkthrough regression evidence 均已存在；clean READY 仍建议补 fresh automated suite evidence。
+- [x] 未引入未经批准的新 scope
+
+## QA Plan
+
+- Sprint 2 QA plan: `production/qa/qa-plan-sprint-2-production-gate-recovery-2026-06-28.md`
+
+## Status Sync — 2026-06-28
+
+`production/sprint-status.yaml` has been synchronized from Sprint 1 to Sprint 2 using the existing gate recovery evidence:
+
+- PGR-02 through PGR-11 are marked `done` based on existing UX review, prototype REPORT, AI surrogate validation, route/walkthrough regression, Production convergence evidence, and 2026-06-28 director gate results.
+- PGR-01 is marked `done` as the Sprint 2 status reconciliation is now complete and this plan records the recovery-only scope.
+- PGR-12 is marked `done` because the recovery evidence pack exists and the Sprint 2 QA plan has now been written. Remaining clean-baseline work is fresh automated suite evidence, not a PGR-12 blocker.
 
 ## Risks
 

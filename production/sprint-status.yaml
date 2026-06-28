@@ -9,74 +9,119 @@
 #   done           ↔  Complete
 #   blocked        ↔  Blocked
 
-sprint: 1
-goal: "完成 HUD Framework 的收尾、验证与后续 MVP UI 屏幕落地准备，使主循环 UI 框架能进入可实现的 story 管理状态。"
-start: "2026-05-19"
-end: "2026-06-02"
-generated: "2026-05-19"
-updated: "2026-05-28"
+sprint: 2
+goal: "在不扩 scope 的前提下，补齐 Production gate 缺失证据：完成本 gate 接受的 AI-agent 代理观察 vertical slice playtest、确认 core fun / core fantasy、通过关键 UX 规格评审、补齐 slice 相关 prototype REPORT，并形成可重跑 gate 的证据包。"
+start: "2026-06-08"
+end: "2026-06-19"
+generated: "2026-06-28"
+updated: "2026-06-28"
 
 stories:
-  - id: "S1-1"
-    name: "完成 HUD Framework 实现收尾"
-    file: "production/sprints/sprint-1.md#s1-1"
+  - id: "PGR-01"
+    name: "刷新 sprint 计划并锁定 recovery scope"
+    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-01"
     priority: must-have
-    status: ready-for-dev
-    owner: ""
-    estimate_days: 1.5
-    blocker: ""
-    completed: ""
-  - id: "S1-2"
-    name: "HUD 手动 walkthrough + 截图证据"
-    file: "production/sprints/sprint-1.md#s1-2"
-    priority: must-have
-    status: ready-for-dev
-    owner: ""
-    estimate_days: 1
-    blocker: ""
-    completed: ""
-  - id: "S1-3"
-    name: "修复 HUD Review/QA 发现的问题"
-    file: "production/sprints/sprint-1.md#s1-3"
-    priority: must-have
-    status: ready-for-dev
-    owner: ""
-    estimate_days: 1
-    blocker: ""
-    completed: ""
-  - id: "S1-4"
-    name: "创建 QA plan for Sprint 1"
-    file: "production/sprints/sprint-1.md#s1-4"
-    priority: must-have
-    status: ready-for-dev
-    owner: ""
-    estimate_days: 1
-    blocker: ""
-    completed: ""
-  - id: "S1-5"
-    name: "准备 Player Management UI story/readiness"
-    file: "production/sprints/sprint-1.md#s1-5"
-    priority: should-have
-    status: backlog
-    owner: ""
-    estimate_days: 1
-    blocker: ""
-    completed: ""
-  - id: "S1-6"
-    name: "准备 Match Performance UI story/readiness"
-    file: "production/sprints/sprint-1.md#s1-6"
-    priority: should-have
-    status: backlog
-    owner: ""
-    estimate_days: 1
-    blocker: ""
-    completed: ""
-  - id: "S1-7"
-    name: "清理 adoption 剩余中优先级基础设施"
-    file: "production/sprints/sprint-1.md#s1-7"
-    priority: nice-to-have
-    status: backlog
-    owner: ""
+    status: done
+    owner: "Producer"
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-28"
+  - id: "PGR-02"
+    name: "定义 core fun / fantasy / key UX 验证 rubric"
+    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-02"
+    priority: must-have
+    status: done
+    owner: "Game Designer"
+    estimate_days: 0.5
+    blocker: ""
+    completed: "2026-06-08"
+  - id: "PGR-03"
+    name: "盘点 slice 相关 prototypes 与缺失 REPORT"
+    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-03"
+    priority: must-have
+    status: done
+    owner: "Producer"
+    estimate_days: 0.5
+    blocker: ""
+    completed: "2026-06-07"
+  - id: "PGR-04"
+    name: "补齐 slice-critical prototypes 的 REPORT.md"
+    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-04"
+    priority: must-have
+    status: done
+    owner: "Producer"
+    estimate_days: 1.0
+    blocker: ""
+    completed: "2026-06-07"
+  - id: "PGR-05"
+    name: "对关键 slice surfaces 执行 /ux-review"
+    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-05"
+    priority: must-have
+    status: done
+    owner: "UX Designer"
+    estimate_days: 1.0
+    blocker: ""
+    completed: "2026-06-06"
+  - id: "PGR-06"
+    name: "准备 moderated playtest 脚本与排期"
+    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-06"
+    priority: must-have
+    status: done
+    owner: "QA Lead"
+    estimate_days: 1.0
+    blocker: ""
+    completed: "2026-06-08"
+  - id: "PGR-07"
+    name: "执行 AI-agent 代理观察 vertical slice playtests"
+    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-07"
+    priority: must-have
+    status: done
+    owner: "QA Lead"
+    estimate_days: 1.5
+    blocker: ""
+    completed: "2026-06-08"
+  - id: "PGR-08"
+    name: "汇总 findings 并形成 gate issue list"
+    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-08"
+    priority: must-have
+    status: done
+    owner: "Producer"
+    estimate_days: 0.5
+    blocker: ""
+    completed: "2026-06-07"
+  - id: "PGR-09"
+    name: "只修 gate-blocking UX / flow 问题"
+    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-09"
+    priority: must-have
+    status: done
+    owner: "UI Programmer"
+    estimate_days: 2.0
+    blocker: ""
+    completed: "2026-06-07"
+  - id: "PGR-10"
+    name: "进行 core fun / core fantasy 创意判定"
+    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-10"
+    priority: must-have
+    status: done
+    owner: "Creative Director"
+    estimate_days: 0.5
+    blocker: ""
+    completed: "2026-06-28"
+  - id: "PGR-11"
+    name: "对修复后 build 做 QA 复验与 route / walkthrough 回归"
+    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-11"
+    priority: must-have
+    status: done
+    owner: "QA Lead"
+    estimate_days: 1.0
+    blocker: ""
+    completed: "2026-06-07"
+  - id: "PGR-12"
+    name: "组装 recovery evidence pack 并给出 re-gate 建议"
+    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-12"
+    priority: must-have
+    status: done
+    owner: "Producer"
+    estimate_days: 0.5
+    blocker: ""
+    completed: "2026-06-28"

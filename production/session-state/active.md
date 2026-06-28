@@ -30,6 +30,9 @@ Pipeline: Production — decision-readability convergence completed for Player/T
 - Carry-forward warnings unchanged: low-fidelity visuals, external-human validation not claimed, remote GitHub Actions green status not claimed, and real Match Live/Halftime command depth remains deferred.
 - Next recommended: keep this bridge closed; continue Production convergence with warning-backed presentation/evidence slices only, without expanding match command depth.
 
+<!-- QA-PLAN: 2026-06-28 | System: sprint-2-production-gate-recovery | Plan written: production/qa/qa-plan-sprint-2-production-gate-recovery-2026-06-28.md -->
+<!-- TEST-EVIDENCE: 2026-06-28 | System: sprint-2-production-gate-recovery | Evidence written: production/qa/evidence/sprint-2-fresh-gate-guardrails-2026-06-28.md | Result: PASS -->
+
 ## Session Extract — Training request bridge 2026-06-07
 
 - Minimum wiring completed: UI `training_requested` now has a production `src` consumer through `TrainingRequestCoordinator` in `Hud.tscn`.
