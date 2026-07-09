@@ -8,9 +8,9 @@
 
 | # | Story | Type | Status | ADR |
 |---|-------|------|--------|-----|
-| 001 | [世界渲染层](story-001-world-rendering-layer.md) | Logic + Visual/Feel | Ready | N/A (STYLE_GUIDE §1-§3) |
-| 002 | [HUD 暖亮化迁移](story-002-hud-warm-migration.md) | UI + Integration | Ready | ADR-0001 |
-| 003 | [资产管线](story-003-asset-pipeline.md) | Config/Data + Visual/Feel | Ready | N/A (STYLE_GUIDE §5, §7) |
+| 001 | [世界渲染层](story-001-world-rendering-layer.md) | Logic + Visual/Feel | Complete | N/A (STYLE_GUIDE §1-§3) |
+| 002 | [HUD 暖亮化迁移](story-002-hud-warm-migration.md) | UI + Integration | Complete | ADR-0001 |
+| 003 | [资产管线](story-003-asset-pipeline.md) | Config/Data + Visual/Feel | Complete | N/A (STYLE_GUIDE §5, §7) |
 
 ## Overview
 

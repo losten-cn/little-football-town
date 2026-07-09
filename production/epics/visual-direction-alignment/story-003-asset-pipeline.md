@@ -1,12 +1,12 @@
 # Story 003: 资产管线
 
 > **Epic**: 视觉方向对齐 (visual-direction-alignment)
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Config/Data + Visual/Feel
 > **Estimate**: S (2-4 hours for spec doc; asset production timeline TBD by strategy)
 > **Manifest Version**: 2026-07-05
-> **Last Updated**: [set by /dev-story when implementation begins]
+> **Last Updated**: 2026-07-10
 
 ## Context
 
@@ -100,5 +100,12 @@
 
 ## Dependencies
 
-- Depends on: None — 可与 Story 001 并行进行（Story 001 实现渲染管线，Story 003 定义资产规格）
-- Unlocks: 后续 P2 资产生产阶段（实际像素资产绘制/购买/导入）
+- Depends on: None — 可与 Story 001 并行进行
+- Unlocks: 后续 P2 资产生产阶段
+
+## Completion Notes
+**Completed**: 2026-07-10
+**Criteria**: 6/6 passing
+**Deviations**: None — 全部 3 份规范文档 + 获取策略决策 + placeholder 验证均完成
+**Test Evidence**: Config/Data — 无需自动化测试；Placeholder TileSet 验证 PASS (40+ assertions, WORLD_RENDERING_LAYER_TEST_PASS)
+**AC-5 Placeholder Verification**: TownWorldRenderer TileSet 已在 Godot 4.6 Compatibility renderer 中验证通过
