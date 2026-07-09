@@ -141,7 +141,7 @@ func get_facility(id: int) -> Facility:
 
 ### Part C: Build / Upgrade / Demolish Operations
 
-All resource costs route through `EconomyManager.accredit_facility_cost()`. Operations return `{success: bool, ...}` — callers check the result.
+All resource costs route through `EconomyManager.accredit_facility_cost()`. Because EconomyManager is a scene-instantiated Core authority rather than a Foundation Autoload, TownBuilding must receive that stable authority reference through gameplay-root injection or a scene-owned service container/runtime registry. Operations return `{success: bool, ...}` — callers check the result.
 
 ```gdscript
 func build_facility(facility_type: Facility.Type, grid_x: int, grid_y: int) -> Dictionary:
@@ -334,6 +334,16 @@ func _adjacency_pair_key(a: Facility.Type, b: Facility.Type) -> String:
 
 ### Part F: Public Formula Interface
 
+For cross-system MVP consumption, TownBuilding exposes only the following stable authority queries:
+
+Callers must consume these through a stable authority reference supplied by gameplay-root injection or a scene-owned service container/runtime registry, because TownBuilding is scene-instantiated rather than a Foundation Autoload.
+
+- `get_facility_training_multiplier(player_age: int) -> float`
+- `get_facility_total_maintenance() -> int`
+- `get_home_advantage_bonus() -> float`
+
+Other `compute_*()` functions may exist as internal formula helpers or non-canonical convenience methods, but they are not the registered MVP cross-system contract surface.
+
 Downstream systems call these read-only methods. All use current live facility state — no caching.
 
 ```gdscript
@@ -343,8 +353,8 @@ func compute_training_efficiency_multiplier() -> float:
     var level: int = tg.level if tg else 0
     return 1.0 + ConfigLoader.town_config.training_ground_bonus_delta * level
 
-## Home advantage bonus (stadium + adjacency to training_ground)
-func compute_home_advantage_bonus() -> float:
+## Canonical MVP home advantage query (for MatchCompetition)
+func get_home_advantage_bonus() -> float:
     var stadium := _find_active_facility(Facility.Type.STADIUM)
     if not stadium:
         return 0.0
@@ -396,15 +406,15 @@ func compute_youth_training_bonus(player_age: int) -> float:
         return 1.0
     return clampf(1.0 + ConfigLoader.town_config.youth_growth_per_level * level, 1.00, 1.20)
 
-## Combined facility training multiplier (for PlayerDevelopment)
-func compute_facility_training_multiplier(player_age: int) -> float:
+## Canonical MVP training multiplier query (for PlayerDevelopment)
+func get_facility_training_multiplier(player_age: int) -> float:
     var efficiency := compute_training_efficiency_multiplier()
     var youth := compute_youth_training_bonus(player_age)
     var adj_youth := _compute_adj_tr_youth_multiplier()
     return efficiency * youth * adj_youth
 
-## Total daily maintenance cost (for EconomyManager)
-func compute_facility_total_maintenance() -> int:
+## Canonical MVP total daily maintenance query (for EconomyManager)
+func get_facility_total_maintenance() -> int:
     var total: int = 0
     var cfg: TownConfig = ConfigLoader.town_config
     for facility: Facility in _facility_by_id.values():

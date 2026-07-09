@@ -30,7 +30,7 @@
 #   Superseded entries:     Grep pattern="status: superseded"
 
 version: 1
-last_updated: "2026-06-03"
+last_updated: "2026-06-28"
 
 # ─── STATE OWNERSHIP ─────────────────────────────────────────────────────────
 # Who is the authoritative owner of each piece of shared game state.
@@ -137,7 +137,7 @@ state_ownership:
     status: active
     owner_system: TownBuilding
     adr: docs/architecture/adr-0008-town-grid-facility-system.md
-    interface: "TownBuilding.compute_*() read-only methods (compute_training_efficiency_multiplier, compute_home_advantage_bonus, compute_stadium_revenue_multiplier, compute_facility_ap_bonus, compute_injury_recovery_reduction, compute_potential_floor_boost, compute_youth_training_bonus, compute_facility_training_multiplier, compute_facility_total_maintenance). Consumed by PlayerDevelopment, MatchCompetition, EconomyManager."
+    interface: "TownBuilding exposes the canonical MVP cross-system authority queries `get_facility_training_multiplier(player_age: int)`, `get_home_advantage_bonus()`, and `get_facility_total_maintenance()`. Additional `compute_*()` methods may exist as internal or non-canonical helper surfaces, but downstream systems consume the registered MVP contract only. Because TownBuilding is scene-instantiated rather than a Foundation Autoload, consumers must receive a stable authority reference through gameplay-root injection or a scene-owned service container/runtime registry."
     write_access: TownBuilding-only (recomputed on facility state change)
     referenced_by:
       - docs/architecture/adr-0008-town-grid-facility-system.md
@@ -183,6 +183,26 @@ state_ownership:
       - docs/architecture/adr-0011-reputation-and-achievement-recognition-framework.md
     added: 2026-06-03
 
+  - state: random_event_state
+    status: active
+    owner_system: RandomEventManager
+    adr: docs/architecture/adr-0012-random-event-settlement-contracts.md
+    interface: "RandomEventManager owns pending_random_event_instance, recent_random_event_history, event_cooldown_state, and processed_event_settlement_keys. External systems consume read-only payloads via build_random_event_offer_view_payload() / build_random_event_history_view_payload(); SaveManager consumes serialize_random_event_state()."
+    write_access: RandomEventManager-only
+    referenced_by:
+      - docs/architecture/adr-0012-random-event-settlement-contracts.md
+    added: 2026-06-28
+
+  - state: audio_preferences
+    status: active
+    owner_system: AudioManager
+    adr: docs/architecture/adr-0013-audio-settings-event-consumption.md
+    interface: "AudioManager.build_audio_settings_payload() returns the authoritative read-only snapshot for audio_master_volume, audio_bgm_volume, audio_sfx_volume, audio_ambience_volume, and audio_muted_categories. Runtime writes route only through AudioManager.set_*_volume() and set_category_muted(); SaveManager consumes serialize_audio_settings()/deserialize_audio_settings() as the registered durable-state extension payload `audio_state`."
+    write_access: AudioManager-only
+    referenced_by:
+      - docs/architecture/adr-0013-audio-settings-event-consumption.md
+    added: 2026-06-28
+
 # Example:
 #   - state: player_health
 #     status: active           # active | superseded_by: ADR-NNNN
@@ -225,7 +245,7 @@ interfaces:
       - MatchPerfUI
       - Onboarding
     adr: docs/architecture/adr-0002-event-signal-architecture.md
-    signal_signature: "EventBus.emit(event_name: String, payload: Dictionary) — 16 signals defined in ADR-0002"
+    signal_signature: "EventBus.emit(event_name: String, payload: Dictionary) — registered cross-system notifications and asynchronous events route through EventBus; accepted direct_call entries below remain valid only as explicit authority command/query contracts"
     referenced_by:
       - docs/architecture/adr-0002-event-signal-architecture.md
       - docs/architecture/adr-0001-scene-management.md
@@ -258,10 +278,12 @@ interfaces:
       - EconomyManager
       - TownBuilding
       - LeagueStructure
+      - AudioManager
     adr: docs/architecture/adr-0003-save-load-persistence.md
-    signal_signature: "SaveManager.register_system(system_id: String, serialize_fn: Callable, deserialize_fn: Callable) — register then SaveManager.save() collects from all registered systems"
+    signal_signature: "SaveManager.register_system(system_id: String, serialize_fn: Callable, deserialize_fn: Callable, slot: String = \"extension\", extension_key: String = \"\") — canonical Core systems restore through fixed snapshot fields; non-Core durable runtime authorities such as AudioManager restore through registered durable-state extensions like `audio_state`."
     referenced_by:
       - docs/architecture/adr-0003-save-load-persistence.md
+      - docs/architecture/adr-0013-audio-settings-event-consumption.md
     added: 2026-05-16
 
   - contract: config_loader_access
@@ -278,7 +300,7 @@ interfaces:
       - LeagueStructure
       - BalanceSystem
     adr: docs/architecture/adr-0004-data-driven-configuration.md
-    signal_signature: "ConfigLoader exposes typed properties (e.g., ConfigLoader.balance_config: BalanceConfig). Core systems read config in _ready() via direct property access. No string-keyed lookups."
+    signal_signature: "ConfigLoader exposes typed properties (e.g., ConfigLoader.balance_config: BalanceConfig). Core systems read config in _ready() via direct property access. No string-keyed lookups. As a Foundation Autoload, ConfigLoader is a stable direct-call authority and does not require scene-level injection."
     referenced_by:
       - docs/architecture/adr-0004-data-driven-configuration.md
     added: 2026-05-16
@@ -295,7 +317,7 @@ interfaces:
       - TownBuilding
       - Onboarding
     adr: docs/architecture/adr-0005-player-data-model.md
-    signal_signature: "PlayerDevelopment.roster.get_player(id) → Player, roster.query_by_tier(tier) → Array[Player], roster.query_by_position(pos) → Array[Player]. Player field access via typed properties."
+    signal_signature: "PlayerDevelopment.roster.get_player(id) → Player, roster.query_by_tier(tier) → Array[Player], roster.query_by_position(pos) → Array[Player]. Player field access via typed properties. Because PlayerDevelopment is scene-instantiated rather than a Foundation Autoload, callers must receive a stable authority reference through gameplay-root injection or a scene-owned service container/runtime registry."
     referenced_by:
       - docs/architecture/adr-0005-player-data-model.md
     added: 2026-05-16
@@ -310,7 +332,7 @@ interfaces:
       - TimeManager
       - MatchPerfUI
     adr: docs/architecture/adr-0006-match-simulation-architecture.md
-    signal_signature: "MatchResultPacket.to_dict() → Dictionary: {home_score, away_score, result, events, player_performances, condition_changes, morale_changes, win_reasons, match_stats, post_match_tags}. Delivered via EventBus match_completed signal."
+    signal_signature: "MatchResultPacket.to_dict() → Dictionary: {home_score, away_score, result, events, player_performances, condition_changes, morale_changes, win_reasons, match_stats, post_match_tags}. Delivered via EventBus match_completed signal. If a direct-call reader accesses MatchCompetition-owned packet/query surfaces, it must do so through an injected stable authority reference rather than implicit global class access."
     referenced_by:
       - docs/architecture/adr-0006-match-simulation-architecture.md
     added: 2026-05-16
@@ -324,7 +346,7 @@ interfaces:
       - TownBuilding (accredit_facility_cost)
       - PlayerDevelopment (accredit_training_cost)
     adr: docs/architecture/adr-0007-economy-transaction-framework.md
-    signal_signature: "execute_transaction(tx: Transaction) → Dictionary {success: bool, tx_id: int}. All resource mutations route through this single entry point. External systems use typed accredit_* methods."
+    signal_signature: "execute_transaction(tx: Transaction) → Dictionary {success: bool, tx_id: int}. All resource mutations route through this single entry point. External systems use typed accredit_* methods. Because EconomyManager is scene-instantiated rather than a Foundation Autoload, callers must use an injected stable authority reference supplied by gameplay root or a scene-owned service container/runtime registry."
     referenced_by:
       - docs/architecture/adr-0007-economy-transaction-framework.md
     added: 2026-05-17
@@ -373,6 +395,48 @@ interfaces:
     referenced_by:
       - docs/architecture/adr-0011-reputation-and-achievement-recognition-framework.md
     added: 2026-06-03
+
+  - contract: random_event_payloads
+    status: active
+    pattern: direct_call
+    producer: RandomEventManager
+    consumers:
+      - MainLoopUI
+      - Onboarding
+      - TutorialHintSystem
+      - SaveManager
+      - ReputationAchievementManager
+    adr: docs/architecture/adr-0012-random-event-settlement-contracts.md
+    signal_signature: "RandomEventManager.build_random_event_offer_view_payload() / build_random_event_history_view_payload() return authoritative Dictionary[String, Variant] snapshots. SaveManager consumes serialize_random_event_state(). ReputationAchievementManager may consume confirmed facts only; UI consumers render only and never redraw event pools, recompute eligibility, or generate event results."
+    referenced_by:
+      - docs/architecture/adr-0012-random-event-settlement-contracts.md
+    added: 2026-06-28
+
+  - contract: audio_event_consumption
+    status: active
+    pattern: event_bus
+    producer: EventBus
+    consumers:
+      - AudioManager
+    adr: docs/architecture/adr-0013-audio-settings-event-consumption.md
+    signal_signature: "AudioManager consumes only stable semantic EventBus events and normalized UI playback anchors via EventBus.subscribe()/unsubscribe(). It must not implement business logic from EventBus.event_fired or infer gameplay/audio truth from raw focus or hover churn."
+    referenced_by:
+      - docs/architecture/adr-0013-audio-settings-event-consumption.md
+    added: 2026-06-28
+
+  - contract: audio_settings_payloads
+    status: active
+    pattern: direct_call
+    producer: AudioManager
+    consumers:
+      - MainLoopUI
+      - SettingsUI
+      - SaveManager
+    adr: docs/architecture/adr-0013-audio-settings-event-consumption.md
+    signal_signature: "AudioManager.build_audio_settings_payload() returns the authoritative Dictionary[String, Variant] snapshot for audio_* preferences. Runtime mutations route only through set_master_volume(), set_bgm_volume(), set_sfx_volume(), set_ambience_volume(), and set_category_muted(); SaveManager consumes serialize_audio_settings()/deserialize_audio_settings()."
+    referenced_by:
+      - docs/architecture/adr-0013-audio-settings-event-consumption.md
+    added: 2026-06-28
 
 # Example:
 #   - contract: damage_delivery
@@ -481,6 +545,26 @@ api_decisions:
       - docs/architecture/adr-0009-league-competition-structure.md
     added: 2026-05-17
 
+  - purpose: random_event_settlement_key_identity
+    status: active
+    api: "RandomEventManager.build_event_settlement_key(event_instance_id, selected_option_id, target_scope, target_id) -> String"
+    not: "Including rule_version or other evaluation metadata in the durable key source"
+    adr: docs/architecture/adr-0012-random-event-settlement-contracts.md
+    reason: "Random Event durable settlement identity must remain stable across metadata revisions, reloads, and migration paths. rule_version is evaluation/history metadata only and must not create a new durable event identity."
+    referenced_by:
+      - docs/architecture/adr-0012-random-event-settlement-contracts.md
+    added: 2026-06-28
+
+  - purpose: random_event_evaluation_metadata_boundary
+    status: active
+    api: "RandomEventManager.build_random_event_evaluation_metadata(event_id, rule_version, trigger_window) -> Dictionary[String, Variant]"
+    not: "Encoding version-sensitive evaluation or compatibility decisions by generating a new durable settlement identity"
+    adr: docs/architecture/adr-0012-random-event-settlement-contracts.md
+    reason: "Version-sensitive behavior belongs in evaluation/history/migration metadata, not in event_settlement_key. This preserves idempotency while still allowing compatibility checks and audit trails."
+    referenced_by:
+      - docs/architecture/adr-0012-random-event-settlement-contracts.md
+    added: 2026-06-28
+
 # Example:
 #   - purpose: physics_raycast
 #     status: active
@@ -573,6 +657,48 @@ forbidden_patterns:
     why: "Including rule_version in the stable key source would break idempotency across migrations and metadata revisions, causing duplicate reward delivery or divergent durable state. ADR-0011 aligns this rule with ADR-0010's stable settlement-key contract."
     adr: docs/architecture/adr-0011-reputation-and-achievement-recognition-framework.md
     added: 2026-06-03
+
+  - pattern: rule_version_in_random_event_settlement_key
+    status: active
+    description: "Stable random-event settlement keys must not include rule_version. The durable key source is limited to deterministic identity fields such as event_instance_id, selected_option_id, target_scope, and target_id; rule_version is metadata only."
+    why: "Including rule_version in the durable random-event key source would make the same historical event result appear new after metadata or migration changes, breaking idempotency across save/load recovery and confirmed-fact routing into downstream systems such as ReputationAchievementManager."
+    adr: docs/architecture/adr-0012-random-event-settlement-contracts.md
+    added: 2026-06-28
+
+  - pattern: version_compatibility_via_new_durable_identity
+    status: active
+    description: "Systems must not resolve version-sensitive evaluation or compatibility changes by generating a new durable settlement identity for the same historical fact. Version differences belong in evaluation/history/migration metadata."
+    why: "Changing durable identity to represent metadata drift breaks replay safety, reload idempotency, and cross-system settlement consistency. Accepted ADRs require durable identity to remain stable while evaluation compatibility is handled in metadata-aware logic."
+    adr: docs/architecture/adr-0012-random-event-settlement-contracts.md
+    added: 2026-06-28
+
+  - pattern: direct_random_event_target_mutation
+    status: active
+    description: "RandomEventManager must not directly mutate resource balances, player attributes/state, facility state, match truth, time progression, or long-term recognition truth. Random event outcomes must be submitted as confirmed facts or effect requests to the authoritative target system."
+    why: "Direct target mutation would break the single-writer ownership model established across EconomyManager, PlayerDevelopment, TownBuilding, MatchCompetition, TimeManager, and ReputationAchievementManager. It would also make save/load recovery and idempotent event settlement unreliable."
+    adr: docs/architecture/adr-0012-random-event-settlement-contracts.md
+    added: 2026-06-28
+
+  - pattern: random_event_ui_truth_recomputation
+    status: active
+    description: "UI must not redraw random event pools, recompute event eligibility, infer processed state from hover/focus/local cache, or generate event results locally. UI consumes RandomEventManager authoritative payloads only."
+    why: "Local UI recomputation would create a second source of truth for pending events and processed results, especially across Godot 4.6 focus behavior changes and save/load restoration paths. Random event truth must remain owned by RandomEventManager."
+    adr: docs/architecture/adr-0012-random-event-settlement-contracts.md
+    added: 2026-06-28
+
+  - pattern: transient_ui_focus_as_audio_truth
+    status: active
+    description: "Audio playback logic must not treat raw Control focus, hover, or other transient local UI heuristics as stable semantic audio truth. AudioManager consumes normalized UI playback anchors and stable EventBus events only."
+    why: "Godot 4.6 dual-focus behavior can make raw focus churn differ by input method and UI state. Using transient UI focus as audio truth would create inconsistent playback semantics and a second inferred source of gameplay/presentation meaning."
+    adr: docs/architecture/adr-0013-audio-settings-event-consumption.md
+    added: 2026-06-28
+
+  - pattern: transient_mix_overwrites_durable_audio_preferences
+    status: active
+    description: "Temporary fades, ducking, or crossfades must not overwrite the durable player preference truth for audio_master_volume, audio_bgm_volume, audio_sfx_volume, audio_ambience_volume, or audio_muted_categories. Persistent preferences and transient runtime mixing must remain separate control layers."
+    why: "If transient runtime mixing writes into the same durable control surface as player preferences, BGM transitions or stinger ducking can corrupt saved settings truth, causing inconsistent restore behavior and ownership drift between runtime playback state and persistent audio settings."
+    adr: docs/architecture/adr-0013-audio-settings-event-consumption.md
+    added: 2026-06-28
 
 # Example:
 #   - pattern: autoload_singleton_coupling

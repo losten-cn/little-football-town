@@ -205,6 +205,7 @@ Three settlement handlers wired to EventBus:
 
 ```gdscript
 func _on_match_completed(payload: Dictionary) -> void:
+    var settlement_id: String = String(payload.get("settlement_id", ""))
     var result: Dictionary = payload.result_packet
     var cfg: EconomyConfig = ConfigLoader.economy_config
 
@@ -217,8 +218,10 @@ func _on_match_completed(payload: Dictionary) -> void:
     else:
         match_income *= cfg.loss_multiplier
 
-    execute_transaction(_make_tx("match_income", match_income, cfg.match_ap_reward,
-                                 0.0, "赛后收入"))
+    var tx: Transaction = _make_tx("match_income", match_income, cfg.match_ap_reward,
+                                   0.0, "赛后收入")
+    tx.metadata["settlement_id"] = settlement_id
+    execute_transaction(tx)
 
 func _on_stage_settled(payload: Dictionary) -> void:
     var cfg: EconomyConfig = ConfigLoader.economy_config
@@ -236,7 +239,10 @@ func _on_season_ended(payload: Dictionary) -> void:
 
 ### Part D: Accredited Entry Points
 
-External systems call `execute_transaction()` through typed entry points. EconomyManager validates the caller's authority:
+External systems call `execute_transaction()` through typed entry points. EconomyManager validates the caller's authority.
+
+Because EconomyManager is a scene-instantiated Core authority rather than a Foundation Autoload, cross-system callers must receive its stable reference through gameplay-root injection or a scene-owned service container/runtime registry. Registered direct calls to `execute_transaction()` or any `accredit_*` entry point must not rely on implicit global class access, hardcoded `NodePath`, or arbitrary scene-tree search.
+
 
 ```gdscript
 ## Called by MatchCompetition after Settlement Handoff
@@ -300,6 +306,8 @@ func _serialize_log() -> Array[Dictionary]:
 | Funds (经费) | EconomyManager | `execute_transaction()` only | MatchCompetition, TownBuilding, PlayerDevelopment, MainLoopUI |
 | AP (运动点数) | EconomyManager | `execute_transaction()` only | PlayerDevelopment, TownBuilding, MainLoopUI |
 | RP (研究点数) | EconomyManager (hidden MVP) | `execute_transaction()` only | PlayerDevelopment (future) |
+
+Post-match settlement transactions must preserve the canonical `settlement_id` from the `match_completed` envelope in transaction metadata or equivalent processed-key bookkeeping so replay, duplicate delivery, and restore paths can remain idempotent.
 
 ### Architecture Diagram
 

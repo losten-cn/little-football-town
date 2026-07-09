@@ -2,12 +2,12 @@
 
 ## Document Status
 
-- **Version**: 2.3
-- **Last Updated**: 2026-06-06
+- **Version**: 2.4
+- **Last Updated**: 2026-06-29
 - **Engine**: Godot 4.6 + GDScript
 - **GDDs Covered**: game-concept.md, systems-index.md, balance-system.md, time-and-season-progression-system.md, save-and-load-system.md, player-development-system.md, match-competition-system.md, economy-management-system.md, town-building-system.md, league-competition-structure-system.md, main-loop-ui-framework.md, player-management-ui.md, match-performance-ui.md, onboarding-system.md, skill-and-trait-system.md, reputation-and-achievement-system.md
-- **ADRs Referenced**: ADR-0001 through ADR-0011 (Foundation + Core set with cross-system payload contract layer plus reputation/achievement recognition)
-- **Architecture Review**: CONCERNS verdict (2026-06-03) — no Godot 4.6 engine blocker and no Foundation/Core hard gap; remaining gaps are future Random Event, Audio, and Presentation ADR coverage before their production work
+- **ADRs Referenced**: ADR-0001 through ADR-0013 (Foundation + Core set with cross-system payload, random-event, and audio contract layers)
+- **Architecture Review**: FAIL verdict (2026-06-29) — no Godot 4.6 engine blocker and no true `NO ADR` gap remain, but `architecture.md` sync, ADR-0005 facility multiplier clarification, and presentation-boundary follow-through still require convergence before the architecture gate can pass cleanly
 - **Technical Director Sign-Off**: 2026-06-06 — APPROVED WITH CONDITIONS (Foundation/Core covered; Feature/Presentation warning ADRs carried forward)
 - **Lead Programmer Feasibility**: Skipped — Lean mode
 
@@ -37,7 +37,7 @@ The architecture is ordered by dependency topology. Foundation and Core are impl
 ├─────────────────────────────────────────────────────────┤
 │  FEATURE CONTRACT LAYER                                 │
 │  LeagueStructure • SkillTraitSystem • ReputationAch     │
-│  RandomEvent [WARNING: ADR gap] • Audio [WARNING: ADR]  │
+│  RandomEvent [ADR-0012] • Audio [ADR-0013]              │
 ├─────────────────────────────────────────────────────────┤
 │  CORE LAYER                                             │
 │  TownBuilding • PlayerDevelopment                       │
@@ -64,14 +64,14 @@ The architecture is ordered by dependency topology. Foundation and Core are impl
 | 存档与读档 / SaveManager | save-and-load-system.md, ADR-0003 | Foundation | Save slots, version validation, migration, atomic snapshot orchestration | Only stable durable state is saved; half-match and half-settlement runtime state is rejected or delayed. |
 | ScreenManager | main-loop-ui-framework.md, ADR-0001 | Foundation | Screen stack, scene transitions, active screen ID | Presentation navigation goes through ScreenManager; gameplay systems never push screens directly. |
 | 小镇建设 / TownBuilding | town-building-system.md, ADR-0008 | Core | Facility grid, facility state, construction progress, MVP facility outputs | MVP hard outputs are only `facility_training_multiplier`, `facility_total_maintenance`, and `home_advantage_bonus`. |
-| 运动员培养 / PlayerDevelopment | player-development-system.md, ADR-0005 | Core | Player roster, attributes, growth history, training authority | Consumes config/time/town read models; outputs typed player and training payloads. |
-| 比赛竞技 / MatchCompetition | match-competition-system.md, ADR-0006 | Core | Match state, lineup validation, simulation, result packet authority | Consumes `match_context` and pre-match snapshots; emits `match_result_packet` or `forfeit_result_packet`. |
+| 运动员培养 / PlayerDevelopment | player-development-system.md, ADR-0005 | Core | Player roster, attributes, growth history, training authority | Consumes config/time/town read models; facility multipliers are an optional read-model input with neutral `1.0` fallback when TownBuilding integration is unavailable; outputs typed player and training payloads. |
+| 比赛竞技 / MatchCompetition | match-competition-system.md, ADR-0006 | Core | Match state, lineup validation, simulation, result packet authority | Consumes `match_context` and pre-match snapshots; emits canonical `match_completed` envelopes with `match_id`, `settlement_id`, and `result_packet`, plus `forfeit_result_packet` when required. |
 | 经济管理 / EconomyManager | economy-management-system.md, ADR-0007 | Core | Funds, research, AP, transaction ledger, settlement grants | Only writer of resource balances; other systems submit requests or confirmed result packets. |
 | 联赛与赛事 / LeagueStructure | league-competition-structure-system.md, ADR-0009 | Feature Contract | Schedule, standings, promotion/relegation, season tags | Provides `match_context`; consumes confirmed match packets only. |
 | 技能与特性 / SkillTraitSystem | skill-and-trait-system.md, ADR-0010 | Feature Contract | Skill/trait durable outcomes, immutable pre-match read model, feedback lifecycle | Uses stable IDs and typed shallow payloads; no live Resource/Node references in durable contracts. |
 | 声望与成就 / ReputationAchievementSystem | reputation-and-achievement-system.md, ADR-0011 | Feature Contract | Reputation state, achievement state, evaluated/processed reward ledgers | Consumes confirmed settlement facts; repeated settlement keys are idempotent no-ops. |
-| 随机事件 / RandomEventSystem | random-event-system.md | Feature Contract | Pending event instance, event history, cooldowns, settlement keys | Warning carried: requires ADR before Random Event production work; not blocking Foundation/Core convergence. |
-| 音频 / AudioSystem | audio-system.md | Feature Contract / Presentation Support | Audio settings, playback cooldowns, event-to-cue mapping | Warning carried: requires ADR before Audio production work; cues must consume stable events, not infer gameplay truth. |
+| 随机事件 / RandomEventSystem | random-event-system.md, ADR-0012 | Feature Contract | Pending event instance, event history, cooldowns, processed settlement keys, confirmed fact/effect-request routing | Consumes TimeManager stable windows and downstream read models; resolves only through stable windows and never directly mutates Economy, Player, Town, Match, Time, or Reputation durable truth. |
+| 音频 / AudioSystem | audio-system.md, ADR-0013 | Feature Contract / Presentation Support | `AudioManager` runtime authority, `audio_*` durable preferences, playback cooldowns, same-window playback ledger, event-to-cue mapping | Consumes stable events and normalized UI semantic events only; persists through SaveManager's registered durable-state extension payload `audio_state`; never infers gameplay truth from transient focus/hover or mutates Core truth. |
 | 主循环 UI / MainLoopUI | main-loop-ui-framework.md | Presentation | Main shell containers, route vocabulary, `screen_id` / `anchor_id` registry | Presentation consumes read models and owns visual sequencing, not gameplay truth. |
 | 球员管理 UI / PlayerManagementUI | player-management-ui.md | Presentation | Roster/detail display state and player UI anchors | Reads PlayerDevelopment and SkillTrait payloads; does not recompute eligibility or effects. |
 | 比赛表现 UI / MatchPerformanceUI | match-performance-ui.md | Presentation | Pre-match/live/result display state and match UI anchors | Reads match packets and snapshots; does not recompute match results or skill triggers. |
@@ -91,8 +91,8 @@ The architecture is ordered by dependency topology. Foundation and Core are impl
 
 ### Warnings Carried Forward
 
-- Random Event ADR gap is tracked and must be closed before Random Event production work.
-- Audio ADR gap is tracked and must be closed before Audio production work.
+- Random Event production work is governed by ADR-0012 and still requires implementation/test follow-through against its stable-window, idempotency, and save/load rules.
+- Audio production work is governed by ADR-0013 and still requires implementation/test follow-through against its SaveManager persistence, two-phase restore, and low-pressure playback rules.
 - Presentation-specific ADRs for Main/Player/Match/Town UI are tracked and must be closed before deep UI production expansion.
 - Requirements traceability and old story/architecture wording drift are cleanup warnings, not blockers for this topology convergence pass.
 
@@ -107,7 +107,7 @@ All exposed gameplay payloads that cross module boundaries must use stable scala
 | ConfigLoader / BalanceConfig | `.tres` configuration, formula constants, tuning tables, configuration validation | `get_config(id)`, `get_formula_constant(key)`, `validate_all()` | None | `ResourceLoader`, `Resource`; Resource typed boundaries are HIGH risk under post-cutoff GDScript/resource rules. |
 | EventBus | Cross-system event queue, event priority, subscription registry | `emit_event(event_id, payload)`, `subscribe(event_id, callable)` | None | Godot `Signal`; string-based `connect()` is forbidden. |
 | TimeManager | Timeline, phase state, season progress, stable settlement windows, match triggers | `advance_day()`, `get_time_state()`, `match_triggered`, `phase_changed` | ConfigLoader, EventBus | `Node` autoload; game logic is node-event driven, not per-frame. |
-| SaveManager | Save slots, version validation, migration, atomic snapshots, restore order | `save(slot)`, `load(slot)`, `get_save_metadata()`, `register_system()` | TimeManager, ScreenManager, all authority systems | `FileAccess`, `ResourceSaver`, `ResourceLoader`; Godot 4.4+ FileAccess write return values must be checked. |
+| SaveManager | Save slots, version validation, migration, atomic snapshots, canonical Core state, registered durable-state extensions, restore order | `save(slot)`, `load(slot)`, `get_save_metadata()`, `register_system()` | TimeManager, ScreenManager, all authority systems | `FileAccess`, `ResourceSaver`, `ResourceLoader`; Godot 4.4+ FileAccess write return values must be checked. |
 | ScreenManager | Screen stack, current `screen_id`, scene transition lifecycle | `push_screen()`, `replace_screen()`, `get_active_screen_id()` | EventBus | `PackedScene.instantiate()`, `Node.add_child()`, `queue_free()`; UI dual-focus is HIGH risk in Godot 4.6. |
 
 ### Core Layer
@@ -125,9 +125,9 @@ All exposed gameplay payloads that cross module boundaries must use stable scala
 |---|---|---|---|---|
 | LeagueStructure | Schedule, standings, promotion/relegation, season tags, `match_context` | `get_next_match_context()`, `record_result_packet()`, `get_standings_payload()` | TimeManager, match result packet, Economy tags | `Resource`; packet contract is covered by ADR-0009. |
 | SkillTraitSystem | Skill/trait durable truth, immutable pre-match snapshot, pending feedback, identity history | `build_pre_match_snapshot()`, `get_skill_trait_read_model()`, `ack_feedback()` | Player confirmed facts, match settlement facts, SaveManager | ADR-0010; typed shallow payloads are HIGH risk and must remain serializable. |
-| ReputationAchievementSystem | Reputation, achievements, evaluated/processed ledgers, pending rewards | `evaluate_settlement_fact()`, `get_reputation_view_payload()`, `claim_reward()` | Match, League, Player, Economy, Skill facts; Random Event facts are optional | ADR-0011; Random Event intake remains a warning until its ADR is written. |
-| RandomEventSystem | Pending event instance, event history, cooldowns, processed event settlement keys | `offer_event()`, `resolve_event_choice()`, `get_event_view_payload()` | Time stable windows, Player/Economy/Town read models | Warning carried: requires ADR before Random Event production. |
-| AudioSystem | Volume settings, mute categories, playback cooldowns, event-to-cue mapping | `play_cue_for_event()`, `set_volume()`, `get_audio_settings()` | Stable UI/Core event labels | Warning carried: requires ADR before Audio production. |
+| ReputationAchievementSystem | Reputation, achievements, evaluated/processed ledgers, pending rewards | `evaluate_settlement_fact()`, `get_reputation_view_payload()`, `claim_reward()` | Match, League, Player, Economy, Skill facts; Random Event confirmed facts when mapped | ADR-0011 + ADR-0012 alignment; Random Event facts remain downstream-only and safe no-op when unmapped. |
+| RandomEventSystem | Pending event instance, event history, cooldowns, processed event settlement keys | `offer_event()`, `resolve_event_choice()`, `get_event_view_payload()` | Time stable windows, Player/Economy/Town read models | ADR-0012; submits confirmed facts/effect requests only and restores durable truth without redrawing the event pool. |
+| AudioSystem | Volume settings, mute categories, playback cooldowns, event-to-cue mapping | `play_cue_for_event()`, `set_volume()`, `get_audio_settings()` | Stable UI/Core event labels | ADR-0013; `AudioManager` owns runtime preference truth, same-window playback policy, and SaveManager-registered `audio_state` persistence. |
 
 ### Presentation / Polish Layer
 
@@ -164,9 +164,10 @@ ConfigLoader
 2. EventBus transmits serializable payloads only, never object references.
 3. Core systems never import UI modules; UI subscribes to Core events or reads explicit view payloads.
 4. Foundation Autoloads form no circular dependencies.
-5. Cross-system payloads with durable gameplay meaning must have one canonical writer and read-only consumers per ADR-0010.
-6. Presentation modules may label or sequence payloads for display, but may not recompute unlock truth, trait triggers, forced-forfeit validity, resource settlement, or resolved match strength.
-7. Random Event, Audio, Presentation ADR gaps, and traceability drift are warnings carried forward, not blockers for Foundation/Core convergence.
+5. Registered direct-call authority contracts that target scene-instantiated Core systems must use gameplay-root injection or a scene-owned service container/runtime registry to supply stable references; they must not rely on implicit global `class_name` access, hardcoded `NodePath`, or arbitrary scene-tree search.
+6. Cross-system payloads with durable gameplay meaning must have one canonical writer and read-only consumers per ADR-0010.
+7. Presentation modules may label or sequence payloads for display, but may not recompute unlock truth, trait triggers, forced-forfeit validity, resource settlement, or resolved match strength.
+8. Random Event and Audio now have accepted ADR coverage; remaining warnings concern implementation follow-through, presentation-boundary depth, and traceability/document synchronization rather than missing architecture decisions.
 
 ## Data Flow
 
@@ -180,7 +181,7 @@ ConfigLoader
 
 ### Save / Load Path
 
-SaveManager 只在 `Planning`、`Match Trigger`、`Post-Match Settlement`、`Stage Settlement`、`Season Settlement`、`Offseason` 等稳定节点提交快照；`Match In Progress` 与任何半结算态必须延后或拒绝保存。保存时统一采集 `screen_id`、时间状态与各权威系统序列化结果，一次性写成原子快照；权威 blob 必须同时包含 durable companions 与 evaluated/processed settlement keys。读档先校验再迁移，随后按 `TimeManager → TownBuilding → PlayerDevelopment → LeagueStructure → EconomyManager → MatchCompetition` 的依赖顺序恢复；只接受完整 durable settlement result，禁止回放半发奖、半技能判定或半比赛结果。
+SaveManager 只在 `Planning`、`Match Trigger`、`Post-Match Settlement`、`Stage Settlement`、`Season Settlement`、`Offseason` 等稳定节点提交快照；`Match In Progress` 与任何半结算态必须延后或拒绝保存。保存时统一采集 `screen_id`、时间状态与各权威系统序列化结果，一次性写成原子快照；权威 blob 必须同时包含 durable companions 与 evaluated/processed settlement keys。读档先校验再迁移，然后按阶段恢复：先恢复 canonical Core durable truth（`TimeManager → TownBuilding → PlayerDevelopment → LeagueStructure → EconomyManager → MatchCompetition`），再恢复 registered durable-state extensions（例如 `audio_state`），随后由各运行时 owner 在 ready 后自行完成 runtime apply，最后才恢复 UI/screen 状态。只接受完整 durable settlement result，禁止回放半发奖、半技能判定或半比赛结果。
 
 ### Initialization Order
 
@@ -196,7 +197,7 @@ SaveManager 只在 `Planning`、`Match Trigger`、`Post-Match Settlement`、`Sta
 
 ### Warnings Carried Forward
 
-Random Event ADR、Audio ADR 与 Presentation ADR 覆盖缺口继续作为 warning 保留；它们必须消费现有稳定事件与 payload 契约，但在补齐对应 ADR 前不扩展新的生产级数据流，不阻塞当前 Foundation/Core 收敛。
+Random Event 与 Audio 已获得 ADR 覆盖，但其实现仍必须严格消费现有稳定事件与 payload 契约，并在 story / test / review 证据中兑现对应的 save/load、idempotency、two-phase restore 与 low-pressure feedback 规则。Presentation ADR 深化、UI API 边界与 traceability 同步仍作为 warning 保留，但不再属于“缺少 ADR”的问题。
 
 ## API Boundaries
 
@@ -216,7 +217,7 @@ Boundary shorthand: `D = Dictionary[String, Variant]`, `AD = Array[Dictionary[St
 
 | Module | Entry Points | Caller Invariants | Module Guarantees |
 |---|---|---|---|
-| TownBuilding | `preview_action(cmd: D) -> D`; `commit_action(cmd: D) -> D`; `get_effects() -> D` | Economy and Time authorization must be satisfied before commit. | Single writer for facilities/grid; only exposes MVP outputs `facility_training_multiplier`, `facility_total_maintenance`, `home_advantage_bonus`. |
+| TownBuilding | `preview_action(cmd: D) -> D`; `commit_action(cmd: D) -> D`; `get_facility_training_multiplier(player_age: int) -> float`; `get_facility_total_maintenance() -> int`; `get_home_advantage_bonus() -> float` | Economy and Time authorization must be satisfied before commit. | Single writer for facilities/grid; only exposes MVP outputs `facility_training_multiplier`, `facility_total_maintenance`, `home_advantage_bonus`. |
 | PlayerDevelopment | `get_roster_summary() -> AD`; `get_player_view(player_id: String) -> D`; `train(player_id: String, training_id: String) -> D`; `consume_match_feedback(result: D) -> void` | Long-term player attributes/status are modified only here; training consumes skill read models, not live skill state. | Persists growth outcomes and emits confirmed facts for Match/Skill/UI consumers. |
 | MatchCompetition | `start_match(match_context: D, lineup: D, tactic: D) -> void`; `get_match_state() -> D`; `get_result_view() -> D` | Enter only through `time_match_triggered`; AP safety grant is complete; no live skill backfill. | Single writer for `match_result_packet`, `forfeit_result_packet`, `settlement_id`, and snapshot status. |
 | EconomyManager | `get_balances() -> D`; `preview_cost(scope: String, args: D) -> D`; `execute_transaction(tx: D) -> D`; `apply_match_day_ap_safety_grant(match_id: String) -> D` | All resource changes go through Economy; transactions include stable IDs. | Single writer for funds/AP/research; ledger is auditable and idempotent. |
@@ -253,12 +254,12 @@ Boundary shorthand: `D = Dictionary[String, Variant]`, `AD = Array[Dictionary[St
 
 | Area | Result | Notes |
 |---|---|---|
-| ADR status | 11/11 Accepted | ADR-0001 through ADR-0011 are accepted and remain valid for the current Foundation/Core topology. |
+| ADR status | 13/13 Accepted | ADR-0001 through ADR-0013 are accepted and remain valid for the current Foundation/Core/Feature contract topology. |
 | Required sections | Complete | All accepted ADRs include Engine Compatibility and GDD Requirements Addressed sections. |
 | Foundation/Core coverage | Pass | Scene/autoloads, EventBus/TimeManager, SaveManager, ConfigLoader, PlayerDevelopment, MatchCompetition, EconomyManager, TownBuilding, LeagueStructure, and cross-system settlement contracts are covered. |
-| Conflicts/cycles | None known | No ADR dependency cycle or layer-ownership conflict is known. |
+| Conflicts/cycles | No explicit ADR dependency cycle known | Remaining concerns are document synchronization and the ADR-0005 facility-multiplier interface clarification, not a newly discovered dependency cycle. |
 | Godot 4.6 risk | No blocker | Deprecated API usage is not present in the architecture contracts; post-cutoff risks remain explicitly flagged. |
-| Traceability drift | Warning | Random Event, Audio, and Presentation ADR coverage remain future-slice warnings; TR-economy-008 and TR-town-013 wording drift is resolved in the traceability matrix. |
+| Traceability drift | Warning | Random Event and Audio are now accepted ADRs; remaining warnings concern architecture.md synchronization, presentation-boundary depth, and story/test follow-through rather than missing ADR coverage. |
 
 ### Traceability Coverage Check
 
@@ -266,27 +267,27 @@ Foundation and Core requirements are sufficiently covered to proceed into Techni
 
 Remaining traceability warnings are not Foundation/Core blockers:
 
-Gate Classification: Random Event, Audio, and future Presentation ADR gaps are future-slice warnings for this gate. They do not block Technical Setup → Pre-Production on the current Foundation/Core scope, but each becomes blocking before its own implementation starts.
+Gate Classification: Random Event and Audio now have accepted ADR coverage. They do not block Technical Setup → Pre-Production on the current Foundation/Core scope, but each becomes implementation-blocking if its own contract rules are ignored. Presentation-boundary depth remains a future-slice warning.
 
 | Gap | Status | Resolution Path |
 |---|---|---|
-| Random Event contracts | Warning | Write Random Event ADR before Random Event production. |
-| Audio settings/persistence | Warning | Write Audio ADR before Audio production/settings work. |
+| Random Event implementation follow-through | Warning | Implement against ADR-0012 stable-window, confirmed-fact/effect-request, idempotency, and restore rules before Random Event production. |
+| Audio settings/persistence follow-through | Warning | Implement against ADR-0013 registered durable-state extension payload `audio_state`, two-phase restore, and stable-event consumption rules before Audio production/settings work. |
 | Presentation-specific UI architecture | Warning | Write UI ADRs before deep Main/Player/Match/Town UI production. |
-| TR-economy-008 / TR-town-013 wording drift | Cleanup note | RTM wording cleanup only; not a gate blocker. |
+| ADR-0005 facility multiplier interface wording | Cleanup note | Clarify optional TownBuilding read-model / neutral `1.0` fallback in architecture and future ADR wording. |
 
 ## Required ADRs
 
 ### Must have before coding starts
 
-No new Foundation/Core ADRs are required before coding starts. ADR-0001 through ADR-0011 cover the current Foundation, Core, and cross-system contract topology.
+No new Foundation/Core ADRs are required before coding starts. ADR-0001 through ADR-0013 cover the current Foundation, Core, and active Feature-contract topology.
 
 ### Should have before the relevant system is built
 
-| Proposed ADR | Covers | Needed Before |
+| Accepted ADR | Covers | Needed Before |
 |---|---|---|
-| Random Event Settlement Contracts | RandomEvent authority, `event_settlement_key`, dedupe ledgers, save/load, effect request boundaries. | Random Event production/Beta implementation. |
-| Audio Settings Persistence | `audio_*` settings ownership, UI → Audio → SaveManager persistence, read-only audio event consumption. | Audio settings or production audio integration. |
+| ADR-0012 — Random Event Settlement Contracts | RandomEvent authority, `event_settlement_key`, dedupe ledgers, save/load, effect request boundaries. | Random Event production/Beta implementation must follow this contract. |
+| ADR-0013 — Audio Settings & Event Consumption | `audio_*` settings ownership, UI → Audio → SaveManager persistence, read-only audio event consumption. | Audio settings or production audio integration must follow this contract. |
 
 ### Can defer as warnings
 

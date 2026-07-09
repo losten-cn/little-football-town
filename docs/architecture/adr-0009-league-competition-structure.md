@@ -289,8 +289,10 @@ func _on_match_completed(payload: Dictionary) -> void:
     if current_season == null or current_season.state != LeagueSeason.State.IN_PROGRESS:
         return
 
-    # match_id is included in the match_completed EventBus payload
-    # alongside result_packet (per ADR-0006 integration contract)
+    # match_completed uses the canonical EventBus envelope from ADR-0006/ADR-0010:
+    # `match_id` correlates to ScheduledMatch.match_id, `settlement_id` carries
+    # durable settlement identity for downstream consumers, and `result_packet`
+    # remains the authoritative match-result body consumed here.
     var completed_match_id: int = payload.get("match_id", -1)
     var result: Dictionary = payload.result_packet
 
@@ -518,16 +520,17 @@ func _deserialize(data: Dictionary) -> void:
 
 ### EventBus Contract Note
 
-The `match_completed` EventBus signal payload must include `match_id` to allow LeagueStructure to correlate results with scheduled matches. ADR-0006's MatchCompetition emits this signal with the following contract:
+The `match_completed` EventBus signal payload must use the canonical envelope so LeagueStructure can correlate results with scheduled matches while downstream settlement consumers retain a durable settlement identity. ADR-0006's MatchCompetition emits this signal with the following contract:
 
 ```
 EventBus.emit("match_completed", {
-    match_id = match_id,           # int — correlates to ScheduledMatch.match_id
-    result_packet = result_packet, # Dictionary — MatchResultPacket.to_dict()
+    match_id = match_id,                 # int — correlates to ScheduledMatch.match_id
+    settlement_id = settlement_id,       # String — durable settlement correlation / replay-dedup identity
+    result_packet = result_packet,       # Dictionary — MatchResultPacket.to_dict()
 })
 ```
 
-This is an additive field to the ADR-0002/ADR-0006 contract — does not change existing payload fields.
+LeagueStructure consumes `match_id` + `result_packet` directly for standings updates and accepts `settlement_id` as part of the stable cross-system contract shared with EconomyManager, save/load replay protection, and other settlement consumers.
 
 ## Alternatives Considered
 

@@ -164,7 +164,7 @@
 
 ### 4. 事件结果去重键
 
-`event_settlement_key = stable_digest(canonical_join([event_instance_id, selected_option_id, target_scope, target_id, rule_version], "|"))`
+`event_settlement_key = stable_digest(canonical_join([event_instance_id, selected_option_id, target_scope, target_id], "|"))`
 
 | Variable | Symbol | Type | Range | Description |
 |---|---|---|---|---|
@@ -172,10 +172,10 @@
 | 选择 ID | `selected_option_id` | string | non-empty | 玩家选择或自动结算选项 |
 | 目标作用域 | `target_scope` | enum/string | non-empty | player / team / town / facility / economy / match / reputation |
 | 目标 ID | `target_id` | string/null | nullable | 目标对象 ID；无单一目标时使用固定空值语义 |
-| 规则版本 | `rule_version` | string/int | non-empty | 事件规则版本 |
+| 规则版本 | `rule_version` | string/int | non-empty | 事件规则版本；只作为 evaluation / history / migration metadata，不进入 durable settlement identity |
 | 事件去重键 | `event_settlement_key` | string | stable digest | 用于防止重复提交事件结果 |
 
-**Rule:** 若 `event_settlement_key` 已存在于 `processed_event_settlement_keys`，本系统必须返回幂等 no-op，不重复提交效果请求、不重复写入历史、不重复展示奖励。
+**Rule:** 若 `event_settlement_key` 已存在于 `processed_event_settlement_keys`，本系统必须返回幂等 no-op，不重复提交效果请求、不重复写入历史、不重复展示奖励。仅 `rule_version` 变化时，不得生成新的 `event_settlement_key`，也不得因此重复结算同一事件结果。
 
 ## Edge Cases
 

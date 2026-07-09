@@ -290,7 +290,7 @@ Migration rule:
 
 ### Part F: EventBus and Contract Envelope Rules
 
-EventBus transmits payload envelopes, not live object references.
+EventBus transmits payload envelopes, not live object references. `match_completed` is the canonical cross-system match settlement envelope: `result_packet` is the authoritative nested result body, while `match_id` and `settlement_id` carry schedule correlation and durable settlement identity across consumers.
 
 Envelope rules:
 
@@ -302,8 +302,9 @@ Envelope rules:
 
 ```gdscript
 EventBus.emit("match_completed", {
-    "result_packet": result_packet,
+    "match_id": match_id,
     "settlement_id": settlement_id,
+    "result_packet": result_packet,
 })
 
 EventBus.emit("skill_trait_feedback_ready", {

@@ -241,7 +241,10 @@ class MatchEvent:
 
 ### Part E: Result Packet
 
-When Second Half completes, `_finalize_result()` produces a `MatchResultPacket`:
+When Second Half completes, `_finalize_result()` produces a `MatchResultPacket`.
+
+If another system consumes MatchCompetition-owned query or packet surfaces through a registered direct-call contract, that system must use an injected stable authority reference supplied by gameplay root or a scene-owned service container/runtime registry. MatchCompetition is a scene-instantiated Core authority, not a Foundation Autoload or implicit global singleton.
+
 
 ```gdscript
 class MatchResultPacket:
@@ -259,6 +262,8 @@ class MatchResultPacket:
     func to_dict() -> Dictionary: ...
     static func from_dict(data: Dictionary) -> MatchResultPacket: ...
 ```
+
+`MatchResultPacket` is the authoritative result body, not the full EventBus envelope. `match_completed` must emit the canonical cross-system payload envelope with `match_id`, `settlement_id`, and `result_packet = MatchResultPacket.to_dict()`. `match_id` correlates the result to LeagueStructure schedule authority, while `settlement_id` is the durable settlement identity used by downstream idempotent settlement and save/load replay protection.
 
 **Win reason generation** (GDD Core Rule 17): After the match, `_analyze_result()` produces reasons:
 1. "阵容强度差距" — if team strength difference > threshold
@@ -432,7 +437,7 @@ Not applicable — no existing match simulation system. This is the first implem
 - [ ] `_serialize()` during FIRST_HALF returns `{is_active = false, pending_context = {...}}` — no partial match state
 - [ ] `MatchResultPacket.to_dict()` roundtrip preserves all fields
 - [ ] `_analyze_result()` produces at least 1 win_reason when team strength difference > 10
-- [ ] `match_completed` signal is emitted with `MatchResultPacket.to_dict()` on reaching SETTLEMENT
+- [ ] `match_completed` signal is emitted with the canonical envelope `{match_id, settlement_id, result_packet = MatchResultPacket.to_dict()}` on reaching SETTLEMENT
 - [ ] `match_event_occurred` signal fires for each generated event with category, minute, side, and narrative_tags
 
 ## Related

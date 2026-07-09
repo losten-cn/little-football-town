@@ -54,6 +54,7 @@ The player-development GDD defines detailed rules for player growth (4 tiers, 5 
 - Attributes use the three-layer model (current/potential/effective) defined in balance-system GDD
 - PlayerDevelopment must register with SaveManager per ADR-0003
 - Training config comes from `ConfigLoader.training_config` per ADR-0004
+- TownBuilding facility influence is an optional read-model input, not a hard dependency: when the facility training multiplier is unavailable, PlayerDevelopment must use a neutral `1.0` fallback rather than blocking training resolution
 
 ### Requirements
 
@@ -61,6 +62,8 @@ The player-development GDD defines detailed rules for player growth (4 tiers, 5 
 - Roster queries: by_id, by_tier, by_position, by_training_efficiency_range
 - Serialization produces flat Dictionary per player (no nested Resource references in save data)
 - Training operations are atomic: validate cost, deduct resources, compute growth, update player, emit signal
+- TownBuilding facility influence is consumed only as a read-only training multiplier input; PlayerDevelopment does not own, recompute, or persist facility truth
+- If the facility multiplier read model is unavailable, training resolution must fall back to `1.0` rather than introducing a hard runtime dependency on TownBuilding
 - Derived values (effective_attribute, positional_overall_rating) computed on-demand, not stored
 
 ## Decision
@@ -331,8 +334,16 @@ func _compute_training_gains(player: Player, item: Dictionary) -> Dictionary:
         0.5, 1.8
     )
 
-    # Facility multiplier from TownBuilding
-    var facility_mult: float = TownBuilding.get_training_multiplier() if TownBuilding else 1.0
+    # Optional facility multiplier read model from TownBuilding.
+    # This is not a hard dependency: if the canonical facility-training query is
+    # unavailable, training falls back to a neutral 1.0 multiplier.
+    # The TownBuilding authority reference must be supplied by gameplay-root
+    # injection or a scene-owned service container/runtime registry rather than
+    # implicit global class access.
+    var facility_mult: float = 1.0
+    var town_building: Node = _get_town_building_authority()
+    if town_building and town_building.has_method("get_facility_training_multiplier"):
+        facility_mult = float(town_building.get_facility_training_multiplier(player.age))
 
     for attr_name: String in item.target_attributes:
         var attr: Player.AttributeTriplet = player.attributes.get_attr(attr_name)
@@ -478,6 +489,7 @@ Player IDs are monotonically increasing integers assigned by `PlayerRoster` at c
 - PlayerRoster as Resource enables clean SaveManager integration (one `serialize()` call)
 - Monotonic ID assignment prevents stale reference bugs
 - Training operations are atomic — validation, deduction, growth, and signaling happen in one method
+- Facility influence remains a read-only external input with neutral `1.0` fallback, avoiding a hard PlayerDevelopment → TownBuilding dependency while preserving later facility integration
 
 ### Negative
 
@@ -505,7 +517,7 @@ Player IDs are monotonically increasing integers assigned by `PlayerRoster` at c
 | `player-development-system.md` | Core Rule 4: 每名球员都必须具有独立的 `training_efficiency` | `Player.training_efficiency: float` with validate() enforcing 0.8–1.5 range |
 | `player-development-system.md` | Core Rule 7: 四层球员分层（普通/优秀/明星/传奇胚子） | `Player.tier: String` with get_tier_potential_band() lookup |
 | `player-development-system.md` | Formula 1: `fatigue_adjusted_training_efficiency` | Computed in `_compute_training_gains()` using `condition_multiplier` and `morale_multiplier` |
-| `player-development-system.md` | Formula 2: `training_actual_gain` (4 factors) | Full implementation in `_compute_training_gains()`: attribute_growth × efficiency × focus_match × facility |
+| `player-development-system.md` | Formula 2: `training_actual_gain` (4 factors) | Full implementation in `_compute_training_gains()`: attribute_growth × efficiency × focus_match × optional facility read-model input, with neutral `1.0` fallback when the TownBuilding training multiplier is unavailable |
 | `player-development-system.md` | Core Rule 17: 已确认的训练收益不得在读档后丢失 | Serialization boundary: only `current` is saved; `effective` is recomputed on load |
 | `player-development-system.md` | AC: 球员差异化 — 不同层级间 `potential_cap`、`training_efficiency` 存在统计显著差异 | `Player.tier` determines initial `potential` range and `training_efficiency` band |
 | `balance-system.md` | Core Rule 4: 每个属性区分 `current` / `potential` / `effective` | `AttributeTriplet` with `.current`, `.potential`, `.effective` (computed) |

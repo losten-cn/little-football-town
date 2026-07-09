@@ -18,7 +18,7 @@ Technical Director, Godot Specialist
 
 ## Summary
 
-ADR-0001 reserved SaveManager as an Autoload and ADR-0002 defined `save_completed`/`load_completed` signals, but neither specified what format saves use, how version migration works across releases, how Core systems register their serialization contracts, or how save slots are managed. This ADR defines: Godot `.tres` Resource format for saves, a mandatory `save_version` field with migration hooks, a 3-slot save system with auto-save, and a registration-based serializer pattern where each Core system registers `serialize()`/`deserialize()` callables with SaveManager at `_ready()` time.
+ADR-0001 reserved SaveManager as an Autoload and ADR-0002 defined `save_completed`/`load_completed` signals, but neither specified what format saves use, how version migration works across releases, how systems register their serialization contracts, how save slots are managed, or how non-Core durable runtime authorities join the unified persistence boundary. This ADR defines: Godot `.tres` Resource format for saves, a mandatory `save_version` field with migration hooks, a 3-slot save system with auto-save, a registration-based serializer pattern where each authoritative system registers `serialize()`/`deserialize()` callables with SaveManager at `_ready()` time, and a split snapshot model with canonical Core gameplay fields plus registered durable-state extensions such as `audio_state`.
 
 ## Engine Compatibility
 
@@ -35,10 +35,10 @@ ADR-0001 reserved SaveManager as an Autoload and ADR-0002 defined `save_complete
 
 | Field | Value |
 |-------|-------|
-| **Depends On** | ADR-0001 (SaveManager Autoload reserved, ScreenManager exposes `get_active_screen_id()`), ADR-0002 (TimeManager exposes `get_state()` for save snapshots; `save_completed` / `load_completed` signals defined) |
+| **Depends On** | ADR-0001 (SaveManager Autoload reserved, ScreenManager exposes `get_active_screen_id()`), ADR-0002 (TimeManager exposes `get_state()` for save snapshots; `save_completed` / `load_completed` signals defined), ADR-0004 (ConfigLoader defines `get_save_version()` and must load before SaveManager version checks) |
 | **Enables** | ADR-0005 through ADR-0009 (all Core ADRs define their serializable state — they declare what, this ADR defines how) |
 | **Blocks** | All Core system implementation — save/load is a Foundation requirement before any Core system can be tested end-to-end |
-| **Ordering Note** | Must be Accepted before Core ADRs (0005-0009) can be Accepted. TimeManager is deserialized first in the load order. |
+| **Ordering Note** | Must be Accepted before Core ADRs (0005-0009) can be Accepted. Practical sequencing includes ADR-0004 before ADR-0003 because SaveManager relies on `ConfigLoader.get_save_version()`. TimeManager is deserialized first in the load order. |
 
 ## Context
 
@@ -68,7 +68,7 @@ The save-and-load-system GDD defines detailed persistence rules: 12 dependency s
 
 ### Part A: Save Format — Godot Resource (.tres)
 
-Saves use Godot's native `Resource` serialization via `ResourceSaver.save()` and `ResourceLoader.load()`. A typed `SaveSnapshot` Resource contains all persisted state:
+Saves use Godot's native `Resource` serialization via `ResourceSaver.save()` and `ResourceLoader.load()`. A typed `SaveSnapshot` Resource contains a fixed canonical Core gameplay state surface plus a registered durable-state extension collection for non-Core runtime authorities that still require unified persistence:
 
 ```gdscript
 # src/autoload/save_snapshot.gd
@@ -91,11 +91,18 @@ extends Resource
 @export var town_state: Dictionary[String, Variant] = {}
 @export var league_state: Dictionary[String, Variant] = {}
 
+# Registered durable-state extensions — non-Core but durable runtime authorities.
+# Example keys: audio_state, random_event_state, reputation_state.
+# These remain part of the unified SaveManager boundary and integrity digest,
+# but they are not promoted to canonical Core gameplay top-level fields unless
+# a later ADR explicitly changes that status.
+@export var durable_extensions: Dictionary[String, Variant] = {}
+
 # Metadata — displayed in save/load UI
 @export var metadata: Dictionary[String, Variant] = {}  # {town_name, season, league_tier, team_rating, integrity_hash, ...}
 ```
 
-**Rationale**: `.tres` provides type-safe serialization (`@export var`), editor visibility for debugging, and native nested Resource handling. JSON was rejected because it requires manual type coercion for every field and gains no benefit for a single-player local save.
+**Rationale**: `.tres` provides type-safe serialization (`@export var`), editor visibility for debugging, and native nested Resource handling. JSON was rejected because it requires manual type coercion for every field and gains no benefit for a single-player local save. Canonical Core gameplay truth remains top-level for clarity and migration control, while durable Feature/Presentation-support state joins the same snapshot through the registered durable-state extension collection.
 
 ### Part B: Save Slot Management
 
@@ -118,20 +125,27 @@ File structure:
 - After `town_facility_completed`
 - On application `NOTIFICATION_WM_CLOSE_REQUEST` (graceful shutdown)
 
-### Part C: Core System Registration
+### Part C: Durable State Registration
 
-Each Core system registers its serialize/deserialize callables with SaveManager in `_ready()`:
+Each authoritative durable-state owner registers its serialize/deserialize callables with SaveManager in `_ready()`. SaveManager distinguishes between:
+
+- **Canonical Core gameplay state** — fixed top-level `SaveSnapshot` fields (`time_state`, `player_state`, `match_state`, `economy_state`, `town_state`, `league_state`)
+- **Registered durable-state extensions** — stable extension payloads stored under `durable_extensions`, such as `audio_state`
+
+This keeps the canonical gameplay snapshot explicit while still allowing Feature or Presentation-support runtime authorities to persist through the same unified SaveManager boundary without inventing a second save path.
 
 ```gdscript
 # src/autoload/save_manager.gd
 extends Node
 
-var _serializers: Dictionary = {}  # {system_id: {serialize: Callable, deserialize: Callable}}
+var _serializers: Dictionary = {}  # {system_id: {serialize: Callable, deserialize: Callable, slot: String, extension_key: String}}
 
-func register_system(system_id: String, serialize_fn: Callable, deserialize_fn: Callable) -> void:
+func register_system(system_id: String, serialize_fn: Callable, deserialize_fn: Callable, slot: String = "extension", extension_key: String = "") -> void:
     _serializers[system_id] = {
         serialize = serialize_fn,
         deserialize = deserialize_fn,
+        slot = slot,
+        extension_key = extension_key,
     }
 
 func save(slot: int) -> bool:
@@ -143,8 +157,24 @@ func save(slot: int) -> bool:
 
     # Collect state from all registered systems
     for system_id: String in _serializers:
-        var state: Dictionary = _serializers[system_id].serialize.call()
-        snapshot.set(system_id + "_state", state)
+        var registration: Dictionary = _serializers[system_id]
+        var state: Dictionary = registration.serialize.call()
+        match String(registration.get("slot", "extension")):
+            "time":
+                snapshot.time_state = state
+            "player":
+                snapshot.player_state = state
+            "match":
+                snapshot.match_state = state
+            "economy":
+                snapshot.economy_state = state
+            "town":
+                snapshot.town_state = state
+            "league":
+                snapshot.league_state = state
+            _:
+                var extension_key: String = String(registration.get("extension_key", system_id + "_state"))
+                snapshot.durable_extensions[extension_key] = state
 
     # Populate metadata
     snapshot.metadata = _build_metadata(snapshot)
@@ -172,20 +202,36 @@ func load(slot: int) -> bool:
     if snapshot.save_version < ConfigLoader.get_save_version():
         snapshot = _migrate(snapshot, snapshot.save_version)
 
-    # Deserialize in dependency order
+    # Restore in phases
+    # Phase 1: canonical Core gameplay restore
     var load_order: Array[String] = ["time", "town", "player", "league", "economy", "match"]
     for system_id: String in load_order:
         if _serializers.has(system_id):
-            var state: Dictionary = snapshot.get(system_id + "_state")
-            _serializers[system_id].deserialize.call(state)
+            var registration: Dictionary = _serializers[system_id]
+            var slot_key: String = String(registration.get("slot", ""))
+            var state: Dictionary = snapshot.get(slot_key + "_state")
+            registration.deserialize.call(state)
 
-    # Restore UI
+    # Phase 2: registered durable-state extensions
+    for system_id: String in _serializers:
+        var registration: Dictionary = _serializers[system_id]
+        if String(registration.get("slot", "extension")) == "extension":
+            var extension_key: String = String(registration.get("extension_key", system_id + "_state"))
+            var extension_state: Dictionary = {}
+            if snapshot.durable_extensions.has(extension_key):
+                extension_state = snapshot.durable_extensions[extension_key]
+            registration.deserialize.call(extension_state)
+
+    # Phase 3: runtime apply happens inside each owner once its runtime is ready
+    # (for example AudioManager may defer bus/player application until its runtime is initialized)
+
+    # Phase 4: restore UI after authoritative gameplay and durable extension state exist
     ScreenManager.replace_screen(snapshot.ui_screen_id)
     EventBus.emit("load_completed", {slot = slot, snapshot = snapshot.metadata})
     return true
 ```
 
-**Deserialize order rationale**: `TimeManager → TownBuilding → PlayerDevelopment → LeagueStructure → EconomyManager → MatchCompetition` — downstream consumers restore first, then the systems they depend on. If a match was in progress, restoring after its data sources exist prevents null references.
+**Restore order rationale**: SaveManager restores in phases. Canonical Core gameplay truth restores first in dependency order — `TimeManager → TownBuilding → PlayerDevelopment → LeagueStructure → EconomyManager → MatchCompetition` — so downstream consumers see stable authoritative state before they restore. Registered durable-state extensions restore after canonical Core state exists. Runtime-only application steps that depend on node readiness, bus lookup, or other initialized infrastructure happen after deserialization inside the owning system. For example, `audio_state` may be handed to `AudioManager.deserialize_audio_settings()` during the extension phase, but volume/bus application occurs only when the audio runtime reports ready.
 
 ### Part D: Version Migration
 
@@ -211,7 +257,7 @@ func _migrate(snapshot: SaveSnapshot, from_version: int) -> SaveSnapshot:
 
 SaveSnapshot carries an `integrity_digest` in `metadata`, computed from a stable canonical serialization of the persisted gameplay state. On load, SaveManager recomputes and compares it as a best-effort corruption detection step. A mismatch is treated as probable save corruption: report the slot to the player and offer recovery or deletion rather than silently loading.
 
-Save integrity must be computed from a canonical serialized representation of the snapshot payload. Runtime `hash(Dictionary)` is not a stable persistence checksum and must not be used as the authoritative integrity digest.
+Save integrity must be computed from a canonical serialized representation of the snapshot payload. Runtime `hash(Dictionary)` is not a stable persistence checksum and must not be used as the authoritative integrity digest. The canonical payload includes both the fixed Core top-level state fields and any registered durable-state extensions such as `audio_state`; durable extensions are part of the unified persistence truth even though they are not promoted to canonical Core top-level fields.
 
 ```gdscript
 func build_snapshot_integrity_digest(snapshot_payload: Dictionary[String, Variant]) -> String:
@@ -229,6 +275,7 @@ func _verify_integrity(snapshot: SaveSnapshot) -> bool:
         "town_state": snapshot.town_state,
         "league_state": snapshot.league_state,
         "match_state": snapshot.match_state,
+        "durable_extensions": snapshot.durable_extensions,
     })
     return stored_digest == _stable_digest(canonical_state)
 ```
@@ -306,8 +353,8 @@ func _slot_path(slot: int) -> String:
 ### Positive
 
 - `.tres` format provides Editor visibility — developers can inspect save files in the Godot Editor during development
-- Registration pattern enforces that Core systems explicitly declare their persistence contract — no implicit "everything gets saved"
-- Ordered deserialization guarantees data dependencies are available before consumers restore
+- Registration pattern enforces that authoritative systems explicitly declare their persistence contract — no implicit "everything gets saved"
+- Ordered phased deserialization guarantees data dependencies are available before consumers restore, while allowing non-Core durable runtime authorities such as AudioManager to join the same persistence boundary safely
 - Version migration is explicit and additive — no silent data loss on upgrade
 - Auto-save at key nodes protects against crash data loss without interrupting gameplay
 
@@ -322,7 +369,7 @@ func _slot_path(slot: int) -> String:
 
 | Risk | Probability | Impact | Mitigation |
 |------|------------|--------|-----------|
-| Core system forgets to register serializer | Medium | High — state silently lost on save/load | Unit test: after save→load cycle, every registered system's state matches pre-save values. GUT test validates all 6 systems registered. |
+| Authoritative system forgets to register serializer | Medium | High — state silently lost on save/load | Unit test: after save→load cycle, every registered canonical system and required durable extension matches pre-save values. Validation covers both the 6 canonical Core systems and registered durable extensions such as `audio_state`. |
 | `ResourceSaver.save()` fails silently (returns error code not checked) | Low | High — player thinks save succeeded but file is corrupt | All `ResourceSaver.save()` calls check return value. On failure, emit `save_failed` event. |
 | Version migration introduces bug that corrupts saves | Low | High — players lose progress | Migration is additive-only. Migrated saves write to a new slot first, verify integrity, then replace original. |
 | Large save file (>10 MB) | Very Low | Medium — slow load | 2D management sim with ~100 players × ~15 fields each = ~2KB of player data. Even with 20 seasons of history, total < 1 MB. |
@@ -333,7 +380,7 @@ func _slot_path(slot: int) -> String:
 | GDD System | Requirement | How This ADR Addresses It |
 |------------|-------------|--------------------------|
 | `save-and-load-system.md` | Rule 1: "存档与读档系统提供的是统一持久化边界" | SaveManager is the sole disk writer; Core systems only provide serialize/deserialize |
-| `save-and-load-system.md` | Rule 2: "任何下游系统若希望新增必须持久化的长期字段…必须先回到本系统修订" | SaveSnapshot defines the canonical field set; new fields require SaveSnapshot version bump |
+| `save-and-load-system.md` | Rule 2: "任何下游系统若希望新增必须持久化的长期字段…必须先回到本系统修订" | SaveSnapshot defines the canonical Core field set plus the registered durable-state extension boundary; new canonical fields or new extension contracts both require SaveManager/ADR alignment |
 | `save-and-load-system.md` | Rule 3: "下游系统可以拥有自己的内容表…但必须明确区分哪些属于长期权威数据" | `serialize()` returns only authoritative state; derived/cached data is reconstructed on load |
 | `save-and-load-system.md` | Edge Case: "存档损坏或升级后不兼容" | Hash integrity check + version migration chain + explicit error messages per failure mode |
 | `save-and-load-system.md` | Edge Case: "读档恢复时当前状态停在关键节点中途" | Deserialize order ensures TimeManager restores first; UI restores to the recorded `ui_screen_id` |
@@ -357,17 +404,20 @@ Not applicable — no existing save system. This is the first save/load implemen
 
 ## Validation Criteria
 
-- [ ] SaveManager.register_system() accepts 3 callables and stores them keyed by system_id
+- [ ] SaveManager.register_system() stores the serializer, deserializer, and persistence slot/extension routing keyed by system_id
 - [ ] SaveManager.save(1) creates `user://saves/slot_1.tres` with valid SaveSnapshot Resource
-- [ ] SaveManager.load(1) restores all 6 registered system states to their pre-save values (roundtrip test)
+- [ ] SaveManager.load(1) restores all canonical Core system states to their pre-save values (roundtrip test)
+- [ ] Registered durable-state extensions such as `audio_state` roundtrip through `durable_extensions` without requiring a second persistence path
+- [ ] Missing optional extension payloads (for example an older save with no `audio_state`) restore to safe owner defaults without blocking load
 - [ ] SaveManager.load(999) returns `false` for non-existent slot
 - [ ] Corrupted save (wrong hash) returns `false` and logs error
 - [ ] Version migration: save with version=1, increment ConfigLoader save_version to 2, load → snapshot.save_version == 2 after migration
 - [ ] Auto-save fires on `match_completed` event receipt
 - [ ] `FileAccess.store_*` return values are checked (code review: no discarded bool returns)
+- [ ] Save integrity digest includes canonical Core state and registered durable-state extensions
 - [ ] Save file does not exceed 2 MB with 100 players × 10 seasons of data
 - [ ] Load completes in <500ms for a 2 MB save file (measured with `Time.get_ticks_msec()`)
-- [ ] All 6 Core systems are registered by the time SaveManager processes its first `save()` call
+- [ ] All 6 canonical Core systems are registered by the time SaveManager processes its first `save()` call, and any accepted durable extensions needed by the active build are also registered before use
 
 ## Related
 

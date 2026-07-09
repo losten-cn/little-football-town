@@ -1,7 +1,7 @@
 # Technical Requirement ID Registry
 
-version: 2
-last_updated: "2026-06-03"
+version: 3
+last_updated: "2026-06-29"
 
 requirements:
   # ─── Foundation: game-concept ───
@@ -1262,8 +1262,9 @@ requirements:
   - id: TR-random-005
     system: random-event
     gdd: design/gdd/random-event-system.md
-    requirement: "event_settlement_key = stable_digest(canonical_join([event_instance_id, selected_option_id, target_scope, target_id, rule_version], \"|\"))"
+    requirement: "event_settlement_key = stable_digest(canonical_join([event_instance_id, selected_option_id, target_scope, target_id], \"|\")); rule_version is durable metadata only and must not enter the settlement key source."
     created: 2026-06-03
+    revised: 2026-06-29
     status: active
 
   - id: TR-random-006

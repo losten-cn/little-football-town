@@ -1,9 +1,9 @@
 # Control Manifest
 
 > **Engine**: Godot 4.6
-> **Last Updated**: 2026-06-03
-> **Manifest Version**: 2026-06-03
-> **ADRs Covered**: ADR-0001, ADR-0002, ADR-0003, ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008, ADR-0009, ADR-0010, ADR-0011
+> **Last Updated**: 2026-07-05
+> **Manifest Version**: 2026-07-05
+> **ADRs Covered**: ADR-0001, ADR-0002, ADR-0003, ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008, ADR-0009, ADR-0010, ADR-0011, ADR-0012, ADR-0013
 > **Status**: Active — regenerate with `/create-control-manifest update` when ADRs change
 
 `Manifest Version` is the date this manifest was generated. Story files embed
@@ -27,7 +27,7 @@ rule, see the referenced ADR.
 - **Popped screens must be `queue_free()`d after `on_leave()` completes; the stack only keeps active screens.** — source: ADR-0001
 - **`ScreenManager` must expose `get_active_screen_id()` and `get_screen_stack_depth()` for save/load capture.** — source: ADR-0001
 - **Autoload order must be `ConfigLoader → EventBus → TimeManager → SaveManager → ScreenManager`.** — source: ADR-0002
-- **`EventBus` is the sole cross-system communication channel for Foundation→Core, Core→Core, and Core→UI messages.** — source: ADR-0002
+- **`EventBus` is the sole channel for cross-system notifications and asynchronous event routing; registered accredited direct calls are allowed only for accepted command/query contracts and single-writer authority entry points.** — source: ADR-0002
 - **Gameplay and UI business logic must subscribe through `subscribe(event_name, callable)` and unsubscribe explicitly.** — source: ADR-0002
 - **Event dispatch order must follow the fixed priority chain: `time_*` → `match_completed` → `league_*` → `economy_*` → `player_*` → `town_*` → `save_*`.** — source: ADR-0002
 - **`TimeManager` must provide synchronous pull access through `get_state()` and runtime push updates through time events.** — source: ADR-0002
@@ -43,12 +43,16 @@ rule, see the referenced ADR.
 - **Durable, event, and public payload boundaries must normalize inbound runtime `Dictionary` / `Variant` containers into `Dictionary[String, Variant]`.** — source: ADR-0010
 - **SaveManager persists durable settlement outcomes and idempotency logs, not transient evaluation scratch state.** — source: ADR-0010
 - **Reputation/Achievement save data must restore complete durable results only: reputation state, pending rewards, granted records, evaluated keys, and processed keys.** — source: ADR-0011
+- **`RandomEventManager` is the single authoritative writer for `pending_random_event_instance`, `recent_random_event_history`, `event_cooldown_state`, and `processed_event_settlement_keys`.** — source: ADR-0012
+- **Random Event evaluation, offer, and resolution may run only inside TimeManager-owned stable trigger windows.** — source: ADR-0012
+- **`AudioManager` must register audio preference serialize/deserialize callables with SaveManager, and durable audio preferences must cross the same registered system-state boundary as other runtime authorities.** — source: ADR-0013
 
 ### Forbidden Approaches
 - **Never use `SceneTree.change_scene_to_file()` as the normal screen-flow architecture.** — it destroys stack semantics and breaks return-state preservation — source: ADR-0001
 - **Never keep all screens permanently instantiated and toggle visibility as the primary screen architecture.** — it violates lifecycle and memory constraints — source: ADR-0001
 - **Never couple producer and consumer systems through direct node-held signal wiring as the main architecture.** — source: ADR-0002
-- **Never mix a hybrid communication model where Core systems call each other directly while UI alone uses EventBus.** — source: ADR-0002
+- **Never use unregistered ad hoc cross-system direct calls or direct node-held signal wiring.** — all direct command/query contracts must be explicitly registered as accepted authority boundaries, and notifications still route through EventBus — source: ADR-0002
+- **Never resolve cross-system authority nodes for registered direct calls via implicit global `class_name` pseudo-singletons, hardcoded `NodePath`, or arbitrary scene-tree search.** — scene-instantiated Core authority references must come from gameplay-root injection or a scene-owned service container/runtime registry — source: ADR-0002
 - **Never consume the generic `event_fired` signal for gameplay or UI business logic.** — source: ADR-0002
 - **Never put Nodes, Resources, Objects, Callables, Variant blobs, live runtime containers, or runtime Dictionary hash order into EventBus/save payloads.** — source: ADR-0002, ADR-0010
 - **Never allow Core systems to write save files directly.** — source: ADR-0003
@@ -56,6 +60,8 @@ rule, see the referenced ADR.
 - **Never define gameplay tuning as inline constants in `src/`.** — source: ADR-0004
 - **Never persist half-resolved skill/trait evaluation passes or incomplete settlement queues as restorable state.** — source: ADR-0010
 - **Never restore reputation/achievement partial results where durable truth exists without the matching idempotency ledgers or reward state.** — source: ADR-0011
+- **Never rebuild Random Event state by redrawing the event pool on load.** — durable random-event truth must restore from saved pending/history/cooldown/idempotency state — source: ADR-0012
+- **Never persist audio preference truth through UI-local state, ad hoc save metadata stuffing, or a second persistence path outside SaveManager.** — source: ADR-0013
 
 ### Performance Guardrails
 - **Screen transitions**: target <1ms CPU per transition — source: ADR-0001
@@ -68,6 +74,8 @@ rule, see the referenced ADR.
 - **Config load**: all config resources combined <50ms — source: ADR-0004
 - **Contract payload assembly**: event-boundary only, negligible frame cost — source: ADR-0010
 - **Reputation/Achievement restoration**: no perceptible load-time regression from ledgers/reward records — source: ADR-0011
+- **Random Event contract cost**: negligible frame cost; trigger, confirmation, and restore work occur only at stable windows and persistence boundaries — source: ADR-0012
+- **Audio restore/init cost**: bus validation and preference apply should remain a minor startup/load cost and non-blocking for normal scene flow — source: ADR-0013
 
 ---
 
@@ -120,6 +128,8 @@ rule, see the referenced ADR.
 - **Use `pending_reputation_rewards` plus `granted_reputation_reward_records` as the durable reward model.** — source: ADR-0011
 - **Recover `reputation_progress_ratio` by validating it against `reputation_total`, current level, and threshold tables; recompute when inconsistent.** — source: ADR-0011
 - **Random Event reputation facts with unmapped `effect_request_type` must return idempotent safe no-op.** — source: ADR-0011
+- **Random Event results must route as confirmed facts or effect requests only; they must never directly mutate Economy, Player, Town, Match, Time, or Reputation durable truth.** — source: ADR-0012
+- **`event_settlement_key` must be generated from stable random-event identity fields and must exclude `rule_version` from durable settlement identity.** — source: ADR-0012
 - **Use typed collections in GDScript for stable Core runtime data structures and payload contracts.** — source: technical-preferences.md
 - **Check `FileAccess.store_*` return values when save code uses them.** — source: ADR-0003, current-best-practices.md
 - **Use `duplicate_deep()` when duplicating nested resource trees that need true deep copies.** — source: ADR-0003, ADR-0004, current-best-practices.md
@@ -143,6 +153,8 @@ rule, see the referenced ADR.
 - **Never replay settlement side effects during migration.** — source: ADR-0010
 - **Never directly modify economic resource balances from `ReputationAchievementManager`.** — source: ADR-0011
 - **Never move a granted reputation reward back to `pending_reputation_rewards` after restore.** — source: ADR-0011
+- **Never include `rule_version` in `event_settlement_key` inputs or use it to force replay of an already-settled random-event outcome.** — source: ADR-0012
+- **Never let Random Event directly write resource balances, player attributes/skills/traits, facility state, time progression, match truth, or reputation rewards.** — source: ADR-0012
 
 ### Performance Guardrails
 - **Roster serialization**: <50ms for a full roster — source: ADR-0005
@@ -176,6 +188,8 @@ rule, see the referenced ADR.
 - **Reputation/Achievement consumes only confirmed facts from upstream systems.** — source: ADR-0011
 - **Random Event `target_scope = reputation` confirmed facts must provide `event_settlement_key` or an equivalent stable settlement ID.** — source: ADR-0011
 - **If a random-event fact maps to reputation recognition, its `event_settlement_key` must directly feed or stably source the reputation `settlement_id`.** — source: ADR-0011
+- **Random Event history, cooldown, pending-instance restore, duplicate UI input, and repeated delivery must all resolve through the same stable `event_settlement_key` idempotency boundary.** — source: ADR-0012
+- **Audio same-window playback policy may prioritize, merge, delay, cooldown, or suppress already-confirmed semantic events, but it must remain presentation-only and never become gameplay truth.** — source: ADR-0013
 
 ### Forbidden Approaches
 - **Never infer feature-level progression state from presentation order alone when tied-placement semantics matter.** — derive display semantics explicitly instead of trusting array order — source: ADR-0009
@@ -183,6 +197,8 @@ rule, see the referenced ADR.
 - **Never move all cross-system contracts into one global mega-payload.** — source: ADR-0010
 - **Never make unconfirmed process state from match, league, player development, town building, random events, or time progression a reputation/achievement input.** — source: ADR-0011
 - **Never require Random Event to re-settle because Reputation/Achievement received an unmapped recognition request.** — source: ADR-0011
+- **Never treat the audio playback ledger/queue as a second gameplay event system or a source of durable truth.** — source: ADR-0013
+- **Never turn normal negative management outcomes into alarm, crisis, countdown, or punishment audio semantics.** — source: ADR-0013
 
 ### Performance Guardrails
 - **Feature-layer settlement work must occur at stable event/settlement boundaries, not per-frame.** — source: ADR-0010, ADR-0011
@@ -206,6 +222,10 @@ rule, see the referenced ADR.
 - **When implementing accessible UI, use Godot Control-node accessibility support via AccessKit-aware patterns.** — source: current-best-practices.md
 - **If the town grid is rendered visually, treat rendering nodes as presentation only; gameplay authority remains in `TownBuilding`.** — source: ADR-0008
 - **Keyboard/mouse is the only supported input method for this project.** — source: technical-preferences.md
+- **Random Event UI must consume `random_event_offer_view_payload` and `random_event_history_view_payload` as read-only authoritative data.** — source: ADR-0012
+- **`AudioManager` is the sole runtime owner of `audio_master_volume`, `audio_bgm_volume`, `audio_sfx_volume`, `audio_ambience_volume`, and `audio_muted_categories`.** — source: ADR-0013
+- **Audio consumes only stable EventBus events and normalized UI semantic events; MainLoopUI or later settings screens may host controls but only forward edits into AudioManager authority.** — source: ADR-0013
+- **Audio preference restore must use a two-phase apply: SaveManager provides durable values first, then `AudioManager` applies them only after runtime node and bus mappings are ready.** — source: ADR-0013
 
 ### Forbidden Approaches
 - **Never poll Core state from `_process()` for routine UI refresh when an EventBus update exists.** — source: ADR-0002
@@ -214,6 +234,9 @@ rule, see the referenced ADR.
 - **Never use hover, keyboard focus, control expansion state, or local UI cache to infer long-term reputation/achievement truth.** — source: ADR-0011
 - **Never render the authoritative town/facility gameplay state directly out of `TileMapLayer` or other visual nodes.** — source: ADR-0008
 - **Never design new controller/gamepad-first, touch-first, or mobile interaction patterns for MVP screens.** — source: technical-preferences.md
+- **Never let Random Event UI redraw the event pool, recompute trigger eligibility, infer processed state from hover/focus/local cache, or locally fabricate event outcomes.** — source: ADR-0012
+- **Never subscribe audio behavior to raw focus churn, transient hover state, or ADR-0002's generic `event_fired` observability signal.** — source: ADR-0013
+- **Never wire gameplay or UI modules directly into audio playback as cross-system signal owners; route stable semantic events through EventBus and AudioManager.** — source: ADR-0013
 
 ### Performance Guardrails
 - **Windows builds must explicitly use the 2D Compatibility renderer for this pixel-art management sim.** — source: technical-preferences.md, current-best-practices.md

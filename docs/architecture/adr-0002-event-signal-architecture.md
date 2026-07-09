@@ -49,7 +49,7 @@ The architecture document defines 5 Core systems, 4 UI modules, and 5 Foundation
 ### Constraints
 
 - Godot 4.6 + GDScript — uses `Signal` as the native mechanism
-- Core systems must not reference each other directly (ADR-0001: cross-screen communication via EventBus)
+- Cross-system notifications and asynchronous runtime events route through EventBus; direct cross-system authority access is allowed only through explicitly registered command/query contracts (ADR-0001 still forbids ad hoc cross-screen node coupling)
 - EventBus must support both broadcast (one producer, N consumers) and targeted (one producer, one consumer) patterns
 - TimeManager must be queryable synchronously (for save/load snapshot) but must emit signals for runtime events
 - Event payloads must be serializable (save/load captures them for mid-event recovery)
@@ -67,7 +67,7 @@ The architecture document defines 5 Core systems, 4 UI modules, and 5 Foundation
 
 ### Part A: EventBus Contract
 
-**EventBus is the sole cross-system communication channel.** All Core→Core, Core→UI, and Foundation→Core communication routes through EventBus. No system directly calls methods on another system's node.
+**EventBus is the sole cross-system channel for broadcast notifications and asynchronous runtime event delivery.** Foundation→Core, Core→Core, and Core→UI notifications route through EventBus. Registered accredited direct calls are also allowed when one authoritative owner exposes a stable command or query contract; ad hoc direct node coupling remains forbidden. When a direct command/query contract targets a scene-instantiated Core authority node, the caller must receive that authority reference through gameplay-root injection or a scene-owned service container/runtime registry — never through implicit global `class_name` access, hardcoded `NodePath`, or arbitrary scene-tree search.
 
 **Event naming convention**: `{system_slug}_{action}_{past_tense_verb}`
 
@@ -80,7 +80,7 @@ The architecture document defines 5 Core systems, 4 UI modules, and 5 Foundation
 | PlayerDevelopment | `player_training_completed` | `player_id: int`, `gains: Dictionary`, `cost: Dictionary` |
 | PlayerDevelopment | `player_milestone_reached` | `player_id: int`, `milestone: String`, `attribute: String` |
 | MatchCompetition | `match_event_occurred` | `event_category: String`, `event_data: Dictionary`, `match_minute: int` |
-| MatchCompetition | `match_completed` | `result_packet: Dictionary` |
+| MatchCompetition | `match_completed` | `match_id: int`, `settlement_id: String`, `result_packet: Dictionary` |
 | EconomyManager | `economy_balance_changed` | `resource_type: String`, `old_value: float`, `new_value: float`, `reason: String` |
 | EconomyManager | `economy_warning_triggered` | `warning_type: String`, `current_value: float`, `threshold: float` |
 | TownBuilding | `town_facility_completed` | `facility_id: int`, `facility_type: String`, `effects: Dictionary` |
@@ -90,7 +90,7 @@ The architecture document defines 5 Core systems, 4 UI modules, and 5 Foundation
 | SaveManager | `save_completed` | `slot: int`, `metadata: Dictionary` |
 | SaveManager | `load_completed` | `slot: int`, `snapshot: Dictionary` |
 
-**Payload contract**: Every payload is a typed `Dictionary`. Values must be GDScript primitive types or typed `Array[Dictionary]`. Object references (nodes, resources) are forbidden in payloads — they create coupling and break serialization.
+**Payload contract**: Every payload is a typed `Dictionary`. Values must be GDScript primitive types or typed `Array[Dictionary]`. Object references (nodes, resources) are forbidden in payloads — they create coupling and break serialization. `match_completed` is a canonical envelope payload rather than a bare result body: `result_packet` remains the authoritative match-result body, while `match_id` and `settlement_id` provide schedule correlation and durable settlement correlation for downstream consumers.
 
 **Event priority queue**: When multiple events are emitted in the same frame (e.g., match completion triggers standings update and balance change simultaneously), EventBus processes them in fixed priority order:
 
@@ -281,12 +281,12 @@ func deserialize(data: Dictionary) -> void: ...
 - **Cons**: Tight coupling — consumer must hold a reference to the producer node; cannot decouple Core from UI (violates ADR-0001 rule: no screen accesses another screen's node tree); save/load cannot capture "which signals are currently connected"; testing requires full scene instantiation
 - **Rejection Reason**: Violates ADR-0001's decoupling requirement. Direct connections would make Core systems depend on UI nodes being in the scene tree, breaking the Core→UI ownership boundary.
 
-### Alternative 2: Hybrid — Core→Core direct, Core→UI via EventBus
+### Alternative 2: Ad hoc Hybrid — unregistered Core→Core direct calls plus EventBus side-by-side
 
-- **Description**: Core systems connect directly to each other; only UI consumes via EventBus
-- **Pros**: Slightly less indirection for high-frequency Core→Core events; fewer allocations
-- **Cons**: Two different communication patterns in the same project; Core systems still coupled to each other's node paths; save/load must handle both patterns; new developers must learn when to use which
-- **Rejection Reason**: Performance benefit is negligible for an event-driven management sim (events fire at human timescale, not per-frame). Consistency of a single communication pattern outweighs the minor dispatch overhead.
+- **Description**: Core systems directly call each other opportunistically, while other traffic still routes through EventBus without an explicit authority-contract registry
+- **Pros**: Slightly less indirection for some high-frequency Core→Core operations; fewer allocations in isolated call paths
+- **Cons**: Two communication patterns drift without one contract source of truth; direct calls become hard to distinguish from authority-approved command/query boundaries; save/load, review, and implementation guidance become inconsistent; new developers must guess when direct access is allowed
+- **Rejection Reason**: The project accepts a registered hybrid authority model, not an ad hoc one. EventBus remains the required path for notifications and asynchronous events, while direct calls are allowed only through explicitly registered command/query authority contracts.
 
 ### Alternative 3: Resource-Based State Observation
 
