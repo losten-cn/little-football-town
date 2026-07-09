@@ -25,6 +25,8 @@ extends PanelContainer
 ##           │     └── Label "%NextMatchValue"
 ##           └── Button "MenuButton"
 
+const Palette := preload("res://src/ui/hud/warm_palette.gd")
+
 @onready var _date_button: BaseButton = %DateButton
 @onready var _date_value: Label = %DateValue
 @onready var _funds_value: Label = %FundsValue
@@ -196,7 +198,7 @@ func _set_button_enabled(button: BaseButton, enabled: bool, highlighted: bool = 
 	button.disabled = not enabled
 	button.focus_mode = Control.FOCUS_ALL if enabled else Control.FOCUS_NONE
 	if enabled and highlighted:
-		button.modulate = _theme_color("color_accent_primary_hover", Color.WHITE)
+		button.modulate = Palette.CLUB_RED
 	elif enabled:
 		button.modulate = Color.WHITE
 	else:
@@ -226,6 +228,5 @@ func _theme_color(color_name: String, fallback: Color) -> Color:
 
 
 func _disabled_tint() -> Color:
-	var disabled := _theme_color("color_text_primary", Color.WHITE)
-	disabled.a = 0.6
+	var disabled := Palette.DISABLED_OVERLAY
 	return disabled

@@ -9,3 +9,6 @@
 - **2026-07-10** (Story 001 — 世界渲染层): 硬编码建筑位置 — TownBuilding 尚未创建，未来需重构为从 authoritative data source 读取 — 追踪自 `production/epics/visual-direction-alignment/story-001-world-rendering-layer.md`
 - **2026-07-10** (Story 001 — 世界渲染层): AC-6 季节测试仅验证"颜色不同"，未验证具体色值（冬季雪层、建筑窗户暖黄等） — 追踪自 `production/epics/visual-direction-alignment/story-001-world-rendering-layer.md`
 - **2026-07-10** (Story 001 — 世界渲染层): AC-7 时间冷暖视觉提示 DEFERRED — 需手动肉眼确认 — 追踪自 `production/epics/visual-direction-alignment/story-001-world-rendering-layer.md`
+- **2026-07-10** (Story 002 — HUD 暖亮化迁移): AC-5 比赛暗色 5s 渐变 DEFERRED — 需手动肉眼确认 — 追踪自 `production/epics/visual-direction-alignment/story-002-hud-warm-migration.md`
+- **2026-07-10** (Story 002 — HUD 暖亮化迁移): match_perf_panel.gd 顺带修改超出 story 边界 — 功能正确但需确认 scope — 追踪自 `production/epics/visual-direction-alignment/story-002-hud-warm-migration.md`
+- **2026-07-10** (Story 001 — 世界渲染层): AC-7 时间冷暖视觉提示 DEFERRED — 需手动肉眼确认 — 追踪自 `production/epics/visual-direction-alignment/story-001-world-rendering-layer.md`

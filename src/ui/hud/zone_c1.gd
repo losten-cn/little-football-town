@@ -2,17 +2,22 @@ extends PanelContainer
 ## Zone C for the strict MVP HUD.
 ##
 ## Displays the two persistent navigation entries:
-## - Roster
-## - Match
+## - Roster (left)
+## - Match (right)
+## - Club Crest (center, 32x32)
 ##
 ## Expected node structure:
 ##   ZoneC1 (PanelContainer)
 ##     └── HBoxContainer
 ##           ├── Button "%RosterButton"
+##           ├── TextureRect "%ClubCrest"
 ##           └── Button "%MatchButton"
+
+const Palette := preload("res://src/ui/hud/warm_palette.gd")
 
 @onready var _roster_button: BaseButton = %RosterButton
 @onready var _match_button: BaseButton = %MatchButton
+@onready var _club_crest: TextureRect = %ClubCrest
 
 var _match_available: bool = false
 var _match_available_text: String = "比赛可进入"
@@ -91,7 +96,7 @@ func _on_screen_changed(_name: String, _payload: Dictionary) -> void:
 func _update_match_button() -> void:
 	_match_button.disabled = not _match_available
 	_match_button.focus_mode = Control.FOCUS_ALL if _match_available else Control.FOCUS_NONE
-	_match_button.modulate = _theme_color("color_accent_primary_hover", Color.WHITE) if _match_available else _disabled_tint()
+	_match_button.modulate = Palette.CLUB_RED if _match_available else _disabled_tint()
 	_match_button.tooltip_text = _match_available_text if _match_available else _match_unavailable_text
 	_match_button.accessibility_description = _match_available_text if _match_available else _match_unavailable_text
 
@@ -109,11 +114,11 @@ func _set_selected(button: BaseButton, selected: bool, highlighted: bool) -> voi
 	if button.disabled:
 		button.modulate = _disabled_tint()
 	elif selected and highlighted:
-		button.modulate = _theme_color("color_accent_primary_hover", Color.WHITE)
+		button.modulate = Palette.CLUB_RED
 	elif selected:
-		button.modulate = Color.WHITE
+		button.modulate = Palette.CLUB_RED
 	elif highlighted:
-		button.modulate = _theme_color("color_accent_primary_hover", Color.WHITE)
+		button.modulate = Palette.CLUB_RED
 	else:
 		button.modulate = Color.WHITE
 
@@ -137,6 +142,4 @@ func _theme_color(color_name: String, fallback: Color) -> Color:
 
 
 func _disabled_tint() -> Color:
-	var disabled := _theme_color("color_text_primary", Color.WHITE)
-	disabled.a = 0.6
-	return disabled
+	return Palette.DISABLED_OVERLAY

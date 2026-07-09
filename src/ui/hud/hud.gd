@@ -9,8 +9,8 @@ extends CanvasLayer
 ## Non-MVP legacy areas such as the sidebar and ticker remain hidden.
 
 const THEME_PATH := "res://assets/themes/hud_theme.tres"
-const ZONE_A_HEIGHT := 48
-const ZONE_C_HEIGHT := 56
+const ZONE_A_HEIGHT := 72
+const ZONE_C_HEIGHT := 64
 const LEGACY_ZONE_HEIGHT := 24
 
 const FOCUS_PATHS: Array[NodePath] = [

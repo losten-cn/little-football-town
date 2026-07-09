@@ -1,12 +1,12 @@
 # Story 002: HUD 暖亮化迁移
 
 > **Epic**: 视觉方向对齐 (visual-direction-alignment)
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: UI + Integration
 > **Estimate**: M (4-6 hours)
 > **Manifest Version**: 2026-07-05
-> **Last Updated**: [set by /dev-story when implementation begins]
+> **Last Updated**: 2026-07-10
 
 ## Context
 
@@ -115,3 +115,12 @@
 
 - Depends on: Story 001 (世界渲染层) — HUD 坐标 (Y=0~72, Y=1016~1080) 依赖 viewport 参数确认
 - Unlocks: 后续 story — 从世界建筑点击进入功能面板（P3 重校准项）
+
+## Completion Notes
+**Completed**: 2026-07-10
+**Criteria**: 6/7 passing (AC-5 DEFERRED — 比赛暗色 5s 渐变需手动肉眼确认)
+**Deviations**:
+- ADVISORY: match_perf_panel.gd + l2_playable_loop_panels_test.gd 被修改 — 相关 warm migration 扩展
+**Test Evidence**: Integration: `tests/integration/ui/hud_warm_migration_test.gd` (PASS) + 现有测试回归 (3/3 PASS)
+**Code Review**: Complete — /code-review APPROVED WITH SUGGESTIONS
+**Dark Token Scan**: Zero forbidden tokens (#1A1A2E/#252540/#FF9800 etc.) in src/ui/
