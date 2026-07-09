@@ -9,6 +9,7 @@ const ROUTE_MATCH_LIVE: String = "match_live"
 var _match_simulation: MatchSimulation = null
 var _event_bus_override: Node = null
 var _time_manager_override: Node = null
+var _last_time_payload: Dictionary[String, Variant] = {}
 var _last_system_payload: Dictionary[String, Variant] = {}
 
 
@@ -22,6 +23,7 @@ func _exit_tree() -> void:
 	var event_bus: Node = _get_event_bus()
 	if event_bus != null:
 		event_bus.unsubscribe("match_start_requested", _on_match_start_requested)
+		event_bus.unsubscribe("time_advanced", _on_time_advanced)
 		event_bus.unsubscribe("system_state_changed", _on_system_state_changed)
 
 
@@ -48,11 +50,25 @@ func _subscribe_events() -> void:
 	if event_bus == null:
 		return
 	event_bus.subscribe("match_start_requested", _on_match_start_requested)
+	event_bus.subscribe("time_advanced", _on_time_advanced)
 	event_bus.subscribe("system_state_changed", _on_system_state_changed)
 
 
+func _on_time_advanced(_event_name: String, payload: Dictionary) -> void:
+	_last_time_payload = _to_string_variant_dictionary(payload)
+	_emit_match_entry_state()
+
+
 func _on_system_state_changed(_event_name: String, payload: Dictionary) -> void:
-	_last_system_payload = _to_string_variant_dictionary(payload)
+	var typed_payload: Dictionary[String, Variant] = _to_string_variant_dictionary(payload)
+	var has_match_entry_gate: bool = typed_payload.has("system_state_allows_match") \
+		or typed_payload.has("system_state_disable_reason") \
+		or typed_payload.has("navigation_context_allows_match") \
+		or typed_payload.has("navigation_context_disable_reason")
+	for key: String in typed_payload.keys():
+		_last_system_payload[key] = typed_payload[key]
+	if has_match_entry_gate:
+		_emit_match_entry_state()
 
 
 func _on_match_start_requested(_event_name: String, payload: Dictionary) -> void:
@@ -114,6 +130,44 @@ func _system_allows_match() -> bool:
 
 func _navigation_allows_match() -> bool:
 	return bool(_last_system_payload.get("navigation_context_allows_match", true))
+
+
+func _emit_match_entry_state() -> void:
+	_get_event_bus().emit("match_entry_state_changed", _build_match_entry_state())
+
+
+func _build_match_entry_state() -> Dictionary[String, Variant]:
+	var available: bool = _match_entry_available()
+	var disabled_reason: String = _resolve_match_entry_disabled_reason()
+	return {
+		"available": available,
+		"disabled_reason": disabled_reason,
+		"available_text": "比赛可进入",
+		"unavailable_text": "比赛暂未开放，请查看 Home 的原因提示",
+	}
+
+
+func _match_entry_available() -> bool:
+	return _system_allows_match() \
+		and _navigation_allows_match() \
+		and bool(_last_time_payload.get("match_trigger_reached", false)) \
+		and bool(_last_time_payload.get("match_center_available", true)) \
+		and bool(_last_time_payload.get("schedule_available", false)) \
+		and not bool(_last_time_payload.get("schedule_missing", false))
+
+
+func _resolve_match_entry_disabled_reason() -> String:
+	if not _system_allows_match():
+		return String(_last_system_payload.get("system_state_disable_reason", "当前系统状态不允许进入比赛"))
+	if not _navigation_allows_match():
+		return String(_last_system_payload.get("navigation_context_disable_reason", "当前导航上下文不允许进入比赛"))
+	if bool(_last_time_payload.get("schedule_missing", false)):
+		return "赛程尚未公布"
+	if not bool(_last_time_payload.get("match_trigger_reached", false)):
+		return "还未到比赛时间"
+	if not bool(_last_time_payload.get("match_center_available", true)):
+		return "比赛中心暂不可用"
+	return "当前不可进入比赛"
 
 
 func _emit_match_start_failed(source_screen_id: String, target_screen_id: String, reason: String, detail: String) -> void:

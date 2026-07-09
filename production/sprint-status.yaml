@@ -9,119 +9,92 @@
 #   done           ↔  Complete
 #   blocked        ↔  Blocked
 
-sprint: 2
-goal: "在不扩 scope 的前提下，补齐 Production gate 缺失证据：完成本 gate 接受的 AI-agent 代理观察 vertical slice playtest、确认 core fun / core fantasy、通过关键 UX 规格评审、补齐 slice 相关 prototype REPORT，并形成可重跑 gate 的证据包。"
-start: "2026-06-08"
-end: "2026-06-19"
-generated: "2026-06-28"
-updated: "2026-06-28"
+sprint: 3
+goal: "将 Production gate 的视觉与展示层 follow-through 从 READY WITH WARNINGS 推进到可执行 story/readiness/QA 证据链：完成 Home visual exemplar story readiness、实施最小 Home/shell visual boundary pass、产出截图/walkthrough 证据，并为后续 Player/Match visual exemplar stories 建立不扩 scope 的模板。"
+start: "2026-07-05"
+end: "2026-07-12"
+generated: "2026-07-05"
+updated: "2026-07-09"
 
 stories:
-  - id: "PGR-01"
-    name: "刷新 sprint 计划并锁定 recovery scope"
-    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-01"
+  - id: "S3-01"
+    name: "验证 Home visual exemplar story readiness"
+    file: "production/epics/main-loop-ui-framework/story-002-home-visual-exemplar-placeholder-boundary.md"
     priority: must-have
     status: done
-    owner: "Producer"
+    owner: "Producer / UX Designer"
     estimate_days: 0.5
     blocker: ""
-    completed: "2026-06-28"
-  - id: "PGR-02"
-    name: "定义 core fun / fantasy / key UX 验证 rubric"
-    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-02"
+    completed: "2026-07-08"
+  - id: "S3-02"
+    name: "为 Home visual exemplar 建立 QA evidence expectations"
+    file: "production/sprints/sprint-3-production-visual-follow-through.md#s3-02"
     priority: must-have
-    status: done
-    owner: "Game Designer"
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-06-08"
-  - id: "PGR-03"
-    name: "盘点 slice 相关 prototypes 与缺失 REPORT"
-    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-03"
-    priority: must-have
-    status: done
-    owner: "Producer"
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-06-07"
-  - id: "PGR-04"
-    name: "补齐 slice-critical prototypes 的 REPORT.md"
-    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-04"
-    priority: must-have
-    status: done
-    owner: "Producer"
-    estimate_days: 1.0
-    blocker: ""
-    completed: "2026-06-07"
-  - id: "PGR-05"
-    name: "对关键 slice surfaces 执行 /ux-review"
-    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-05"
-    priority: must-have
-    status: done
-    owner: "UX Designer"
-    estimate_days: 1.0
-    blocker: ""
-    completed: "2026-06-06"
-  - id: "PGR-06"
-    name: "准备 moderated playtest 脚本与排期"
-    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-06"
-    priority: must-have
-    status: done
+    status: ready-for-dev
     owner: "QA Lead"
-    estimate_days: 1.0
-    blocker: ""
-    completed: "2026-06-08"
-  - id: "PGR-07"
-    name: "执行 AI-agent 代理观察 vertical slice playtests"
-    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-07"
-    priority: must-have
-    status: done
-    owner: "QA Lead"
-    estimate_days: 1.5
-    blocker: ""
-    completed: "2026-06-08"
-  - id: "PGR-08"
-    name: "汇总 findings 并形成 gate issue list"
-    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-08"
-    priority: must-have
-    status: done
-    owner: "Producer"
     estimate_days: 0.5
     blocker: ""
-    completed: "2026-06-07"
-  - id: "PGR-09"
-    name: "只修 gate-blocking UX / flow 问题"
-    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-09"
+    completed: ""
+  - id: "S3-03"
+    name: "实施 Home/shell 最小 visual exemplar boundary pass"
+    file: "production/epics/main-loop-ui-framework/story-002-home-visual-exemplar-placeholder-boundary.md"
     priority: must-have
     status: done
     owner: "UI Programmer"
-    estimate_days: 2.0
+    estimate_days: 1.5
     blocker: ""
-    completed: "2026-06-07"
-  - id: "PGR-10"
-    name: "进行 core fun / core fantasy 创意判定"
-    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-10"
+    completed: "2026-07-08"
+  - id: "S3-04"
+    name: "跑 Home route guardrails 与 MVP visual walkthrough"
+    file: "production/sprints/sprint-3-production-visual-follow-through.md#s3-04"
     priority: must-have
-    status: done
-    owner: "Creative Director"
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-06-28"
-  - id: "PGR-11"
-    name: "对修复后 build 做 QA 复验与 route / walkthrough 回归"
-    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-11"
-    priority: must-have
-    status: done
-    owner: "QA Lead"
+    status: ready-for-dev
+    owner: "QA Lead / UI Programmer"
     estimate_days: 1.0
     blocker: ""
-    completed: "2026-06-07"
-  - id: "PGR-12"
-    name: "组装 recovery evidence pack 并给出 re-gate 建议"
-    file: "production/sprints/sprint-2-production-gate-recovery.md#pgr-12"
+    completed: ""
+  - id: "S3-05"
+    name: "写入 Home visual exemplar evidence pack"
+    file: "production/qa/evidence/home-visual-exemplar-placeholder-boundary-2026-07-05.md"
     priority: must-have
-    status: done
+    status: ready-for-dev
+    owner: "QA Lead"
+    estimate_days: 0.5
+    blocker: ""
+    completed: ""
+  - id: "S3-06"
+    name: "更新 Sprint 状态与 story completion verdict"
+    file: "production/sprints/sprint-3-production-visual-follow-through.md#s3-06"
+    priority: must-have
+    status: ready-for-dev
     owner: "Producer"
     estimate_days: 0.5
     blocker: ""
-    completed: "2026-06-28"
+    completed: ""
+  - id: "S3-07"
+    name: "起草 Player/Training visual exemplar follow-up story"
+    file: "production/sprints/sprint-3-production-visual-follow-through.md#s3-07"
+    priority: should-have
+    status: done
+    owner: "UX Designer / Producer"
+    estimate_days: 0.5
+    blocker: ""
+    completed: "2026-07-09"
+  - id: "S3-08"
+    name: "起草 Match visual exemplar follow-up story"
+    file: "production/sprints/sprint-3-production-visual-follow-through.md#s3-08"
+    priority: should-have
+    status: backlog
+    owner: "UX Designer / Producer"
+    estimate_days: 0.5
+    blocker: ""
+    completed: ""
+  - id: "S3-09"
+    name: "记录非本 sprint 系统的 explicit deferral notes"
+    file: "production/sprints/sprint-3-production-visual-follow-through.md#s3-09"
+    priority: nice-to-have
+    status: backlog
+    owner: "Producer"
+    estimate_days: 0.5
+    blocker: ""
+    completed: ""

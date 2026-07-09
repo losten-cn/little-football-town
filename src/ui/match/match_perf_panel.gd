@@ -289,7 +289,7 @@ func _on_result_confirm_pressed() -> void:
 
 
 func _can_start_match() -> bool:
-	return bool(_system_payload.get("system_state_allows_match", true)) and bool(_system_payload.get("navigation_context_allows_match", true)) and bool(_time_payload.get("schedule_available", false)) and bool(_time_payload.get("match_trigger_reached", false)) and bool(_time_payload.get("match_center_available", false))
+	return bool(_system_payload.get("system_state_allows_match", true)) and bool(_system_payload.get("navigation_context_allows_match", true)) and bool(_time_payload.get("schedule_available", false)) and not bool(_time_payload.get("schedule_missing", false)) and bool(_time_payload.get("match_trigger_reached", false)) and bool(_time_payload.get("match_center_available", false))
 
 
 func _match_disable_reason() -> String:
@@ -309,7 +309,7 @@ func _match_disable_reason() -> String:
 func _format_pre_match_summary() -> String:
 	return _localized_text(
 		"MATCH_PRE_SUMMARY_READABILITY_FORMAT",
-		"赛前检查：联赛第%s轮｜%s %s｜阵容：%s｜战术：%s\n是否适合开赛：%s\n判断：%s\n下一步：%s"
+		"赛前信息\n联赛第%s轮｜%s %s\n\n阵容\n%s\n战术：%s\n\n准备\n%s\n判断：%s\n下一步：%s"
 	) % [
 		str(_time_payload.get("round", _time_payload.get("current_round", _localized_text("MATCH_ROUND_PENDING", "本轮")))),
 		_player_facing_venue(str(_time_payload.get("home_away", _time_payload.get("venue", "")))),
@@ -325,7 +325,7 @@ func _format_pre_match_summary() -> String:
 func _format_live_summary() -> String:
 	return _localized_text(
 		"MATCH_LIVE_SUMMARY_READABILITY_FORMAT",
-		"现场状态：比分 %s｜时间 %s｜阶段 %s\n刚刚重点：%s\n影响：%s\n下一步关注：%s"
+		"比分\n%s\n\n时间线\n时间 %s｜阶段 %s\n\n刚刚重点\n%s\n\n影响\n%s\n\n下一步关注\n%s"
 	) % [
 		str(_time_payload.get("score_display", _result_score_text())),
 		_match_time_text(),
@@ -339,7 +339,7 @@ func _format_live_summary() -> String:
 func _format_result_summary() -> String:
 	return _localized_text(
 		"MATCH_RESULT_SUMMARY_READABILITY_FORMAT",
-		"比赛结果：%s｜%s\n原因：%s\n表现/联赛影响：%s｜%s\n下一步：%s"
+		"比赛结果\n%s｜%s\n\n原因\n%s\n\n表现/联赛影响\n%s｜%s\n\n下一步\n%s"
 	) % [
 		_result_score_text(),
 		_player_facing_result_text(),

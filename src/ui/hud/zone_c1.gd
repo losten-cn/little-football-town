@@ -14,7 +14,9 @@ extends PanelContainer
 @onready var _roster_button: BaseButton = %RosterButton
 @onready var _match_button: BaseButton = %MatchButton
 
-var _match_available := false
+var _match_available: bool = false
+var _match_available_text: String = "比赛可进入"
+var _match_unavailable_text: String = "比赛暂未开放，请查看 Home 的原因提示"
 
 
 func _ready() -> void:
@@ -22,32 +24,41 @@ func _ready() -> void:
 	_match_button.pressed.connect(_on_match_pressed)
 	_subscribe_events()
 	_apply_accessibility()
+	_request_authoritative_refresh()
 	_update_match_button()
 	_update_selection(ScreenManager.get_active_screen_id())
 
 
 func _exit_tree() -> void:
-	EventBus.unsubscribe("time_advanced", _on_time_advanced)
+	EventBus.unsubscribe("match_entry_state_changed", _on_match_entry_state_changed)
 	EventBus.unsubscribe("screen_pushed", _on_screen_changed)
 	EventBus.unsubscribe("screen_popped", _on_screen_changed)
 	EventBus.unsubscribe("screen_stack_reset", _on_screen_changed)
 
 
 func _subscribe_events() -> void:
-	EventBus.subscribe("time_advanced", _on_time_advanced)
+	EventBus.subscribe("match_entry_state_changed", _on_match_entry_state_changed)
 	EventBus.subscribe("screen_pushed", _on_screen_changed)
 	EventBus.subscribe("screen_popped", _on_screen_changed)
 	EventBus.subscribe("screen_stack_reset", _on_screen_changed)
 
 
+func _request_authoritative_refresh() -> void:
+	if TimeManager != null and TimeManager.has_method("request_refresh"):
+		TimeManager.call("request_refresh")
+
+
+## Requests navigation to the roster route through the shared screen request contract.
 func request_roster() -> void:
 	_on_roster_pressed()
 
 
+## Requests navigation to the match route when the authoritative payload allows it.
 func request_match() -> void:
 	_on_match_pressed()
 
 
+## Returns whether the bottom Match entry is enabled by the latest authoritative payloads.
 func is_match_available() -> bool:
 	return _match_available
 
@@ -55,7 +66,7 @@ func is_match_available() -> bool:
 func _on_roster_pressed() -> void:
 	if ScreenManager.get_active_screen_id() == "roster":
 		return
-	EventBus.emit("screen_requested", {"screen_id": "roster"})
+	EventBus.emit("screen_requested", _screen_request_payload("roster"))
 
 
 func _on_match_pressed() -> void:
@@ -63,20 +74,13 @@ func _on_match_pressed() -> void:
 		return
 	if ScreenManager.get_active_screen_id() == "match_pre":
 		return
-	EventBus.emit("screen_requested", {"screen_id": "match_pre"})
+	EventBus.emit("screen_requested", _screen_request_payload("match_pre"))
 
 
-func _on_time_advanced(_name: String, payload: Dictionary) -> void:
-	var has_match_state := payload.has("match_trigger_reached") or payload.has("schedule_missing") or payload.has("match_center_available") or payload.has("schedule_available")
-	if not has_match_state:
-		return
-
-	var schedule_missing := bool(payload.get("schedule_missing", false))
-	var schedule_available := bool(payload.get("schedule_available", not schedule_missing))
-	var match_trigger_reached := bool(payload.get("match_trigger_reached", false))
-	var match_center_available := bool(payload.get("match_center_available", true))
-
-	_match_available = schedule_available and not schedule_missing and match_trigger_reached and match_center_available
+func _on_match_entry_state_changed(_name: String, payload: Dictionary) -> void:
+	_match_available = bool(payload.get("available", false))
+	_match_available_text = String(payload.get("available_text", _localized_text("HUD_MATCH_AVAILABLE", "比赛可进入")))
+	_match_unavailable_text = String(payload.get("unavailable_text", _localized_text("HUD_MATCH_UNAVAILABLE", "比赛暂未开放，请查看 Home 的原因提示")))
 	_update_match_button()
 
 
@@ -88,7 +92,8 @@ func _update_match_button() -> void:
 	_match_button.disabled = not _match_available
 	_match_button.focus_mode = Control.FOCUS_ALL if _match_available else Control.FOCUS_NONE
 	_match_button.modulate = _theme_color("color_accent_primary_hover", Color.WHITE) if _match_available else _disabled_tint()
-	_match_button.accessibility_description = _localized_text("HUD_MATCH_AVAILABLE", "比赛可进入") if _match_available else _localized_text("HUD_MATCH_UNAVAILABLE", "当前不可进入比赛")
+	_match_button.tooltip_text = _match_available_text if _match_available else _match_unavailable_text
+	_match_button.accessibility_description = _match_available_text if _match_available else _match_unavailable_text
 
 
 func _update_selection(active_screen: String) -> void:
@@ -111,6 +116,10 @@ func _set_selected(button: BaseButton, selected: bool, highlighted: bool) -> voi
 		button.modulate = _theme_color("color_accent_primary_hover", Color.WHITE)
 	else:
 		button.modulate = Color.WHITE
+
+
+func _screen_request_payload(screen_id: String) -> Dictionary[String, Variant]:
+	return {"screen_id": screen_id}
 
 
 func _localized_text(key: String, fallback: String) -> String:

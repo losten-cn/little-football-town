@@ -2,9 +2,9 @@
 
 > **Layer**: Presentation
 > **GDD**: design/gdd/main-loop-ui-framework.md
-> **Status**: Complete
+> **Status**: Complete with Production follow-up planned
 > **Topology**: L1 — shell after League contract freeze
-> **Stories**: 1 current-wave story
+> **Stories**: 1 complete current-wave story + 1 Production follow-up story
 
 ## Overview
 
@@ -50,6 +50,7 @@
 | # | Story | Type | Status | Notes |
 |---|---|---|---|---|
 | 001 | [建立 Home Shell 与主循环导航骨架](story-001-home-loop-navigation.md) | UI | Complete | Freezes route/container contract for L2 UI packages. |
+| 002 | [Home visual exemplar and placeholder boundary](story-002-home-visual-exemplar-placeholder-boundary.md) | UI | Ready | Production follow-through story for Home/shell visual exemplar and placeholder tolerance. |
 
 ## Status / Notes
 

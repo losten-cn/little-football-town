@@ -46,7 +46,7 @@ func get_training_options() -> Array[Dictionary]:
 			"name": String(project.get("name", "训练项目")),
 			"summary": String(project.get("summary", "提升球员成长")),
 			"cost_summary": _cost_summary(project),
-			"risk_summary": String(project.get("risk_summary", "占用本轮训练机会")),
+			"risk_summary": String(project.get("risk_summary", "暂无训练风险说明")),
 			"payoff_summary": String(project.get("payoff_summary", "下一场比赛前形成成长反馈")),
 			"available": true,
 		})

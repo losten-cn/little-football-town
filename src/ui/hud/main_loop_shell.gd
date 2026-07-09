@@ -34,6 +34,7 @@ var _content_margin: MarginContainer = null
 var _content_box: VBoxContainer = null
 var _title_label: Label = null
 var _summary_label: Label = null
+var _home_cards_box: VBoxContainer = null
 var _disable_reason_label: Label = null
 var _primary_button: Button = null
 var _secondary_button: Button = null
@@ -42,6 +43,7 @@ var _last_system_payload: Dictionary[String, Variant] = {}
 var _last_player_action_payload: Dictionary[String, Variant] = {}
 var _last_roster_payload: Dictionary[String, Variant] = {}
 var _last_training_payload: Dictionary[String, Variant] = {}
+var _match_entry_state: Dictionary[String, Variant] = {}
 var _player_panel: Control = null
 var _match_panel: Control = null
 var _guidance_panel: Control = null
@@ -53,8 +55,11 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_setup_container()
 	_subscribe_events()
-	ScreenManager.reset_to_screen(ROUTE_HOME)
-	_mount_route(ROUTE_HOME)
+	var active_route: String = ScreenManager.get_active_screen_id()
+	if not _is_supported_route(active_route):
+		active_route = ROUTE_HOME
+		ScreenManager.reset_to_screen(ROUTE_HOME)
+	_mount_route(active_route)
 	_request_authoritative_refresh()
 
 
@@ -65,6 +70,7 @@ func _exit_tree() -> void:
 	EventBus.unsubscribe("screen_stack_reset", _on_screen_changed)
 	EventBus.unsubscribe("time_advanced", _on_time_advanced)
 	EventBus.unsubscribe("system_state_changed", _on_system_state_changed)
+	EventBus.unsubscribe("match_entry_state_changed", _on_match_entry_state_changed)
 	EventBus.unsubscribe("roster_updated", _on_roster_updated)
 	EventBus.unsubscribe("training_options_updated", _on_training_options_updated)
 	EventBus.unsubscribe("player_action_completed", _on_player_action_completed)
@@ -164,10 +170,16 @@ func _setup_container() -> void:
 	_summary_label.add_theme_color_override("font_color", UI_COLOR_TOWN_TEXT)
 	_content_box.add_child(_summary_label)
 
+	_home_cards_box = VBoxContainer.new()
+	_home_cards_box.name = "HomeInfoCards"
+	_home_cards_box.add_theme_constant_override("separation", 8)
+	_content_box.add_child(_home_cards_box)
+
 	_disable_reason_label = Label.new()
 	_disable_reason_label.name = "DisableReason"
 	_disable_reason_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_disable_reason_label.add_theme_color_override("font_color", UI_COLOR_TOWN_ACCENT)
+	_disable_reason_label.add_theme_color_override("font_color", UI_COLOR_TOWN_TEXT)
+	_disable_reason_label.add_theme_stylebox_override("normal", _disable_reason_style())
 	_disable_reason_label.visible = false
 	_content_box.add_child(_disable_reason_label)
 
@@ -210,12 +222,42 @@ func _town_button_style(is_primary: bool) -> StyleBoxFlat:
 	return style
 
 
+func _town_button_focus_style(is_primary: bool) -> StyleBoxFlat:
+	var style := _town_button_style(is_primary)
+	style.border_color = Color("5B8C5A")
+	style.set_border_width_all(3)
+	return style
+
+
+func _home_card_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("FFF8E8")
+	style.border_color = Color("D8A85A")
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(6)
+	style.set_content_margin_all(8.0)
+	return style
+
+
+func _disable_reason_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("FFE9C2")
+	style.border_color = UI_COLOR_TOWN_ACCENT
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(6)
+	style.set_content_margin_all(8.0)
+	return style
+
+
 func _apply_town_button_style(button: Button, is_primary: bool) -> void:
 	button.add_theme_stylebox_override("normal", _town_button_style(is_primary))
-	button.add_theme_stylebox_override("hover", _town_button_style(true))
-	button.add_theme_stylebox_override("pressed", _town_button_style(true))
+	button.add_theme_stylebox_override("hover", _town_button_focus_style(is_primary))
+	button.add_theme_stylebox_override("focus", _town_button_focus_style(is_primary))
+	button.add_theme_stylebox_override("pressed", _town_button_focus_style(is_primary))
 	button.add_theme_stylebox_override("disabled", _town_button_style(false))
 	button.add_theme_color_override("font_color", Color.WHITE if is_primary else UI_COLOR_TOWN_TEXT)
+	button.add_theme_color_override("font_hover_color", Color.WHITE if is_primary else UI_COLOR_TOWN_TEXT)
+	button.add_theme_color_override("font_focus_color", Color.WHITE if is_primary else UI_COLOR_TOWN_TEXT)
 	button.add_theme_color_override("font_disabled_color", UI_COLOR_TOWN_TEXT)
 
 
@@ -226,6 +268,7 @@ func _subscribe_events() -> void:
 	EventBus.subscribe("screen_stack_reset", _on_screen_changed)
 	EventBus.subscribe("time_advanced", _on_time_advanced)
 	EventBus.subscribe("system_state_changed", _on_system_state_changed)
+	EventBus.subscribe("match_entry_state_changed", _on_match_entry_state_changed)
 	EventBus.subscribe("roster_updated", _on_roster_updated)
 	EventBus.subscribe("training_options_updated", _on_training_options_updated)
 	EventBus.subscribe("player_action_completed", _on_player_action_completed)
@@ -264,9 +307,17 @@ func _on_time_advanced(_event_name: String, payload: Dictionary) -> void:
 
 
 func _on_system_state_changed(_event_name: String, payload: Dictionary) -> void:
-	_last_system_payload = _to_string_variant_dictionary(payload)
+	var typed_payload: Dictionary[String, Variant] = _to_string_variant_dictionary(payload)
+	for key: String in typed_payload.keys():
+		_last_system_payload[key] = typed_payload[key]
 	if _match_panel != null:
 		_match_panel.call("set_system_payload", _last_system_payload)
+	if _current_route == ROUTE_HOME:
+		_mount_home()
+
+
+func _on_match_entry_state_changed(_event_name: String, payload: Dictionary) -> void:
+	_match_entry_state = _to_string_variant_dictionary(payload)
 	if _current_route == ROUTE_HOME:
 		_mount_home()
 
@@ -311,6 +362,7 @@ func _mount_home() -> void:
 	_set_l2_panels_visible(false, false)
 	_title_label.text = _localized_text("HOME_TITLE", "俱乐部主页")
 	_summary_label.text = _build_home_summary_text()
+	_rebuild_home_info_cards()
 	_primary_button.text = _primary_home_action_text()
 	_primary_button.disabled = false
 	_primary_button.focus_mode = Control.FOCUS_ALL
@@ -376,9 +428,7 @@ func _sync_player_panel_payloads() -> void:
 
 
 func _request_training_read_models() -> void:
-	var coordinator: Node = get_parent().get_node_or_null("TrainingRequestCoordinator") if get_parent() != null else null
-	if coordinator != null and coordinator.has_method("publish_training_read_models"):
-		coordinator.call("publish_training_read_models")
+	EventBus.emit("training_read_models_requested", {"source": "main_loop_shell"})
 
 
 func _ensure_match_panel() -> void:
@@ -394,6 +444,8 @@ func _ensure_match_panel() -> void:
 func _set_shell_chrome_visible(is_visible: bool) -> void:
 	_title_label.visible = is_visible
 	_summary_label.visible = is_visible
+	if _home_cards_box != null:
+		_home_cards_box.visible = is_visible and _current_route == ROUTE_HOME
 	_disable_reason_label.visible = is_visible and not _disable_reason_label.text.is_empty()
 	_primary_button.visible = is_visible
 	_secondary_button.visible = is_visible
@@ -443,30 +495,61 @@ func _find_descendant_by_name(root: Node, node_name: String) -> Node:
 
 
 func _build_home_summary_text() -> String:
+	return _localized_text("HOME_VISUAL_EXEMPLAR_SUMMARY", "温暖的小镇俱乐部正在运转。这里保留当前状态、下一步行动和比赛入口，不需要打开深层菜单就能判断现在该做什么。")
+
+
+func _rebuild_home_info_cards() -> void:
+	if _home_cards_box == null:
+		return
+	_clear_children(_home_cards_box)
 	var date_display: String = str(_last_time_payload.get("date_display", _localized_text("HOME_TIME_NOT_READY", "时间准备中")))
 	var phase: String = _home_phase_display(str(_last_time_payload.get("phase", "PLANNING")))
-	var next_match: String = _resolve_next_match_summary()
 	var action_windows: String = str(_last_time_payload.get("available_action_windows", "0"))
 	var team_overview: String = str(_last_system_payload.get("team_overview", _localized_text("HOME_TEAM_EMPTY", "球队信息正在整理")))
 	var recent_summary: String = _localized_text("HOME_RECENT_NONE", "暂无新的训练或比赛结果")
 	if _last_player_action_payload.has("summary"):
 		recent_summary = str(_last_player_action_payload.get("summary", recent_summary))
-	var recommended_action: String = _recommended_home_action_summary()
-	var action_context: String = _home_action_context_summary()
-	var resource_summary: String = _home_resource_summary(action_windows)
-	var town_anchor: String = _home_town_anchor_summary()
-	var club_mood: String = _home_club_mood_summary()
-	var recent_and_match: String = _localized_text("HOME_RECENT_AND_MATCH_FORMAT", "最近：%s\n下一场：%s") % [recent_summary, next_match]
-	return "%s\n%s\n%s\n%s\n%s\n\n%s\n%s\n%s" % [
-		_localized_text("HOME_STATUS_FORMAT", "当前：%s / %s") % [date_display, phase],
-		resource_summary,
-		town_anchor,
-		club_mood,
-		action_context,
-		recommended_action,
-		_localized_text("HOME_CLUB_OVERVIEW_FORMAT", "俱乐部概览：%s") % team_overview,
-		recent_and_match,
-	]
+	_add_home_info_card("HomeCardTime", _localized_text("HOME_CARD_TIME_TITLE", "当前节奏"), _localized_text("HOME_CARD_TIME_FORMAT", "%s / %s") % [date_display, phase])
+	_add_home_info_card("HomeCardMatch", _localized_text("HOME_CARD_MATCH_TITLE", "下一场比赛"), _resolve_next_match_summary())
+	_add_home_info_card("HomeCardTeam", _localized_text("HOME_CARD_TEAM_TITLE", "球队概览"), team_overview)
+	_add_home_info_card("HomeCardResources", _localized_text("HOME_CARD_RESOURCE_TITLE", "资源与行动"), _home_resource_summary(action_windows))
+	_add_home_info_card("HomeCardNextStep", _localized_text("HOME_CARD_NEXT_STEP_TITLE", "建议下一步"), _recommended_home_action_summary())
+	_add_home_info_card("HomeCardTownWarmth", _localized_text("HOME_CARD_TOWN_TITLE", "小镇氛围"), "%s\n%s\n%s" % [_home_town_anchor_summary(), _home_club_mood_summary(), recent_summary])
+
+
+func _add_home_info_card(card_name: String, title: String, body: String) -> void:
+	var card := PanelContainer.new()
+	card.name = card_name
+	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_theme_stylebox_override("panel", _home_card_style())
+	_home_cards_box.add_child(card)
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 4)
+	margin.add_theme_constant_override("margin_top", 3)
+	margin.add_theme_constant_override("margin_right", 4)
+	margin.add_theme_constant_override("margin_bottom", 3)
+	card.add_child(margin)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 2)
+	margin.add_child(box)
+	var title_label := Label.new()
+	title_label.name = "%sTitle" % card_name
+	title_label.text = title
+	title_label.add_theme_color_override("font_color", UI_COLOR_TOWN_ACCENT)
+	title_label.add_theme_font_size_override("font_size", 14)
+	box.add_child(title_label)
+	var body_label := Label.new()
+	body_label.name = "%sBody" % card_name
+	body_label.text = body
+	body_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	body_label.add_theme_color_override("font_color", UI_COLOR_TOWN_TEXT)
+	box.add_child(body_label)
+
+
+func _clear_children(node: Node) -> void:
+	for child: Node in node.get_children():
+		node.remove_child(child)
+		child.queue_free()
 
 
 func _home_phase_display(phase: String) -> String:
@@ -578,7 +661,7 @@ func _on_primary_action_pressed() -> void:
 			route_to(ROUTE_MATCH_PRE)
 			return
 		if bool(_last_time_payload.get("match_trigger_reached", false)):
-			_show_disable_reason(_resolve_match_disable_reason())
+			_show_disable_reason(_localized_text("HOME_MATCH_DISABLED_VISIBLE_FORMAT", "比赛暂未开放：%s") % _resolve_match_disable_reason())
 			return
 		route_to(ROUTE_ROSTER)
 		return
@@ -594,26 +677,11 @@ func _on_secondary_action_pressed() -> void:
 
 
 func _can_enter_match() -> bool:
-	var system_allows: bool = bool(_last_system_payload.get("system_state_allows_match", true))
-	var navigation_allows: bool = bool(_last_system_payload.get("navigation_context_allows_match", true))
-	var trigger_reached: bool = bool(_last_time_payload.get("match_trigger_reached", false))
-	var match_center_available: bool = bool(_last_time_payload.get("match_center_available", true))
-	var schedule_available: bool = bool(_last_time_payload.get("schedule_available", false))
-	return system_allows and navigation_allows and trigger_reached and match_center_available and schedule_available
+	return bool(_match_entry_state.get("available", false))
 
 
 func _resolve_match_disable_reason() -> String:
-	if not bool(_last_system_payload.get("system_state_allows_match", true)):
-		return _player_facing_disable_reason(str(_last_system_payload.get("system_state_disable_reason", "当前系统状态不允许进入比赛")))
-	if not bool(_last_system_payload.get("navigation_context_allows_match", true)):
-		return _player_facing_disable_reason(str(_last_system_payload.get("navigation_context_disable_reason", "当前导航上下文不允许进入比赛")))
-	if bool(_last_time_payload.get("schedule_missing", false)):
-		return _localized_text("MATCH_DISABLED_SCHEDULE_MISSING", "赛程尚未公布")
-	if not bool(_last_time_payload.get("match_trigger_reached", false)):
-		return _localized_text("MATCH_DISABLED_TIME", "还未到比赛时间")
-	if not bool(_last_time_payload.get("match_center_available", true)):
-		return _localized_text("MATCH_DISABLED_CENTER", "比赛中心暂不可用")
-	return _localized_text("MATCH_DISABLED_DEFAULT", "当前不可进入比赛")
+	return _player_facing_disable_reason(String(_match_entry_state.get("disabled_reason", _localized_text("MATCH_DISABLED_DEFAULT", "当前不可进入比赛"))))
 
 
 func _player_facing_disable_reason(reason: String) -> String:

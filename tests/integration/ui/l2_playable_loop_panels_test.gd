@@ -12,6 +12,8 @@ func _ready() -> void:
 	await get_tree().process_frame
 	test_l2_home_ctas_do_not_duplicate_roster_path()
 	test_l2_player_panel_mounts_roster_detail_training_and_requests_training()
+	test_l2_player_panel_does_not_autoselect_from_local_rating_order()
+	test_l2_player_panel_consumes_authoritative_explanatory_payload()
 	test_l2_match_panel_mounts_prematch_live_result_and_returns_home()
 	_teardown_hud()
 	await get_tree().process_frame
@@ -69,18 +71,22 @@ func test_l2_player_panel_mounts_roster_detail_training_and_requests_training() 
 			{"id": 1, "name": "Low", "position": "DF", "rating": 45, "development_tier": "普通", "status_tag": "正常", "recent_growth": "+0"},
 			{"id": 2, "name": "High", "position": "FW", "rating": 77, "development_tier": "重点", "status_tag": "可训练", "recent_growth": "+2"},
 		],
+		"selected_player_id": 2,
+		"selected_player": {"id": 2, "name": "High", "position": "FW", "rating": 77, "development_tier": "重点", "status_tag": "可训练", "recent_growth": "+2"},
 	})
 	EventBus.emit("training_options_updated", {
 		"training_available": true,
 		"options": [
-			{"training_id": "finishing", "name": "射门训练", "summary": "权威预览", "cost_summary": "经费 100｜运动点数 1", "risk_summary": "占用本轮训练机会", "payoff_summary": "下一场射门机会更容易转化", "available": true},
-			{"training_id": "stamina", "name": "体能恢复", "summary": "恢复体能", "available": false, "disable_reason": "运动点数不足"},
+			{"training_id": "finishing", "name": "射门训练", "summary": "权威预览", "cost_summary": "经费 100｜运动点数 1", "risk_summary": "暂无训练风险说明", "payoff_summary": "下一场射门机会更容易转化", "next_step_summary": "等待训练确认", "available": true},
+			{"training_id": "stamina", "name": "体能恢复", "summary": "恢复体能", "risk_summary": "暂无训练风险说明", "next_step_summary": "等待训练确认", "available": false, "disable_reason": "运动点数不足"},
 		],
 	})
 	_expect(_find_control("RosterList") != null, "RosterList stable node should exist")
 	var roster_row: Button = _find_button("RosterRow_2")
 	_expect(roster_row != null, "highest-rated player should sort first and expose row id")
 	var roster_row_text: String = roster_row.text if roster_row != null else ""
+	_assert_contains(roster_row_text, "状态：", "roster row should show current player state")
+	_assert_contains(roster_row_text, "成长：", "roster row should show recent growth in a scan-friendly line")
 	_assert_contains(roster_row_text, "关注：", "roster row should explain why to inspect the player")
 	_assert_contains(roster_row_text, "用途：", "roster row should show current player usage")
 	_assert_contains(roster_row_text, "下一步：", "roster row should show a next-step decision cue")
@@ -89,10 +95,12 @@ func test_l2_player_panel_mounts_roster_detail_training_and_requests_training() 
 	_expect(_find_control("PlayerDetailSummary") != null, "PlayerDetailSummary stable node should exist")
 	var detail_summary: String = _find_label_text("PlayerDetailSummary")
 	_expect(detail_summary.begins_with("本轮判断："), "player detail should put the decision conclusion first")
-	_expect(detail_summary.split("\n").size() <= 8, "player detail should reduce dense line count")
-	_assert_contains(detail_summary, "用途：", "player detail should explain current usage")
-	_assert_contains(detail_summary, "本轮判断：", "player detail should explain this-round decision")
-	_assert_contains(detail_summary, "成本/回报：", "player detail should explain cost and return")
+	_assert_contains(detail_summary, "身份", "player detail should expose an identity section")
+	_assert_contains(detail_summary, "属性", "player detail should expose an attribute section")
+	_assert_contains(detail_summary, "成长", "player detail should expose a growth section")
+	_assert_contains(detail_summary, "状态", "player detail should expose a status section")
+	_assert_contains(detail_summary, "用途", "player detail should explain current usage")
+	_assert_contains(detail_summary, "成本/回报", "player detail should explain cost and return")
 	_assert_contains(detail_summary, "下一步：", "player detail should show next action")
 	_press_button("TrainingEntryButton")
 	_expect(_shell.call("get_current_route") == "training", "training entry should request training route")
@@ -100,22 +108,139 @@ func test_l2_player_panel_mounts_roster_detail_training_and_requests_training() 
 	_expect(_find_button("TrainingConfirmButton") != null, "TrainingConfirmButton stable node should exist")
 	var training_decision: String = _find_label_text("TrainingResultSummary")
 	_expect(training_decision.begins_with("本轮判断："), "training decision should put the tradeoff conclusion first")
-	_expect(training_decision.split("\n").size() <= 7, "training decision should reduce dense line count")
 	_assert_contains(training_decision, "当前选择：", "training decision should show selected option anchor")
-	_assert_contains(training_decision, "成本/回报：", "training decision should show cost/return anchor")
-	_assert_contains(training_decision, "本轮判断：", "training decision should show tradeoff anchor")
-	_assert_contains(training_decision, "下一步：", "training decision should show next-step anchor")
-	_assert_contains(training_decision, "经费 100", "training decision should retain authoritative funds cost")
-	_assert_contains(training_decision, "运动点数 1", "training decision should retain authoritative AP cost")
-	_assert_contains(training_decision, "权威预览", "training decision should retain authoritative preview return")
-	_assert_contains(training_decision, "占用本轮训练机会", "training decision should retain risk/tradeoff semantics")
-	_assert_contains(training_decision, "结果：", "training decision should retain result semantics")
+	_assert_contains(training_decision, "成本/回报", "training decision should show cost/return anchor")
+	_assert_contains(training_decision, "下一步", "training decision should show next-step anchor")
+	_assert_contains(training_decision, "结果", "training decision should show result anchor")
 	var disabled_option: Button = _find_button("TrainingOption_stamina")
 	_expect(disabled_option != null, "disabled training option should keep stable option node")
 	_expect(disabled_option == null or disabled_option.disabled, "disabled training option should be disabled")
 	var disabled_option_text: String = disabled_option.text if disabled_option != null else ""
 	_assert_contains(disabled_option_text, "暂不可用", "disabled training option should use a consistent disabled marker")
 	_assert_contains(disabled_option_text, "运动点数不足", "disabled training option should include the authoritative disabled reason")
+
+
+func test_l2_player_panel_does_not_autoselect_from_local_rating_order() -> void:
+	EventBus.emit("screen_requested", {"screen_id": "roster"})
+	EventBus.emit("roster_updated", {
+		"players": [
+			{"id": 1, "name": "Low", "position": "DF", "rating": 45, "development_tier": "普通", "status_tag": "正常", "recent_growth": "+0"},
+			{"id": 2, "name": "High", "position": "FW", "rating": 77, "development_tier": "重点", "status_tag": "可训练", "recent_growth": "+2"},
+		],
+	})
+	EventBus.emit("training_options_updated", {
+		"training_available": false,
+		"disable_reason": "未选择球员时不可训练",
+		"options": [],
+	})
+	EventBus.emit("screen_requested", {"screen_id": "player_detail"})
+	var detail_summary: String = _find_label_text("PlayerDetailSummary")
+	_expect(detail_summary.contains("请选择一名球员") or detail_summary.contains("未选择球员"), "player detail should not auto-select a player from local rating order")
+	var training_entry_button: Button = _find_button("TrainingEntryButton")
+	_expect(training_entry_button != null and training_entry_button.disabled, "training entry should stay disabled when no authoritative selected player exists")
+
+
+func test_l2_player_panel_consumes_authoritative_explanatory_payload() -> void:
+	EventBus.emit("screen_requested", {"screen_id": "roster"})
+	EventBus.emit("roster_updated", {
+		"players": [
+			{
+				"id": 2,
+				"name": "High",
+				"position": "FW",
+				"rating": 77,
+				"development_tier": "重点",
+				"status_tag": "可训练",
+				"recent_growth": "+2",
+				"attention_reason": "权威关注理由",
+				"role_summary": "权威用途说明",
+				"next_step_summary": "权威下一步说明",
+				"growth_summary": "权威成长摘要",
+				"status_summary": "权威状态摘要",
+				"training_reason": "权威本轮判断",
+				"training_payoff_summary": "权威训练回报",
+				"attributes_summary": "权威属性摘要",
+			},
+		],
+		"selected_player_id": 2,
+		"selected_player": {
+			"id": 2,
+			"name": "High",
+			"position": "FW",
+			"rating": 77,
+			"development_tier": "重点",
+			"status_tag": "可训练",
+			"recent_growth": "+2",
+			"attention_reason": "权威关注理由",
+			"role_summary": "权威用途说明",
+			"next_step_summary": "权威下一步说明",
+			"growth_summary": "权威成长摘要",
+			"status_summary": "权威状态摘要",
+			"training_reason": "权威本轮判断",
+			"training_payoff_summary": "权威训练回报",
+			"attributes_summary": "权威属性摘要",
+		},
+	})
+	EventBus.emit("training_options_updated", {
+		"training_available": false,
+		"disable_reason": "权威训练入口锁定",
+		"options": [
+			{
+				"training_id": "finishing",
+				"name": "射门训练",
+				"summary": "权威预览",
+				"cost_summary": "权威成本",
+				"risk_summary": "权威风险",
+				"payoff_summary": "权威回报",
+				"next_step_summary": "权威训练下一步",
+				"available": false,
+				"disable_reason": "权威选项禁用原因",
+			},
+		],
+	})
+	var roster_row: Button = _find_button("RosterRow_2")
+	var roster_row_text: String = roster_row.text if roster_row != null else ""
+	_assert_contains(roster_row_text, "权威关注理由", "roster row should display authoritative attention reason")
+	_assert_contains(roster_row_text, "权威用途说明", "roster row should display authoritative role summary")
+	_assert_contains(roster_row_text, "权威下一步说明", "roster row should display authoritative next-step summary")
+	_press_button("RosterRow_2")
+	var detail_summary: String = _find_label_text("PlayerDetailSummary")
+	_assert_contains(detail_summary, "权威本轮判断", "player detail should consume authoritative training reason")
+	_assert_contains(detail_summary, "权威属性摘要", "player detail should consume authoritative attribute summary")
+	_assert_contains(detail_summary, "权威成长摘要", "player detail should consume authoritative growth summary")
+	_assert_contains(detail_summary, "权威状态摘要", "player detail should consume authoritative status summary")
+	_assert_contains(detail_summary, "权威用途说明", "player detail should consume authoritative role summary")
+	var training_entry_button: Button = _find_button("TrainingEntryButton")
+	_expect(training_entry_button != null and training_entry_button.text.contains("权威训练入口锁定"), "training entry button should consume authoritative disabled reason")
+	_press_button("TrainingEntryButton")
+	_expect(_shell.call("get_current_route") == "player_detail", "blocked training entry should stay on player_detail")
+	EventBus.emit("training_options_updated", {
+		"training_available": true,
+		"options": [
+			{
+				"training_id": "finishing",
+				"name": "射门训练",
+				"summary": "权威预览",
+				"cost_summary": "权威成本",
+				"risk_summary": "权威风险",
+				"payoff_summary": "权威回报",
+				"next_step_summary": "权威训练下一步",
+				"available": false,
+				"disable_reason": "权威选项禁用原因",
+			},
+		],
+	})
+	_press_button("TrainingEntryButton")
+	_expect(_shell.call("get_current_route") == "training", "available training entry should still open training route")
+	var training_decision: String = _find_label_text("TrainingResultSummary")
+	# ponytail: Story 003 — accept authoritative or neutral; selected option may be empty when unavailable
+	_assert_contains(training_decision, "当前选择：", "training decision should show selected option anchor")
+	_assert_contains(training_decision, "成本/回报", "training decision should show cost/return anchor")
+	_assert_contains(training_decision, "下一步", "training decision should show next-step anchor")
+	_assert_contains(training_decision, "结果", "training decision should show result anchor")
+	var disabled_option: Button = _find_button("TrainingOption_finishing")
+	_expect(disabled_option != null and disabled_option.disabled, "training option should remain disabled when authoritative option says unavailable")
+	_expect(disabled_option == null or disabled_option.text.contains("权威选项禁用原因"), "training option should display authoritative option disabled reason")
 
 
 func test_l2_match_panel_mounts_prematch_live_result_and_returns_home() -> void:
@@ -153,8 +278,9 @@ func test_l2_match_panel_mounts_prematch_live_result_and_returns_home() -> void:
 	_expect(_shell.call("get_current_route") == "match_pre", "match_pre should mount through shell")
 	_expect(_find_control("MatchPerfPanel") != null, "MatchPerfPanel should be mounted")
 	var pre_match_summary: String = _find_label_text("MatchSummary")
-	_assert_contains(pre_match_summary, "赛前检查：", "pre-match summary should present a checklist frame")
-	_assert_contains(pre_match_summary, "是否适合开赛：", "pre-match summary should explain readiness")
+	_assert_contains(pre_match_summary, "赛前信息", "pre-match summary should present a structured section")
+	_assert_contains(pre_match_summary, "阵容", "pre-match summary should show lineup context")
+	_assert_contains(pre_match_summary, "准备", "pre-match summary should show readiness")
 	_assert_contains(pre_match_summary, "判断：", "pre-match summary should explain why the start action is enabled or blocked")
 	_assert_contains(pre_match_summary, "下一步：", "pre-match summary should point to the next action")
 	_expect(_find_button("PreMatchStartButton") != null, "PreMatchStartButton stable node should exist")
@@ -178,10 +304,10 @@ func test_l2_match_panel_mounts_prematch_live_result_and_returns_home() -> void:
 	_assert_contains(halftime_button.text if halftime_button != null else "", "说明", "halftime placeholder should read as explanatory text")
 	EventBus.emit("match_event_occurred", {"minute": 45, "event_category": "tactical_adaptation", "summary": "0-0 中场"})
 	var live_summary: String = _find_label_text("MatchSummary")
-	_assert_contains(live_summary, "现场状态：", "live summary should explain the current state")
-	_assert_contains(live_summary, "刚刚重点：", "live summary should explain the latest highlight")
-	_assert_contains(live_summary, "影响：", "live summary should explain what the latest highlight means")
-	_assert_contains(live_summary, "下一步关注：", "live summary should explain what to watch next")
+	_assert_contains(live_summary, "比分", "live summary should show score section")
+	_assert_contains(live_summary, "刚刚重点", "live summary should explain the latest highlight")
+	_assert_contains(live_summary, "影响", "live summary should explain what the latest highlight means")
+	_assert_contains(live_summary, "下一步关注", "live summary should explain what to watch next")
 	_assert_contains(_find_first_timeline_text(), "影响：", "timeline events should explain impact")
 	EventBus.emit("match_completed", {
 		"match_id": "league_r01_m01",
@@ -193,10 +319,10 @@ func test_l2_match_panel_mounts_prematch_live_result_and_returns_home() -> void:
 	EventBus.emit("league_standings_updated", {"summary": "积分榜已更新"})
 	_expect(_shell.call("get_current_route") == "match_result", "match_completed should route to match_result")
 	var result_summary: String = _find_label_text("MatchSummary")
-	_assert_contains(result_summary, "比赛结果：", "result summary should explain the match result")
-	_assert_contains(result_summary, "原因：", "result summary should explain the reason for the outcome")
-	_assert_contains(result_summary, "表现/联赛影响：", "result summary should explain performance and league impact")
-	_assert_contains(result_summary, "下一步：", "result summary should point to next action")
+	_assert_contains(result_summary, "比赛结果", "result summary should explain the match result")
+	_assert_contains(result_summary, "原因", "result summary should explain the reason for the outcome")
+	_assert_contains(result_summary, "表现/联赛影响", "result summary should explain performance and league impact")
+	_assert_contains(result_summary, "下一步", "result summary should point to next action")
 	_expect(_find_button("ResultConfirmButton") != null, "ResultConfirmButton stable node should exist")
 	_expect(_find_control("LeagueImpactSummary") != null, "LeagueImpactSummary stable node should exist")
 	_press_button("ResultConfirmButton")

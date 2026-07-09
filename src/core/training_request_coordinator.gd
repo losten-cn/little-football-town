@@ -24,6 +24,7 @@ func _ready() -> void:
 		_get_event_bus().subscribe("player_training_completed", _on_player_training_completed)
 	_get_event_bus().subscribe("screen_requested", _on_screen_requested)
 	_get_event_bus().subscribe("training_requested", _on_training_requested)
+	_get_event_bus().subscribe("training_read_models_requested", _on_training_read_models_requested)
 	_publish_training_read_models()
 
 
@@ -32,6 +33,7 @@ func _exit_tree() -> void:
 	if event_bus != null:
 		event_bus.unsubscribe("screen_requested", _on_screen_requested)
 		event_bus.unsubscribe("training_requested", _on_training_requested)
+		event_bus.unsubscribe("training_read_models_requested", _on_training_read_models_requested)
 		event_bus.unsubscribe("player_training_completed", _on_player_training_completed)
 
 
@@ -92,6 +94,10 @@ func _on_screen_requested(_event_name: String, payload: Dictionary) -> void:
 		call_deferred("_publish_training_read_models")
 
 
+func _on_training_read_models_requested(_event_name: String, _payload: Dictionary) -> void:
+	call_deferred("_publish_training_read_models")
+
+
 func _on_training_requested(_event_name: String, payload: Dictionary) -> void:
 	var typed_payload: Dictionary[String, Variant] = _to_string_variant_dictionary(payload)
 	var player_id: int = int(typed_payload.get("player_id", 0))
@@ -127,11 +133,15 @@ func _on_player_training_completed(_event_name: String, payload: Dictionary) -> 
 func _publish_training_read_models() -> void:
 	var event_bus: Node = _get_event_bus()
 	if _player_development != null:
-		event_bus.emit("roster_updated", {"players": _build_roster_view()})
+		event_bus.emit("roster_updated", {
+			"players": _build_roster_view(),
+			"selected_player_id": null,
+			"selected_player": {},
+		})
 	if _training_catalog != null and _training_catalog.has_method("get_training_options"):
 		event_bus.emit("training_options_updated", {
 			"training_available": true,
-			"options": _training_catalog.call("get_training_options"),
+			"options": _build_training_options_view(),
 		})
 	if _economy_manager != null:
 		var balances: Dictionary[String, float] = _economy_manager.get_balance_snapshot()
@@ -139,8 +149,6 @@ func _publish_training_read_models() -> void:
 			"funds": int(balances.get("funds", 0.0)),
 			"ap": int(balances.get("action_points", 0.0)),
 			"team_overview": "训练系统已接入，球员成长可结算",
-			"system_state_allows_match": true,
-			"navigation_context_allows_match": true,
 		})
 
 
@@ -151,14 +159,28 @@ func _build_roster_view() -> Array[Dictionary]:
 		var player_data: Dictionary[String, Variant] = _to_string_variant_dictionary(player_variant)
 		var attributes: Dictionary[String, Variant] = _to_string_variant_dictionary(player_data.get("attributes", {}))
 		var tec: Dictionary[String, Variant] = _to_string_variant_dictionary(attributes.get("TEC", {}))
+		var player_name: String = String(player_data.get("name", "球员"))
+		var position: String = String(player_data.get("position", "MF"))
+		var rating: int = int(tec.get("current", 50))
+		var development_tier: String = String(player_data.get("tier", "普通"))
+		var recent_growth: String = _recent_growth_text(player_data)
+		var status_summary: String = "可训练"
 		players.append({
 			"id": int(player_data.get("id", 0)),
-			"name": String(player_data.get("name", "球员")),
-			"position": String(player_data.get("position", "MF")),
-			"rating": int(tec.get("current", 50)),
-			"development_tier": String(player_data.get("tier", "普通")),
-			"status_tag": "可训练",
-			"recent_growth": _recent_growth_text(player_data),
+			"name": player_name,
+			"position": position,
+			"rating": rating,
+			"development_tier": development_tier,
+			"status_tag": status_summary,
+			"status_summary": status_summary,
+			"recent_growth": recent_growth,
+			"growth_summary": _roster_growth_summary(recent_growth),
+			"attention_reason": _roster_attention_reason(rating, recent_growth),
+			"role_summary": _roster_role_summary(position, rating),
+			"next_step_summary": _roster_next_step_summary(rating, recent_growth),
+			"attributes_summary": _roster_attributes_summary(attributes),
+			"training_reason": _roster_training_reason(rating, recent_growth),
+			"training_payoff_summary": _roster_training_payoff_summary(position),
 		})
 	return players
 
@@ -204,6 +226,81 @@ func _recent_growth_text(player_data: Dictionary[String, Variant]) -> String:
 		return "+0"
 	var latest: Dictionary[String, Variant] = _to_string_variant_dictionary(history[history.size() - 1])
 	return "+%s" % str(int(round(float(latest.get("applied_gain", 0.0)))))
+
+
+func _build_training_options_view() -> Array[Dictionary]:
+	var options: Array[Dictionary] = []
+	if _training_catalog == null or not _training_catalog.has_method("get_training_options"):
+		return options
+	for option_variant: Variant in _training_catalog.call("get_training_options"):
+		var option: Dictionary[String, Variant] = _to_string_variant_dictionary(option_variant)
+		if not option.has("next_step_summary"):
+			option["next_step_summary"] = "等待训练确认"
+		if not option.has("risk_summary"):
+			option["risk_summary"] = "暂无训练风险说明"
+		options.append(option)
+	return options
+
+
+func _roster_growth_summary(recent_growth: String) -> String:
+	return recent_growth if not recent_growth.is_empty() else "暂无近期成长记录"
+
+
+func _roster_attention_reason(rating: int, recent_growth: String) -> String:
+	if rating >= 70:
+		return "当前评分靠前，适合优先检查首发价值。"
+	if recent_growth.contains("+") and recent_growth != "+0":
+		return "近期有成长记录，适合继续观察训练回报。"
+	return "先看他的状态与位置，决定是否纳入下一次训练。"
+
+
+func _roster_role_summary(position: String, rating: int) -> String:
+	if rating >= 70:
+		return "%s 主力候选，优先确认能否稳定出场。" % position
+	if rating >= 55:
+		return "%s 轮换候选，适合用训练补齐短板。" % position
+	return "%s 培养候选，先看成长窗口再决定投入。" % position
+
+
+func _roster_next_step_summary(rating: int, recent_growth: String) -> String:
+	if rating >= 70 or (recent_growth.contains("+") and recent_growth != "+0"):
+		return "进入详情后安排训练。"
+	return "进入详情确认状态。"
+
+
+func _roster_training_reason(rating: int, recent_growth: String) -> String:
+	if rating >= 70 or (recent_growth.contains("+") and recent_growth != "+0"):
+		return "他正处在适合加练的窗口，训练收益更容易被看见。"
+	return "先给重点球员一次明确安排，能让下一场比赛更有牵挂。"
+
+
+func _roster_training_payoff_summary(position: String) -> String:
+	return "下一场%s位置的比赛处理会更容易转化。" % position
+
+
+func _roster_attributes_summary(attributes: Dictionary[String, Variant]) -> String:
+	var labels: Dictionary[String, String] = {
+		"SPD": "速度",
+		"PWR": "力量",
+		"TEC": "技术",
+		"INT": "智力",
+		"STA": "体能",
+	}
+	var parts: Array[String] = []
+	for key: String in ["SPD", "PWR", "TEC", "INT", "STA"]:
+		if not attributes.has(key):
+			continue
+		var attribute_value: Dictionary[String, Variant] = _to_string_variant_dictionary(attributes[key])
+		parts.append("%s %s/%s" % [labels[key], str(attribute_value.get("current", "?")), str(attribute_value.get("potential", "?"))])
+	if parts.is_empty():
+		return "暂无详细属性"
+	return "｜".join(parts)
+
+
+func _training_option_next_step_summary(is_available: bool) -> String:
+	if is_available:
+		return "确认训练后回到主页，看下一场比赛如何承接这次安排。"
+	return "当前先处理阻塞原因，再决定是否安排这次训练。"
 
 
 func _get_event_bus() -> Node:

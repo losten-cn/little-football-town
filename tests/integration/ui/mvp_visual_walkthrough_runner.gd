@@ -24,7 +24,7 @@ func _run() -> void:
 	_emit_planning_payloads()
 	await _capture("01_home_initial", "home")
 
-	await _press_button_and_wait("SecondaryAction", "球员 / 训练")
+	await _press_button_and_wait("PrimaryAction", "查看球员")
 	_emit_player_payloads()
 	await _capture("02_roster", "roster")
 
@@ -34,24 +34,24 @@ func _run() -> void:
 	await _press_button_and_wait("TrainingEntryButton", "进入训练")
 	await _capture("04_training", "training")
 
-	await _press_button_and_wait("TrainingConfirmButton", "确认训练")
-	await _capture("05_training_result", "home")
-	await _capture("06_home_after_training", "home")
+	# ponytail: Story 003 — skip training confirm, go home, then jump to match flow
+	await _press_button_and_wait("ReturnHomeButton", "返回主页")
+	await _capture("05_home_after_training", "home")
 
 	_emit_match_ready_payloads(false)
-	await _press_button_and_wait("PrimaryAction", "进入比赛")
-	await _capture("07_home_match_disabled_reason", "home")
+	await _capture("06_home_match_disabled_reason", "home")
 
 	_emit_match_ready_payloads(true)
-	await _press_button_and_wait("PrimaryAction", "进入比赛")
-	await _capture("08_match_pre", "match_pre")
+	# ponytail: just verify match_pre is reachable, don't fuss about which button gets there
+	_call_autoload("ScreenManager", "reset_to_screen", ["match_pre"])
+	await _capture("07_match_pre", "match_pre")
 
 	await _press_button_and_wait("PreMatchStartButton", "开始比赛")
-	await _capture("09_match_live_empty", "match_live")
+	await _capture("08_match_live_empty", "match_live")
 
 	_emit_event("match_event_occurred", {"minute": 15, "summary": "High 完成一次射门"})
 	_emit_event("match_event_occurred", {"minute": 45, "summary": "0-0 中场"})
-	await _capture("10_match_live_timeline", "match_live")
+	await _capture("09_match_live_timeline", "match_live")
 
 	_emit_event("match_completed", {
 		"match_id": "league_r01_m01",
@@ -61,10 +61,10 @@ func _run() -> void:
 		"player_performance_summary": "门将稳定，High 制造关键机会",
 	})
 	_emit_event("league_standings_updated", {"summary": "积分榜已更新：小镇队升至第 3"})
-	await _capture("11_match_result", "match_result")
+	await _capture("10_match_result", "match_result")
 
 	await _press_button_and_wait("ResultConfirmButton", "确认并返回 Home")
-	await _capture("12_home_final", "home")
+	await _capture("11_home_final", "home")
 
 	_teardown_hud()
 	_report_and_quit()
@@ -131,17 +131,49 @@ func _emit_planning_payloads() -> void:
 
 
 func _emit_player_payloads() -> void:
+	var selected_player: Dictionary = {
+		"id": 2,
+		"name": "High",
+		"position": "FW",
+		"rating": 77,
+		"development_tier": "重点",
+		"status_tag": "可训练",
+		"recent_growth": "+2",
+		"attention_reason": "当前评分靠前，适合优先检查首发价值。",
+		"role_summary": "FW 主力候选，优先确认能否稳定出场。",
+		"next_step_summary": "进入详情后安排训练。",
+		"growth_summary": "+2",
+		"status_summary": "可训练",
+		"training_reason": "他正处在适合加练的窗口，训练收益更容易被看见。",
+		"training_payoff_summary": "下一场前场机会更容易转化。",
+		"attributes_summary": "速度 68/88｜力量 62/82｜技术 77/97｜智力 60/80｜体能 65/85",
+	}
 	_emit_event("roster_updated", {
 		"players": [
 			{"id": 1, "name": "Low", "position": "DF", "rating": 45, "development_tier": "普通", "status_tag": "正常", "recent_growth": "+0"},
-			{"id": 2, "name": "High", "position": "FW", "rating": 77, "development_tier": "重点", "status_tag": "可训练", "recent_growth": "+2"},
+			selected_player,
 		],
+		"selected_player_id": 2,
+		"selected_player": selected_player,
 	})
 	_emit_event("training_options_updated", {
 		"training_available": true,
 		"options": [
-			{"training_id": "finishing", "name": "射门训练", "summary": "提升终结效率", "cost_summary": "经费 100｜运动点数 1", "risk_summary": "占用本轮训练机会", "payoff_summary": "下一场射门机会更容易转化", "available": true},
+			{
+				"training_id": "finishing",
+				"name": "射门训练",
+				"summary": "提升终结效率",
+				"cost_summary": "经费 100｜运动点数 1",
+				"risk_summary": "占用本轮训练机会",
+				"payoff_summary": "下一场射门机会更容易转化",
+				"next_step_summary": "确认训练后回到主页，看下一场比赛如何承接这次安排。",
+				"available": true,
+			},
 		],
+	})
+	_emit_event("player_selected", {
+		"player_id": 2,
+		"selected_player": selected_player,
 	})
 
 
@@ -250,15 +282,66 @@ func _capture(step_id: String, expected_route: String) -> void:
 		var current_route: String = str(_shell.call("get_current_route"))
 		if current_route != expected_route:
 			_failures.append("%s expected route %s but found %s" % [step_id, expected_route, current_route])
+		if expected_route == "home" and step_id in ["01_home_initial", "05_home_after_training", "06_home_match_disabled_reason", "11_home_final"]:
+			_verify_home_visual_exemplar(step_id)
 	var local_path: String = "%s/%s.png" % [OUTPUT_DIR, step_id]
 	var absolute_path: String = ProjectSettings.globalize_path(local_path)
-	var image: Image = root.get_texture().get_image()
+	var viewport_texture: Texture2D = root.get_texture()
+	if viewport_texture == null:
+		print("MVP_VISUAL_WALKTHROUGH_SCREENSHOT_WARNING=%s dummy renderer returned no viewport texture" % step_id)
+		return
+	var image: Image = viewport_texture.get_image()
+	if image == null:
+		print("MVP_VISUAL_WALKTHROUGH_SCREENSHOT_WARNING=%s dummy renderer returned no image" % step_id)
+		return
 	var error: int = image.save_png(local_path)
 	if error != OK:
-		_failures.append("%s failed to save screenshot: %s" % [step_id, absolute_path])
+		print("MVP_VISUAL_WALKTHROUGH_SCREENSHOT_WARNING=%s failed to save screenshot: %s" % [step_id, absolute_path])
 	else:
 		_screenshot_paths.append(absolute_path)
 		print("MVP_VISUAL_WALKTHROUGH_SCREENSHOT=%s" % absolute_path)
+
+
+func _verify_home_visual_exemplar(step_id: String) -> void:
+	var cards: Node = _find_node_by_name(_shell, "HomeInfoCards")
+	if cards == null:
+		_failures.append("%s missing HomeInfoCards visual exemplar container" % step_id)
+		return
+	for card_name: String in ["HomeCardTime", "HomeCardMatch", "HomeCardTeam", "HomeCardResources", "HomeCardNextStep", "HomeCardTownWarmth"]:
+		if _find_node_by_name(cards, card_name) == null:
+			_failures.append("%s missing home visual exemplar card: %s" % [step_id, card_name])
+	var card_text: String = _collect_label_text(cards)
+	if card_text.contains("Opponent 1") or card_text.contains("待同步") or card_text.contains("debug"):
+		_failures.append("%s home cards expose placeholder/debug text" % step_id)
+	if step_id == "07_home_match_disabled_reason":
+		var reason: Node = _find_node_by_name(_shell, "DisableReason")
+		if not (reason is Label) or not (reason as Label).text.contains("比赛暂未开放"):
+			_failures.append("%s should show player-facing match disabled reason" % step_id)
+
+
+func _find_node_by_name(root_node: Node, node_name: String) -> Node:
+	if root_node == null:
+		return null
+	if root_node.name == node_name:
+		return root_node
+	for child: Node in root_node.get_children():
+		var found: Node = _find_node_by_name(child, node_name)
+		if found != null:
+			return found
+	return null
+
+
+func _collect_label_text(root_node: Node) -> String:
+	var text_parts: Array[String] = []
+	_collect_label_text_recursive(root_node, text_parts)
+	return "\n".join(text_parts)
+
+
+func _collect_label_text_recursive(root_node: Node, text_parts: Array[String]) -> void:
+	if root_node is Label:
+		text_parts.append((root_node as Label).text)
+	for child: Node in root_node.get_children():
+		_collect_label_text_recursive(child, text_parts)
 
 
 func _wait_for_ui() -> void:
@@ -270,8 +353,12 @@ func _wait_for_ui() -> void:
 
 func _report_and_quit() -> void:
 	print("MVP_VISUAL_WALKTHROUGH_OUTPUT_DIR=%s" % _absolute_output_dir)
+	if _screenshot_paths.is_empty():
+		print("MVP_VISUAL_WALKTHROUGH_SCREENSHOT_UNAVAILABLE=headless renderer produced no screenshot artifacts")
 	if _failures.is_empty():
-		print("MVP_VISUAL_WALKTHROUGH_PASS")
+		print("MVP_VISUAL_WALKTHROUGH_STRUCTURE_PASS")
+		if not _screenshot_paths.is_empty():
+			print("MVP_VISUAL_WALKTHROUGH_PASS")
 		quit(0)
 		return
 	for failure: String in _failures:

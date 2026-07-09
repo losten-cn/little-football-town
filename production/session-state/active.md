@@ -1,8 +1,101 @@
 # Active Session State
 
-Task: Production decision clarity slice complete with accepted warnings
-Date: 2026-06-08
-Pipeline: Production — decision-readability convergence completed for Player/Training and Match panels; route topology, ScreenManager, gameplay authority, stable payloads, and stable node/button names unchanged; local UI regressions passed; Match Live/Halftime command depth deferred; AI-agent surrogate validation is accepted as effective evidence; external-human validation is not required under the current project rule; remote GitHub Actions green status is not claimed
+Task: Production gate CONCERNS → READY convergence follow-through
+Date: 2026-07-01
+Pipeline: Production — source-of-truth architecture has converged from FAIL-level blockers to CONCERNS; current work is not to reopen ADRs, but to refresh derived artifacts, record gate state, and identify the minimum evidence/story/visual follow-through needed for clean READY.
+
+<!-- STATUS -->
+Epic: Production Gate Follow-through
+Feature: Presentation follow-through story readiness
+Task: Run story-readiness for Home visual exemplar story
+<!-- /STATUS -->
+
+## Session Extract — /dev-story 2026-07-05
+
+- Story: `production/epics/main-loop-ui-framework/story-002-home-visual-exemplar-placeholder-boundary.md` — Story 002: Home visual exemplar and placeholder boundary.
+- Files changed: `src/ui/hud/main_loop_shell.gd`, `src/ui/hud/zone_c1.gd`, `tests/integration/ui/main_loop_shell_navigation_test.gd`, `tests/integration/ui/mvp_visual_walkthrough_runner.gd`, `production/qa/evidence/home-visual-exemplar-placeholder-boundary-2026-07-05.md`, `production/sprint-status.yaml`.
+- Implementation: Home is now a short summary plus six read-only warm-town information cards for current rhythm, next match, team overview, resources/action windows, next step, and town warmth; match-disabled reason is a dedicated player-facing block; bottom Match nav disabled tooltip/accessibility copy points players back to Home reason text.
+- Test written/updated: `tests/integration/ui/main_loop_shell_navigation_test.gd` adds Home visual exemplar card and placeholder-boundary guardrails; `tests/integration/ui/mvp_visual_walkthrough_runner.gd` verifies Home card structure across Home initial / after training / match disabled / final states.
+- Evidence written: `production/qa/evidence/home-visual-exemplar-placeholder-boundary-2026-07-05.md` with PASS WITH WARNINGS.
+- Verification passed: `MAIN_LOOP_SHELL_NAVIGATION_TEST_PASS`, `L2_PLAYABLE_LOOP_PANELS_TEST_PASS`, `MVP_VISUAL_WALKTHROUGH_PASS` using `/home/kylin/godot/godot` v4.6.3.
+- Code-review fix follow-up: `zone_c1.gd` now consumes both `time_advanced` and `system_state_changed` match availability flags before enabling the bottom Match entry; `main_loop_shell_navigation_test.gd` now covers the bottom Match disabled-state regression. The shell still allows `match_pre` as an explanatory preparation context, matching existing L2 expectations; the disabled start action remains guarded inside Match Pre.
+- Verification warning: headless dummy renderer still returns no viewport image for screenshot save, so visual walkthrough records screenshot warnings while route and Home structure checks pass.
+- Blockers: None.
+- Next: `/code-review src/ui/hud/main_loop_shell.gd src/ui/hud/zone_c1.gd tests/integration/ui/main_loop_shell_navigation_test.gd tests/integration/ui/mvp_visual_walkthrough_runner.gd production/qa/evidence/home-visual-exemplar-placeholder-boundary-2026-07-05.md` then `/story-done production/epics/main-loop-ui-framework/story-002-home-visual-exemplar-placeholder-boundary.md`.
+
+## Session Extract — Production gate architecture-derived artifact refresh 2026-07-01
+
+- Verified source-of-truth architecture state before acting:
+  - `docs/architecture/architecture-review-2026-07-01.md` verdict is `CONCERNS`.
+  - 13 ADR files exist and are currently `Accepted`.
+  - `docs/architecture/architecture-traceability.md` is refreshed to 2026-07-01.
+  - `production/gate-checks/2026-07-01-pre-production-to-production.md` verdict is `CONCERNS`.
+- Confirmed converged architecture contracts:
+  - EventBus / direct-call unified under the registered hybrid authority model.
+  - TownBuilding cross-system MVP consumption uses the canonical three-query surface.
+  - ADR-0003 / ADR-0013 use aligned `audio_state` persistence vocabulary.
+  - Scene-instantiated Core authority references for registered direct calls must use gameplay-root injection or scene-owned service container/runtime registry; implicit pseudo-singletons, hardcoded `NodePath`, and arbitrary scene-tree search remain forbidden.
+- Refreshed derived artifact:
+  - `docs/architecture/requirements-traceability.md` now points to the 2026-07-01 architecture review and architecture traceability index.
+  - Full-chain RTM remains 97/201 = 48.3%.
+  - RTM status remains 0 `MISSING`, 28 `NONE`, 76 `NO STORY`, 0 `NO ADR`.
+  - Architecture coverage context remains 131 Covered, 70 Partial, 0 Gaps.
+- Current Production gate state:
+  - Production may continue under the accepted warning posture and within architecture-covered scope.
+  - Gate remains `CONCERNS`, not clean `READY`.
+- Fresh full CI-equivalent automated baseline completed after RTM/session-state refresh:
+  - Evidence written: `production/qa/evidence/fresh-ci-equivalent-baseline-2026-07-01.md`.
+  - Local CI-equivalent dispatch matched `.github/workflows/tests.yml` Node/SceneTree split policy.
+  - Result: `STANDARD_AUTOMATED_TEST_BASELINE_SUMMARY node=34 scenetree=37 failed=0 total=71` and `STANDARD_AUTOMATED_TEST_BASELINE_PASS`.
+  - Remote GitHub Actions green status is not claimed.
+  - Godot exit-time ObjectDB/resource warnings and intentional SaveManager negative-path errors remain non-failing warnings under this evidence.
+- Accepted-but-unscheduled story/test/defer governance completed:
+  - Backlog written: `production/sprints/production-ready-follow-through-2026-07-01.md`.
+  - This does not authorize implementation or edit `production/sprint-status.yaml`; missing systems still need `/create-epics`, `/create-stories`, `/story-readiness`, and `/dev-story` before implementation.
+  - The backlog explicitly covers Random Event, Audio, Skill/Trait, Reputation/Achievement, Town UI, Tutorial/Hint, deeper Main/Player/Match UI boundaries, and Onboarding follow-through.
+  - Producer-facing risk is reduced from “accepted systems remain invisible / unscheduled” to “accepted systems have explicit follow-through / deferral governance.”
+- Production visual exemplar / placeholder tolerance evidence completed:
+  - Evidence written: `production/qa/evidence/production-visual-exemplar-placeholder-tolerance-2026-07-05.md`.
+  - Current MVP exemplar surfaces are Home, Roster/Player Detail, Training/Training Result, Match disabled reason, Match Pre, Match Live/Timeline, and Match Result.
+  - Placeholder tolerance is now explicit: tolerated placeholders must not hide critical actions, create route ambiguity, expose internal IDs/enums/debug labels, break warm-town visual direction, reduce readability, or obscure the return path to Home.
+  - Art Director concern can now be reduced toward READY WITH WARNINGS; final production art pass and fresh screenshot evidence remain follow-up work, not current-scope blockers.
+- Production gate follow-up re-check completed:
+  - Report written: `production/gate-checks/2026-07-05-pre-production-to-production-followup.md`.
+  - Review mode: `lean`.
+  - Director Panel: Creative Director READY, Technical Director CONCERNS, Producer READY, Art Director READY WITH WARNINGS.
+  - Verdict remains `CONCERNS` by minimum director verdict, but it is now an improved CONCERNS best described as “Production may continue under READY WITH WARNINGS posture, but clean READY is not yet supported.”
+  - No stop-the-line blocker prevents continuing Production inside accepted, architecture-covered, story-ready scope.
+  - `production/stage.txt` was not updated because the follow-up verdict is not PASS.
+- Remaining clean-READY concerns:
+  - RTM full-chain coverage remains 97/201 = 48.3% despite the fresh baseline pass, governance backlog, visual tolerance evidence, and gate follow-up.
+  - Concrete per-epic story files still need to be generated later for systems selected as near-term.
+  - Clean final-art readiness still requires a future production art pass and fresh screenshot evidence.
+  - Remote GitHub Actions green status is not claimed.
+  - Concrete near-term story/readiness chains still need to be authored before new implementation work.
+- Control manifest freshness reconciled:
+  - `docs/architecture/control-manifest.md` already covered ADR-0001 through ADR-0013 and the current key authority/audio/random-event rules.
+  - Header refreshed to `Last Updated: 2026-07-05` and `Manifest Version: 2026-07-05` so new stories can embed the current rule version.
+  - Rule body was not rewritten because the existing manifest content already covered the accepted ADR set.
+- Near-term Production follow-through slice selected and first story authored:
+  - Selected slice: Presentation boundary / visual exemplar stabilization.
+  - Story written: `production/epics/main-loop-ui-framework/story-002-home-visual-exemplar-placeholder-boundary.md`.
+  - Epic updated: `production/epics/main-loop-ui-framework/EPIC.md` now lists Story 002 and marks the epic as complete with Production follow-up planned.
+  - Story 002 is `Ready` as authored, but implementation must not begin until `/story-readiness` validates it.
+- Next topology:
+  1. Run `/story-readiness production/epics/main-loop-ui-framework/story-002-home-visual-exemplar-placeholder-boundary.md`.
+  2. If story-readiness passes, decide whether to start `/dev-story` or first draft matching QA evidence expectations.
+  3. Keep Random Event, Audio, Skill/Trait, Reputation/Achievement, Town UI, and Tutorial/Hint deferred unless explicitly selected for a future slice.
+
+## Session Extract — Architecture convergence follow-through 2026-06-29
+
+- Random Event ADR updated: `docs/architecture/adr-0012-random-event-settlement-contracts.md` is now `Accepted`; stable `event_settlement_key` excludes `rule_version` and remains the random-event idempotency boundary.
+- Audio ADR updated: `docs/architecture/adr-0013-audio-settings-event-consumption.md` is now `Accepted`; persistence boundary now routes durable `audio_*` preferences through SaveManager as `audio_state`-style registered durable state, and `AudioManager` runtime placement is clarified as an Autoload with two-phase restore semantics.
+- Control manifest refreshed: `docs/architecture/control-manifest.md` now covers `ADR-0001` through `ADR-0013`, including Random Event and Audio required/forbidden/guardrail themes.
+- Architecture overview synchronized: `docs/architecture/architecture.md` now references `ADR-0001` through `ADR-0013`, removes Random Event / Audio ADR-gap wording, records optional facility multiplier read-model fallback for PlayerDevelopment, and reflects accepted Feature-contract coverage.
+- Derived architecture artifacts refreshed: `docs/architecture/architecture-review-2026-06-29.md`, `docs/architecture/requirements-traceability.md`, and `docs/architecture/architecture-traceability.md` were updated to replace old Proposed-status conclusions with Accepted ADR coverage and a `CONCERNS`-level follow-through posture.
+- Supporting ADR cleanup completed: `docs/architecture/adr-0005-player-data-model.md` now treats TownBuilding facility influence as an optional read-model input with neutral `1.0` fallback; `docs/architecture/adr-0003-save-load-persistence.md` now declares its ADR-0004 dependency; `docs/architecture/adr-0007-economy-transaction-framework.md` now carries `settlement_id` through post-match economy settlement metadata for idempotency follow-through.
+- Main remaining concerns are no longer missing ADRs; they are implementation-facing follow-through items: deeper Presentation API boundary definition, story/test coverage for Random Event / Audio / other unscheduled systems, and any optional cleanup around semantic audio/UI event registry detail.
+- Recommended next: treat the architecture gap-closure slice as complete; next work should either (a) transition into story/implementation planning against the accepted contracts, or (b) run a fresh formal `/architecture-review` output pass only if a new report artifact is desired after these synchronized edits.
 
 ## Session Extract — Production decision clarity slice 2026-06-08
 
@@ -175,11 +268,7 @@ Pipeline: Production — decision-readability convergence completed for Player/T
 
 Current MVP topology wave is frozen with warnings after automated visual walkthrough passed. Next, carry warnings forward and start the next production step; only reopen this wave for route-breaking hotfixes.
 
-<!-- STATUS -->
-Epic: Production Gate Preparation
-Feature: Player experience readiness
-Task: Focused revision before Production entry
-<!-- /STATUS -->
+Historical status at this checkpoint: Production Gate Preparation > Player experience readiness > Focused revision before Production entry
 
 ## Session Extract — MVP visual walkthrough freeze 2026-06-05
 - Evidence written: `production/qa/evidence/mvp-visual-walkthrough-2026-06-05.md`.
@@ -1068,3 +1157,51 @@ Task: Focused revision before Production entry
 - Blockers: `systems-index.md` dependency/MVP boundary drift; town-building outputs without complete downstream consumers; forced match progression lacks legal-state fallback; MVP economy/town-building scope is unstable; match-day AP deadlock risk.
 - Warnings: Hidden MVP research-point resource, town-building optimization-grid drift from warm-town pillar, youth academy/training-ground snowball risk, maintenance soft-stall risk, league team count vs time pacing mismatch, home advantage double-count/stale cap wording, pre-match attention budget overload, training ROI time-cost ownership gap, UI return-path ambiguity.
 - Next: Decide whether MVP includes a minimal town-building slice, update `systems-index.md`, define match-trigger fallback rules for insufficient AP and illegal lineup, normalize town-building outputs, then re-run `/review-all-gdds`.
+
+## Session Extract — /architecture-review 2026-06-28
+- Verdict: FAIL
+- Requirements: 201 total — 131 covered, 64 partial, 6 gaps
+- RTM chain: 97 COVERED, 0 MISSING, 28 NONE, 70 NO STORY, 6 NO ADR
+- New TR-IDs registered: None
+- GDD revision flags: None
+- Top ADR gaps: Audio Settings & Event Consumption; ADR-0012 Random Event stable-key revision; canonical `match_completed` payload alignment
+- Report: `docs/architecture/architecture-review-2026-06-28.md`
+- Traceability: `docs/architecture/architecture-traceability.md`, `docs/architecture/requirements-traceability.md`
+- Next: Write a missing ADR or revise ADR-0012 before re-running `/architecture-review`.
+
+## Session Extract — /architecture-decision 2026-06-28
+- Decision: Wrote `docs/architecture/adr-0013-audio-settings-event-consumption.md`
+- Registry updated: added `audio_preferences` state ownership, `audio_event_consumption` and `audio_settings_payloads` interface contracts, and forbidden patterns `transient_ui_focus_as_audio_truth` / `transient_mix_overwrites_durable_audio_preferences` in `docs/registry/architecture.yaml`
+- Review mode: `lean` (TD-ADR skipped per mode)
+- Engine validation: Godot specialist confirmed the direction with no blocking API issues; key revisions captured Node/Autoload runtime ownership for `AudioManager`, separation between durable preference control and transient mixing, bus-mapping validation, and two-phase save/load restore application
+- Story unblock check: no explicit production story was marked `Blocked` solely on this ADR gap, so no story status files were updated to `Ready`
+- Next: re-run `/architecture-review` in a fresh Claude Code session; remaining known architecture follow-up still includes ADR-0012 random-event stable-key revision and canonical `match_completed` payload alignment
+
+## Session Extract — /architecture-review 2026-06-29
+- Verdict: FAIL
+- Requirements: 201 total — 131 covered, 70 partial, 0 gaps
+- RTM chain: 97 COVERED, 0 MISSING, 28 NONE, 76 NO STORY, 0 NO ADR
+- New TR-IDs registered: None; `TR-random-005` wording revised so `rule_version` is metadata only and not part of the durable settlement key source
+- GDD revision flags: None
+- Top ADR gaps: None as true NO ADR; blockers are stale `architecture.md`, ADR-0005 facility multiplier contract/interface ambiguity, ADR-0013 persistence alignment with ADR-0003, and ADR-0012/ADR-0013 remaining Proposed
+- Report: `docs/architecture/architecture-review-2026-06-29.md`
+- Traceability: `docs/architecture/architecture-traceability.md`, `docs/architecture/requirements-traceability.md`
+- Next: update `architecture.md`, revise ADR-0005 and ADR-0013/ADR-0003 alignment, then decide whether ADR-0012 and ADR-0013 can move to Accepted before re-running `/architecture-review`.
+
+## Session Extract — /story-done 2026-07-08
+- Verdict: COMPLETE WITH NOTES
+- Story: `production/epics/main-loop-ui-framework/story-002-home-visual-exemplar-placeholder-boundary.md` — Story 002: Home visual exemplar and placeholder boundary
+- Tech debt logged: None
+- Next recommended: `production/sprints/sprint-3-production-visual-follow-through.md#s3-07` — 起草 Player/Training visual exemplar follow-up story
+
+## Session Extract — /story-done 2026-07-09
+- Verdict: COMPLETE WITH NOTES
+- Story: `production/epics/player-management-ui/story-002-player-training-visual-exemplar-boundary.md` — Story 002: Player / Training visual exemplar boundary
+- Tech debt logged: None
+- Next recommended: `production/epics/player-management-ui/story-003-authoritative-explanatory-payload-contract.md` — 收敛 PlayerMgmt explanatory payload authority contract
+
+## Session Extract — /story-done 2026-07-09
+- Verdict: COMPLETE WITH NOTES
+- Story: `production/epics/match-performance-ui/story-002-match-visual-exemplar-boundary.md` — Story 002: Match visual exemplar boundary
+- Tech debt logged: None
+- Next recommended: Sprint 3 complete — run `/smoke-check sprint` then `/retrospective` then `/sprint-plan new`
