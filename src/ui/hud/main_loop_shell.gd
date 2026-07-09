@@ -14,6 +14,7 @@ const WhatNextGuidanceScript: Script = preload("res://src/ui/onboarding/what_nex
 const GrowthSummaryScript: Script = preload("res://src/ui/growth_summary.gd")
 const TownGridScript: Script = preload("res://src/ui/town_grid.gd")
 const AudioSettingsPanelScript: Script = preload("res://src/ui/audio_settings_panel.gd")
+const RecognitionSummaryScript: Script = preload("res://src/ui/recognition_summary.gd")
 const ROUTE_IDS: Array[String] = [
 	ROUTE_HOME,
 	ROUTE_ROSTER,
@@ -59,6 +60,7 @@ var _growth_panel: Control = null
 var _town_grid: Control = null
 var _settings_panel: Control = null
 var _settings_toggle_button: Button = null
+var _recognition_panel: Control = null
 var _transition_tween: Tween = null
 
 
@@ -235,6 +237,10 @@ func _setup_container() -> void:
 	_settings_panel = AudioSettingsPanelScript.new() as Control
 	_settings_panel.name = "AudioSettingsPanel"
 	_content_box.add_child(_settings_panel)
+
+	_recognition_panel = RecognitionSummaryScript.new() as Control
+	_recognition_panel.name = "RecognitionSummary"
+	_content_box.add_child(_recognition_panel)
 
 
 func _town_panel_style() -> StyleBoxFlat:
@@ -489,6 +495,8 @@ func _set_shell_chrome_visible(is_visible: bool) -> void:
 		_settings_toggle_button.visible = is_visible and _current_route == ROUTE_HOME
 	if _settings_panel != null and not (is_visible and _current_route == ROUTE_HOME):
 		_settings_panel.visible = false
+	if _recognition_panel != null:
+		_recognition_panel.visible = is_visible and _current_route == ROUTE_HOME
 	_disable_reason_label.visible = is_visible and not _disable_reason_label.text.is_empty()
 	_primary_button.visible = is_visible
 	_secondary_button.visible = is_visible
