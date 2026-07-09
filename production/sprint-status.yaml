@@ -42,20 +42,20 @@ stories:
 
   - id: "S6-04"
     name: "补齐 S5 visual evidence 文件"
-    file: "production/sprints/sprint-6-technical-foundation-and-recognition-stub.md#s6-04"
+    file: "production/qa/evidence/sprint-5-visual-evidence-2026-07-10.md"
     priority: should-have
-    status: backlog
+    status: done
     owner: "UI Programmer"
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-07-10"
 
   - id: "S6-05"
     name: "Onboarding/Tutorial — 首次 hint stub"
     file: "production/sprints/sprint-6-technical-foundation-and-recognition-stub.md#s6-05"
     priority: nice-to-have
-    status: backlog
+    status: done
     owner: "UI Programmer"
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-07-10"

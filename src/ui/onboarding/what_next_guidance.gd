@@ -15,6 +15,7 @@ const UI_COLOR_MUTED := Color("6D5A3A")
 var _current_route: String = STEP_HOME
 var _current_step: String = STEP_HOME
 var _dismissed: bool = false
+var _first_visit_welcomed: bool = false
 var _training_completed: bool = false
 var _result_seen: bool = false
 var _anchor_available: bool = true
@@ -175,6 +176,12 @@ func _refresh() -> void:
 	if _hint_label == null:
 		return
 	visible = not _dismissed and _current_step != STEP_DONE
+	if _current_step == STEP_HOME and not _first_visit_welcomed:
+		_first_visit_welcomed = true
+		_hint_label.text = _localized_text("ONBOARDING_FIRST_VISIT", "欢迎来到你的足球小镇！从管理球员和参加比赛开始，一步步建设属于你的球队之家。")
+		_target_label.text = ""
+		_target_label.visible = false
+		return
 	_hint_label.text = _copy_for_step()
 	_target_label.text = _target_for_step()
 	_target_label.visible = not _target_label.text.is_empty()
