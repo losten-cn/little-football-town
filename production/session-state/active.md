@@ -1,14 +1,50 @@
 # Active Session State
 
-Task: Production gate CONCERNS → READY convergence follow-through
-Date: 2026-07-01
-Pipeline: Production — source-of-truth architecture has converged from FAIL-level blockers to CONCERNS; current work is not to reopen ADRs, but to refresh derived artifacts, record gate state, and identify the minimum evidence/story/visual follow-through needed for clean READY.
+Task: P1 最小视觉原型 — 在 prototypes/ 下验证 32×32 TileMap + Camera2D + 2x 缩放 + Y-sort
+Date: 2026-07-10
+Pipeline: Production — 文档收敛已完成。P1 启动。
 
 <!-- STATUS -->
-Epic: Production Gate Follow-through
-Feature: Presentation follow-through story readiness
-Task: Run story-readiness for Home visual exemplar story
+Epic: Town Building System
+Feature: Town Management UI
+Task: S5-02 facility grid stub — 实现完成，等待 /code-review + /story-done
 <!-- /STATUS -->
+
+## 2026-07-10 文档收敛完成
+
+P0 方向锁定 + 文档体系收敛全部完成：
+
+| 里程碑 | 文件 | 状态 |
+|--------|------|------|
+| 像素宪法 | `STYLE_GUIDE.md` (根目录) | ✅ V1.0 终稿封存 |
+| 概念同步 | `design/gdd/game-concept.md` | ✅ Visual Identity Anchor 已重写 |
+| HUD 冲突标记 | `design/art/hud-visual-design.md` | ✅ 8 处废弃标记 |
+| Art Bible 冲突标记 | `design/art/art-bible.md` | ✅ 6 处废弃标记 |
+| 重校准文档 | `production/session-state/visual-direction-recalibration-2026-07-09.md` | ✅ P0 标记完成 |
+
+文档层级：STYLE_GUIDE.md (权威) → game-concept.md (摘要) → art-bible.md + hud-visual-design.md (哲学/layout 仍有效，技术参数已废弃)
+
+## P1 最小视觉原型 — 验证目标
+
+按 STYLE_GUIDE §7 启动行动清单，第一步验证渲染管线：
+
+1. **TileMapLayer** — 32×32px 原始 tile，验证 2x 缩放后为 64×64px
+2. **Camera2D** — 验证 Viewport 30列×17行 (960×544 → 1920×1088)
+3. **Y-sort** — 验证基于 Y 轴的绘制排序
+4. **色板** — 临时色块使用 7 色闭环
+
+## ⚠️ 重要：完整上下文在独立文档中
+
+**本 session 的核心发现和决策已保存到：**
+→ `production/session-state/visual-direction-recalibration-2026-07-09.md`
+
+新 session 启动后，请先读取该文档（约 300 行），其中包含：
+- 问题诊断（管理仪表盘 vs 可视世界）
+- 断层分析（设计要求 vs 当前实现）
+- 已达成的共识（视角/风格/资产策略）
+- 优先级排序的下一步行动
+- 图像生成提示词（3 张参考图）
+- 关键设计文档速查索引
 
 ## Session Extract — /dev-story 2026-07-05
 
@@ -1205,3 +1241,21 @@ Historical status at this checkpoint: Production Gate Preparation > Player exper
 - Story: `production/epics/match-performance-ui/story-002-match-visual-exemplar-boundary.md` — Story 002: Match visual exemplar boundary
 - Tech debt logged: None
 - Next recommended: Sprint 3 complete — run `/smoke-check sprint` then `/retrospective` then `/sprint-plan new`
+
+## Session Extract — /story-done 2026-07-10
+- Verdict: COMPLETE WITH NOTES
+- Story: `production/epics/skill-and-trait-system/story-001-growth-summary-stub.md` — Story 001: Skill/Trait Growth Summary stub
+- Tech debt logged: None
+- Next recommended: `production/sprints/sprint-5-feature-adjacent-presentation.md#s5-02` — Town Management UI grid stub
+
+## Session Extract — /dev-story 2026-07-10
+- Story: `production/epics/town-building-system/story-002-town-ui-grid-stub.md` — Town Management UI grid stub
+- Files created:
+  - `src/ui/town_grid.gd` — 326 lines, read-only 5×5 grid PanelContainer consuming TownBuilding authority
+  - `tests/integration/ui/town_grid_authoritative_payload_test.gd` — 4 test functions
+- Files modified:
+  - `src/ui/hud/main_loop_shell.gd` — TownGrid mount + EventBus subscription + visibility control
+  - `production/sprint-status.yaml` — S5-02 status → in-progress, file path corrected
+- Tests: `TOWN_GRID_AUTHORITATIVE_PAYLOAD_TEST_PASS`, `L2_PLAYABLE_LOOP_PANELS_TEST_PASS`, `MVP_VISUAL_WALKTHROUGH_STRUCTURE_PASS`
+- Blockers: None
+- Next: `/code-review src/ui/town_grid.gd src/ui/hud/main_loop_shell.gd tests/integration/ui/town_grid_authoritative_payload_test.gd` then `/story-done production/epics/town-building-system/story-002-town-ui-grid-stub.md`

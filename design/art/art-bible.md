@@ -1,11 +1,13 @@
 # Art Bible: 足球小镇 (Football Town)
 
-> **Status**: In Design
+> **Status**: ⚠️ 部分条款已被 `STYLE_GUIDE.md` (V1.0 终稿, 2026-07-10) 取代
 > **Author**: nico + art-director
-> **Last Updated**: 2026-05-19
+> **Last Updated**: 2026-05-19 (冲突标记: 2026-07-10)
 > **Reference**: 开罗游戏系列 (Kairosoft)
 > **Pillars**: 轻度足球经营 / 像素小镇养成 / 低压力长期成长
 > **Art Director Sign-Off (AD-ART-BIBLE)**: Approved
+>
+> **⚠️ 重要提示**: 本文在 2026-07-10 经过与 `STYLE_GUIDE.md` 的逐条对比。标记 `[已废弃，见 STYLE_GUIDE.md]` 的条款以 STYLE_GUIDE 为准。本文的情感基调、形状哲学、角色设计方向、环境叙事等"软性指导"仍然有效；技术参数（像素精度、色板精确值、HUD 坐标、字体锁定）以 STYLE_GUIDE 为唯一权威。
 
 ---
 
@@ -124,15 +126,11 @@ Shape language should make the town feel welcoming at a glance and understandabl
 
 **Supports:** Visual Rule + **轻度足球经营**
 
-- UI should **echo the town aesthetic, but stay cleaner than the world art**.
-- Preferred UI container language:
-  - rounded or lightly chamfered rectangles
-  - solid, stable panels
-  - clear edge separation
-  - minimal ornament
-- Avoid ornate frames, sharp fantasy spikes, or sleek sci-fi cuts.
-- Buttons and panels should use **broad, calm shapes** with obvious click targets.
-- Data-heavy areas should favor **straight alignment and consistent panel rhythm** over environmental mimicry. When town flavor and readability conflict, readability wins.
+[已废弃，见 STYLE_GUIDE.md §4 通用面板]
+
+STYLE_GUIDE 锁定 UI 面板为「边框 2px #3A2A1A + 内框 1px #C58A3A，背景 #FFF2D2，标题栏 #D6B35A，**圆角 = 0（绝对直角）**」。原「rounded or lightly chamfered rectangles」规则与本条冲突，不再适用。
+
+以下 UI shape 原则除"圆角"条款外仍可参考：
 
 ### 3.4 Hero Shapes vs Supporting Shapes
 
@@ -165,6 +163,10 @@ Shape language should make the town feel welcoming at a glance and understandabl
 Use a restrained, warm palette anchored in cream and gold, with red reserved for football emotion and moment emphasis. Colors should read as lived-in and trustworthy, not neon or broadcast-sports aggressive. Keep hue relationships stable across the game; communicate state changes mostly through temperature, value, and saturation shifts rather than swapping to entirely different palettes.
 
 ### Primary Semantic Palette
+
+[已锁定，见 STYLE_GUIDE.md §3 绝对色板]
+
+STYLE_GUIDE 已将 7 色闭环锁定为精确 hex 值。下表 hex 值与 STYLE_GUIDE 完全一致 ✅，语义角色兼容。命名差异以 STYLE_GUIDE 为准（`Slate Neutral` → `石板灰`），但本文的语义使用规则（§4 后续段落）仍有效。
 
 Suggested foundation swatches; exact production values may drift slightly by asset set, but the semantic roles should remain fixed.
 
@@ -375,10 +377,12 @@ The UI/HUD should read as the town’s organized “management layer”: visuall
 - Use icons to accelerate scanning, not replace text entirely; pair unfamiliar actions or systems with labels.
 
 ### Panel, Frame, and Button Style
-- Panels should use broad, calm shapes with gentle corner treatment, subtle inner contrast, and restrained border definition.
-- They may echo painted wood signs, notice boards, or enamel placards in proportion and palette, but should not imitate physical materials so literally that they reduce clarity.
-- Buttons should be large, stable, and obviously interactive, with clear hover, pressed, selected, and disabled states.
-- Ornament should be minimal; spacing, contrast, and grouping should do most of the work.
+
+[已废弃，见 STYLE_GUIDE.md §4 通用面板]
+
+STYLE_GUIDE 锁定通用面板规范：边框 2px #3A2A1A + 内框 1px #C58A3A，背景 #FFF2D2，标题栏 #D6B35A，圆角 = 0（绝对直角），关闭按钮 16×16 悬停变红，尺寸三档（640×480 / 800×560 / 960×640）。原「gentle corner treatment」规则与本条冲突。
+
+以下按钮状态通用原则仍可参考：
 
 ### Animation Feel
 - UI motion should feel calm, light, and supportive.
@@ -428,6 +432,12 @@ Rules:
 - Re-exported revisions replace the same logical asset name unless the runtime role truly changed.
 
 ### Pixel-Perfect Scaling Rules
+
+[已废弃，见 STYLE_GUIDE.md §1 核心基石]
+
+STYLE_GUIDE 锁定：Tile 32×32px 原始资产，2x 整数缩放至 64×64px 显示，禁止非整数缩放。Viewport 30列×17行（960×544 原始像素 → 2x 后 1920×1088）。
+
+以下原始规则与 STYLE_GUIDE 精神一致，但缺少精确数值，仅供参考：
 - Assets must be authored against a consistent base pixel grid and displayed at integer scale in gameplay views whenever possible.
 - Do not hand off assets that only read correctly at fractional scaling.
 - Avoid sub-pixel detail, anti-aliased diagonals, and 1-pixel noise clusters that depend on smooth scaling to look correct.
@@ -435,6 +445,11 @@ Rules:
 - Outline thickness, icon strokes, and key silhouette breaks must remain readable at the smallest expected in-game display size.
 
 ### Resolution and Size Tiers
+
+[已废弃，见 STYLE_GUIDE.md §5 实体与空间]
+
+STYLE_GUIDE 已锁定具体尺寸：建筑 2×2 Tile 起（64×64px 基底），角色 32×48px（头 12px / 身体 24px / 腿 12px），球场 14行×20列 Tile。以下原始 tier 体系过于模糊，不再作为尺寸依据：
+
 This project uses **tiered target sizes with small tolerance bands**, not purely relative guidance and not rigid one-off sizing for every asset. The goal is consistent hierarchy with enough flexibility for practical production.
 
 Recommended production tiers:
@@ -535,6 +550,16 @@ Any asset set that materially increases draw-call count, atlas fragmentation, ov
 | **Local football club posters / community sports noticeboards** | Draw from **civic pride graphics**: banners, match posters, painted signs, youth-team flyers, scarves, pennants, club crests, and large readable numerals. This is the right source for making football feel woven into town life rather than isolated in the stadium. | Avoid **real-club mimicry, sponsor-wall clutter, aggressive pro-sports gloss, or esports-style lightning/flame graphics**. The football identity should feel local, communal, and handmade before it feels commercial. |
 
 ### Style Prohibitions
+
+[已扩展，见 STYLE_GUIDE.md §6 绝对禁止清单]
+
+STYLE_GUIDE 将禁止清单扩展至 10 条，新增以下本文未覆盖的红线：
+- 禁止 1:1 头身 Q 版
+- 禁止比赛纯文本结果（必须播放自动跑动动画）
+- 禁止 HUD 遮挡世界中央 60%×50% 区域
+- 禁止等距菱形网格
+
+以下原始禁止条目仍然有效，与 STYLE_GUIDE 兼容：
 
 - Do **not** use neon cyberpunk palettes, cold sci-fi lighting, or nightclub contrast.
 - Do **not** push the town into grime, despair, or economic-collapse visuals; this world may be modest, but it should never feel hopeless.

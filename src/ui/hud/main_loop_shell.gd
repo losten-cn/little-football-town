@@ -11,6 +11,8 @@ const ROUTE_MATCH_RESULT: String = "match_result"
 const PlayerMgmtPanelScript: Script = preload("res://src/ui/player/player_mgmt_panel.gd")
 const MatchPerfPanelScript: Script = preload("res://src/ui/match/match_perf_panel.gd")
 const WhatNextGuidanceScript: Script = preload("res://src/ui/onboarding/what_next_guidance.gd")
+const GrowthSummaryScript: Script = preload("res://src/ui/growth_summary.gd")
+const TownGridScript: Script = preload("res://src/ui/town_grid.gd")
 const ROUTE_IDS: Array[String] = [
 	ROUTE_HOME,
 	ROUTE_ROSTER,
@@ -47,6 +49,8 @@ var _match_entry_state: Dictionary[String, Variant] = {}
 var _player_panel: Control = null
 var _match_panel: Control = null
 var _guidance_panel: Control = null
+var _growth_panel: Control = null
+var _town_grid: Control = null
 var _transition_tween: Tween = null
 
 
@@ -200,6 +204,14 @@ func _setup_container() -> void:
 	_guidance_panel = WhatNextGuidanceScript.new() as Control
 	_guidance_panel.name = "WhatNextGuidance"
 	_content_box.add_child(_guidance_panel)
+
+	_growth_panel = GrowthSummaryScript.new() as Control
+	_growth_panel.name = "GrowthSummary"
+	_content_box.add_child(_growth_panel)
+
+	_town_grid = TownGridScript.new() as Control
+	_town_grid.name = "TownGrid"
+	_content_box.add_child(_town_grid)
 
 
 func _town_panel_style() -> StyleBoxFlat:
@@ -446,6 +458,10 @@ func _set_shell_chrome_visible(is_visible: bool) -> void:
 	_summary_label.visible = is_visible
 	if _home_cards_box != null:
 		_home_cards_box.visible = is_visible and _current_route == ROUTE_HOME
+	if _growth_panel != null:
+		_growth_panel.visible = is_visible and _current_route == ROUTE_HOME
+	if _town_grid != null:
+		_town_grid.visible = is_visible and _current_route == ROUTE_HOME
 	_disable_reason_label.visible = is_visible and not _disable_reason_label.text.is_empty()
 	_primary_button.visible = is_visible
 	_secondary_button.visible = is_visible

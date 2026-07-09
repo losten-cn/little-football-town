@@ -1,10 +1,12 @@
 # HUD Visual Design Spec: 足球小镇
 
-> **Status**: Aligned to Approved UX
+> **Status**: ⚠️ 部分条款已被 `STYLE_GUIDE.md` (V1.0 终稿, 2026-07-10) 取代
 > **Author**: nico + art-director
-> **Last Updated**: 2026-05-19
+> **Last Updated**: 2026-05-19 (冲突标记: 2026-07-10)
 > **Implements**: `design/ux/hud.md`, `design/ux/interaction-patterns.md`, `design/accessibility-requirements.md`
 > **Template**: Visual Design Specification
+>
+> **⚠️ 重要提示**: 本文在 2026-07-10 经过与 `STYLE_GUIDE.md` 的逐条对比。标记 `[已废弃，见 STYLE_GUIDE.md]` 的条款以 STYLE_GUIDE 为准。未标记的 HUD layout 框架（Zone 分区逻辑、focus order、toast/tooltip/dialog 行为规范、accessibility 规则）仍然有效。
 
 ---
 
@@ -18,16 +20,24 @@ Production 全局基线采用暖亮 town UI：浅暖面板、木质/琥珀边框
 
 ### 1.2 Production Town-Light Delta Palette
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `town-surface` | `#FFF2D2` | Home / Roster / Training / Result 的默认暖亮面板 |
-| `town-border` | `#C58A3A` | 像素木质边框、卡片分隔、暖色焦点外框 |
-| `town-text` | `#3A2A1A` | 暖亮面板上的正文 |
-| `town-muted` | `#6D5A3A` | 次级说明、训练结果辅助文案 |
-| `town-accent` | `#C76A00` | 主行动、比赛就绪、标题与关键提醒 |
-| `match-dark-local` | `#1A1A2E` | Match Live 局部紧张态背景，不作为全局 UI 基线 |
+[已废弃，见 STYLE_GUIDE.md §3 绝对色板 + §4 界面交互铁律]
+
+以下 token 定义保留作为历史参考。STYLE_GUIDE 已锁定 7 色绝对闭环（奶油 `#F2E8D5` / 小镇金 `#D6B35A` / 俱乐部红 `#B84A4A` / 冷静蓝 `#5E7FA3` / 球场绿 `#6F8F5B` / 大地棕 `#8A6B4F` / 石板灰 `#4C4A4A`），任何未出现在该闭环中的色值均为无效。
+
+| Token | Hex | Usage | STYLE_GUIDE 判定 |
+|-------|-----|-------|-----------------|
+| `town-surface` | `#FFF2D2` | Home / Roster / Training / Result 的默认暖亮面板 | ⚠️ 近似兼容。STYLE_GUIDE 奶油色为 `#F2E8D5`，顶部栏底色 `#FFF2D2` 为具体使用变体 |
+| `town-border` | `#C58A3A` | 像素木质边框、卡片分隔、暖色焦点外框 | ❌ 不在 7 色闭环中。STYLE_GUIDE 木质边框为 `#C58A3A`（秋调变体），但主边框应为 `#3A2A1A`（深棕） |
+| `town-text` | `#3A2A1A` | 暖亮面板上的正文 | ❌ 不在 7 色闭环中。STYLE_GUIDE 正文使用石板灰 `#4C4A4A` |
+| `town-muted` | `#6D5A3A` | 次级说明、训练结果辅助文案 | ❌ 不在 7 色闭环中 |
+| `town-accent` | `#C76A00` | 主行动、比赛就绪、标题与关键提醒 | ❌ 不在 7 色闭环中。STYLE_GUIDE 强调色为小镇金 `#D6B35A` 或俱乐部红 `#B84A4A` |
+| `match-dark-local` | `#1A1A2E` | Match Live 局部紧张态背景 | ❌ 不在 7 色闭环中。STYLE_GUIDE 比赛暗色为深木炭 `#2A1F1A` |
 
 ### 1.3 Core Palette
+
+[已废弃，见 STYLE_GUIDE.md §4 界面交互铁律]
+
+本表格为暗色面板系统的完整色板定义。STYLE_GUIDE §6 体验红线第 2 条明确规定「禁止全局暗色 UI（仅比赛直播 5 分钟内可用）」，因此以下全部 token 仅可在 Match Live 场景中作为历史参考，不得用于 Home / Roster / Training / Result 等日常界面。
 
 | Token | Hex | Usage | Contrast (on `#1A1A2E`) |
 |-------|-----|-------|-------------------------|
@@ -49,6 +59,10 @@ Production 全局基线采用暖亮 town UI：浅暖面板、木质/琥珀边框
 | `focus-ring` | `#FFD700` | 键盘焦点环 | 8.4:1 |
 
 ### 1.3 Overlay Palette
+
+[已废弃，见 STYLE_GUIDE.md §4 通用面板]
+
+以下 Toast 色板均使用暗色背景，与 STYLE_GUIDE 暖亮面板方向不一致。Toast/Dialog 实现时请使用 7 色闭环中的奶油 `#F2E8D5` 面板 + 石板灰 `#4C4A4A` 文字 + 小镇金 `#D6B35A` 标题栏作为基线。
 
 | Token | Hex | Usage |
 |-------|-----|-------|
@@ -81,6 +95,10 @@ Production 全局基线采用暖亮 town UI：浅暖面板、木质/琥珀边框
 
 ### 2.2 Font Sizes
 
+[已废弃，见 STYLE_GUIDE.md §4 Zpix 字体排版]
+
+STYLE_GUIDE 锁定字号为：最大 24px（仅比赛横幅），常规 16px/18px/20px。以下 12px/14px 字号低于 STYLE_GUIDE 常规下限，不再使用。
+
 | Element | Pixel Size | Notes |
 |---------|------------|-------|
 | Zone A 主数值 / 状态文本 | 14px | 日期、经费、运动点数、行动窗口、下一场比赛 |
@@ -101,7 +119,17 @@ Production 全局基线采用暖亮 town UI：浅暖面板、木质/琥珀边框
 
 ## 3. Zone Visual Treatment
 
-### 3.1 Zone A — Top Status Bar (48px)
+### 3.1 Zone A — Top Status Bar (48px → 已废弃为 72px)
+
+[已废弃，见 STYLE_GUIDE.md §4 顶部状态栏]
+
+| 属性 | 本稿值 | STYLE_GUIDE 值 |
+|------|--------|---------------|
+| 高度 | 48px | **72px** (Y=0~72) |
+| 背景色 | `bg-base` (#1A1A2E) | **#FFF2D2** (暖亮奶油) |
+| 底部边框 | 1px `border-default` (#3D3D5C) | **2px #C58A3A** (木质边框) |
+
+以下 Zone A 原始规格全部以 STYLE_GUIDE 为准：
 
 ```text
 ┌ 日期/赛季 │ 经费 │ 运动点数 │ 行动窗口 │ 下一场比赛 │ 菜单 ┐
@@ -135,7 +163,20 @@ Production 全局基线采用暖亮 town UI：浅暖面板、木质/琥珀边框
 - 通知角标
 - 滚动信息条
 
-### 3.2 Zone C — Bottom Navigation (56px)
+### 3.2 Zone C — Bottom Navigation (56px → 已废弃为 64px)
+
+[已废弃，见 STYLE_GUIDE.md §4 底部导航栏]
+
+| 属性 | 本稿值 | STYLE_GUIDE 值 |
+|------|--------|---------------|
+| 高度 | 56px | **64px** (Y=1016~1080) |
+| 背景色 | `bg-base` (#1A1A2E) | **#8A6B4F** (大地棕) + 奶油细条纹 |
+| 顶部边框 | 1px `border-default` (#3D3D5C) | **2px #C58A3A** (木质边框) |
+| 按钮布局 | 两个等宽主按钮 | **左侧球员入口 + 右侧比赛入口 + 中间 32×32 队徽** |
+| 按钮悬停 | `bg-surface-hover` + 橙色边框 | **#FFF2D2 + 金边** |
+| 按钮激活 | 橙色边框/下划线/文字高亮 | **文字 #B84A4A + 左侧 4px 红块指示器** |
+
+以下 Zone C 原始规格全部以 STYLE_GUIDE 为准：
 
 ```text
 ┌ 球员入口 │ 比赛入口 ┐
@@ -168,6 +209,10 @@ Production 全局基线采用暖亮 town UI：浅暖面板、木质/琥珀边框
 ---
 
 ## 4. Control Styling
+
+[已废弃，见 STYLE_GUIDE.md §4 界面交互铁律]
+
+本节省略全部原始状态表。所有按钮/进度条/图标按钮的状态颜色均引用暗色面板 token（`bg-surface`, `bg-surface-hover`, `accent-primary` #FF9800, `semantic-warning` #FFC107 等），与 STYLE_GUIDE 暖亮基线不兼容。重新实现时请直接参照 STYLE_GUIDE 7 色闭环定义 hover/active/disabled 状态。
 
 ### 4.1 Status Button
 
@@ -315,6 +360,16 @@ Production 全局基线采用暖亮 town UI：浅暖面板、木质/琥珀边框
 ---
 
 ## 8. Resolution & Scaling
+
+[已废弃，见 STYLE_GUIDE.md §1 核心基石]
+
+STYLE_GUIDE 锁定：
+- 原生分辨率 1920×1080，兼容 1280×720
+- 2x 整数缩放（32px→64px），禁止非整数缩放
+- Viewport 30列×17行 (960×544 原始像素)
+- HUD 顶部 72px + 底部 64px，中央 944px 留给世界
+
+以下原始 Godot 设置仅供参考，实际实现以 STYLE_GUIDE 为准：
 
 | Resolution | Behavior |
 |-----------|----------|

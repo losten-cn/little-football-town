@@ -1,6 +1,6 @@
 # Epics Index
 
-Last Updated: 2026-06-03
+Last Updated: 2026-07-10
 Engine: Godot 4.6
 
 | Epic | Layer | System | GDD | Stories | Status |
@@ -12,8 +12,11 @@ Engine: Godot 4.6
 | [比赛竞技系统](match-competition-system/EPIC.md) | Core | 比赛竞技系统 | `design/gdd/match-competition-system.md` | 9 stories | Ready |
 | [经济管理系统](economy-management-system/EPIC.md) | Core | 经济管理系统 | `design/gdd/economy-management-system.md` | 9 stories | Ready |
 | [小镇建设系统](town-building-system/EPIC.md) | Core | 小镇建设系统 | `design/gdd/town-building-system.md` | 9 stories | Ready |
-| [联赛与赛事结构系统](league-competition-structure-system/EPIC.md) | Core | 联赛与赛事结构系统 | `design/gdd/league-competition-structure-system.md` | 1 current-wave story | Complete |
-| [主循环 UI 框架](main-loop-ui-framework/EPIC.md) | Presentation | 主循环 UI 框架 | `design/gdd/main-loop-ui-framework.md` | 1 current-wave story | Complete |
-| [球员管理 UI](player-management-ui/EPIC.md) | Presentation | 球员管理 UI | `design/gdd/player-management-ui.md` | 1 current-wave story | Complete with warnings |
-| [比赛表现 UI](match-performance-ui/EPIC.md) | Presentation | 比赛表现 UI | `design/gdd/match-performance-ui.md` | 1 current-wave story | Complete with warnings |
-| [新手引导系统](onboarding-system/EPIC.md) | Polish | 新手引导系统 | `design/gdd/onboarding-system.md` | 1 current-wave story | Complete with warnings |
+| [联赛与赛事结构系统](league-competition-structure-system/EPIC.md) | Core | 联赛与赛事结构系统 | `design/gdd/league-competition-structure-system.md` | 1 story | Complete |
+| [声望与成就系统](reputation-and-achievement-system/EPIC.md) | Feature | 声望与成就系统 | `design/gdd/reputation-and-achievement-system.md` | Not yet created | Ready |
+| [技能与特性系统](skill-and-trait-system/EPIC.md) | Feature | 技能与特性系统 | `design/gdd/skill-and-trait-system.md` | 1 story | Planned |
+| [主循环 UI 框架](main-loop-ui-framework/EPIC.md) | Presentation | 主循环 UI 框架 | `design/gdd/main-loop-ui-framework.md` | 2 stories | Complete |
+| [球员管理 UI](player-management-ui/EPIC.md) | Presentation | 球员管理 UI | `design/gdd/player-management-ui.md` | 3 stories | Planned |
+| [比赛表现 UI](match-performance-ui/EPIC.md) | Presentation | 比赛表现 UI | `design/gdd/match-performance-ui.md` | 2 stories | Planned |
+| [视觉方向对齐](visual-direction-alignment/EPIC.md) | Presentation | 视觉方向对齐 (跨系统) | `STYLE_GUIDE.md` V1.0 | 3 stories | Ready |
+| [新手引导系统](onboarding-system/EPIC.md) | Polish | 新手引导系统 | `design/gdd/onboarding-system.md` | 1 story | Planned |

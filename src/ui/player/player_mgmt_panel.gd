@@ -405,8 +405,8 @@ func _format_training_result() -> String:
 		_resolve_training_risk_summary(selected_option),
 		_resolve_training_option_name(selected_option),
 		_resolve_training_cost_summary(selected_option),
-		_resolve_training_impact_summary(selected_option),
 		_resolve_training_payoff_summary(_resolve_selected_player(), selected_option),
+		_resolve_training_impact_summary(selected_option),
 		_resolve_training_next_step_summary(selected_option),
 		result_summary,
 	]
