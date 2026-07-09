@@ -1,7 +1,7 @@
 # Story 001: 世界渲染层
 
 > **Epic**: 视觉方向对齐 (visual-direction-alignment)
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Logic + Visual/Feel
 > **Estimate**: M (4-6 hours)
@@ -122,3 +122,13 @@
 
 - Depends on: None（P1 原型已验证核心管线，此 story 直接基于已验证参数实现）
 - Unlocks: Story 002 (HUD 暖亮化迁移 — 需要确认 viewport 参数后调整 HUD 坐标)
+
+## Completion Notes
+**Completed**: 2026-07-10
+**Criteria**: 7/8 passing (AC-7 DEFERRED — 手动肉眼确认时间冷暖视觉提示)
+**Deviations**:
+- ADVISORY: 硬编码建筑位置 — Story 001 范围限制，TownBuilding 尚未创建。未来 Story（小镇建设系统对接）需重构
+- ADVISORY: AC-6 季节测试仅验证"颜色不同"，未验证具体色值（如冬季雪层、建筑窗户暖黄）
+**Test Evidence**: Logic: `tests/unit/visual/world_rendering_layer_test.gd` (40+ assertions, ALL PASS)
+**Code Review**: Complete — /code-review APPROVED WITH SUGGESTIONS (0 violations, 5 warnings)
+**Engine Validation**: godot-gdscript-specialist 6/6 PASS
