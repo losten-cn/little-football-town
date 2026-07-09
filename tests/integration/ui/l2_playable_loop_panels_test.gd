@@ -299,9 +299,12 @@ func test_l2_match_panel_mounts_prematch_live_result_and_returns_home() -> void:
 	_expect(_find_control("LiveExitWarning") != null, "LiveExitWarning stable node should exist")
 	var halftime_button: Button = _find_button("HalftimeAdjustButton")
 	_expect(halftime_button != null, "HalftimeAdjustButton stable node should exist")
-	_expect(halftime_button == null or halftime_button.disabled, "halftime placeholder should remain disabled")
-	_expect(halftime_button == null or halftime_button.focus_mode == Control.FOCUS_NONE, "halftime placeholder should not present as an interactive action")
-	_assert_contains(halftime_button.text if halftime_button != null else "", "说明", "halftime placeholder should read as explanatory text")
+	_expect(halftime_button != null, "halftime button should exist (S5-04: enabled stub)")
+	# S5-04: halftime button is now interactive — enabled during match_live with tactic options
+	var halftime_option: OptionButton = _find_node_by_name(_hud, "HalftimeTacticOption") as OptionButton
+	_expect(halftime_option != null, "HalftimeTacticOption should exist (S5-04 stub)")
+	var halftime_confirm: Button = _find_button("HalftimeConfirmButton")
+	_expect(halftime_confirm != null, "HalftimeConfirmButton should exist (S5-04 stub)")
 	EventBus.emit("match_event_occurred", {"minute": 45, "event_category": "tactical_adaptation", "summary": "0-0 中场"})
 	var live_summary: String = _find_label_text("MatchSummary")
 	_assert_contains(live_summary, "比分", "live summary should show score section")

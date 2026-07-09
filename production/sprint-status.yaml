@@ -20,28 +20,28 @@ stories:
     name: "Town Management UI — 最小 facility grid stub"
     file: "production/epics/town-building-system/story-002-town-ui-grid-stub.md"
     priority: must-have
-    status: in-progress
+    status: done
     owner: "UI Programmer"
     estimate_days: 1.5
     blocker: ""
-    completed: ""
+    completed: "2026-07-10"
 
   - id: "S5-03"
     name: "Audio Settings UI — 最小容器 stub"
-    file: "production/sprints/sprint-5-feature-adjacent-presentation.md#s5-03"
+    file: "production/epics/audio-system/story-001-audio-settings-ui-stub.md"
     priority: should-have
-    status: backlog
+    status: done
     owner: "UI Programmer"
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-07-10"
 
   - id: "S5-04"
     name: "Match Live halftime — minimum command stub"
     file: "production/sprints/sprint-5-feature-adjacent-presentation.md#s5-04"
     priority: nice-to-have
-    status: backlog
+    status: done
     owner: "UI Programmer"
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-07-10"

@@ -24,6 +24,7 @@ EventBus="*res://src/autoload/event_bus.gd"
 TimeManager="*res://src/autoload/time_manager.gd"
 SaveManager="*res://src/autoload/save_manager.gd"
 ScreenManager="*res://src/autoload/screen_manager.gd"
+AudioManager="*res://src/autoload/audio_manager.gd"
 
 [display]
 

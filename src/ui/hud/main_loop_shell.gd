@@ -13,6 +13,7 @@ const MatchPerfPanelScript: Script = preload("res://src/ui/match/match_perf_pane
 const WhatNextGuidanceScript: Script = preload("res://src/ui/onboarding/what_next_guidance.gd")
 const GrowthSummaryScript: Script = preload("res://src/ui/growth_summary.gd")
 const TownGridScript: Script = preload("res://src/ui/town_grid.gd")
+const AudioSettingsPanelScript: Script = preload("res://src/ui/audio_settings_panel.gd")
 const ROUTE_IDS: Array[String] = [
 	ROUTE_HOME,
 	ROUTE_ROSTER,
@@ -22,13 +23,18 @@ const ROUTE_IDS: Array[String] = [
 	ROUTE_MATCH_LIVE,
 	ROUTE_MATCH_RESULT,
 ]
-const TOP_BAR_HEIGHT: int = 48
-const BOTTOM_BAR_HEIGHT: int = 56
+const TOP_BAR_HEIGHT: int = 72
+const BOTTOM_BAR_HEIGHT: int = 64
 const TRANSITION_SECONDS: float = 0.2
-const UI_COLOR_TOWN_SURFACE := Color("FFF2D2")
-const UI_COLOR_TOWN_BORDER := Color("C58A3A")
-const UI_COLOR_TOWN_TEXT := Color("3A2A1A")
-const UI_COLOR_TOWN_ACCENT := Color("C76A00")
+const Palette := preload("res://src/ui/hud/warm_palette.gd")
+const UI_COLOR_TOWN_SURFACE := Palette.ZONE_A_BG
+const UI_COLOR_TOWN_BORDER := Palette.WOOD_BORDER
+const UI_COLOR_TOWN_TEXT := Palette.ZONE_A_TEXT
+const UI_COLOR_TOWN_ACCENT := Palette.BUTTON_PRIMARY_BG
+const UI_COLOR_TOWN_PANEL_BG := Palette.CREAM
+const UI_COLOR_TOWN_PANEL_OUTER := Palette.PANEL_OUTER_BORDER
+const UI_COLOR_TOWN_PANEL_INNER := Palette.PANEL_INNER_BORDER
+const UI_COLOR_TOWN_TITLE_BAR := Palette.PANEL_TITLE_BAR
 
 var _current_route: String = ROUTE_HOME
 var _content_panel: PanelContainer = null
@@ -51,6 +57,8 @@ var _match_panel: Control = null
 var _guidance_panel: Control = null
 var _growth_panel: Control = null
 var _town_grid: Control = null
+var _settings_panel: Control = null
+var _settings_toggle_button: Button = null
 var _transition_tween: Tween = null
 
 
@@ -116,6 +124,8 @@ func route_to(route_id: String) -> bool:
 
 ## Returns to Home without creating a parallel navigation stack.
 func return_home() -> void:
+	if _settings_panel != null:
+		_settings_panel.visible = false
 	ScreenManager.reset_to_screen(ROUTE_HOME)
 	_mount_route(ROUTE_HOME)
 
@@ -213,50 +223,63 @@ func _setup_container() -> void:
 	_town_grid.name = "TownGrid"
 	_content_box.add_child(_town_grid)
 
+	_settings_toggle_button = Button.new()
+	_settings_toggle_button.name = "SettingsToggleButton"
+	_settings_toggle_button.text = _localized_text("HOME_SETTINGS_BUTTON", "⚙")
+	_settings_toggle_button.focus_mode = Control.FOCUS_ALL
+	_settings_toggle_button.size_flags_horizontal = Control.SIZE_SHRINK_END
+	_apply_town_button_style(_settings_toggle_button, false)
+	_settings_toggle_button.pressed.connect(_on_settings_toggle_pressed)
+	_content_box.add_child(_settings_toggle_button)
+
+	_settings_panel = AudioSettingsPanelScript.new() as Control
+	_settings_panel.name = "AudioSettingsPanel"
+	_content_box.add_child(_settings_panel)
+
 
 func _town_panel_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
-	style.bg_color = UI_COLOR_TOWN_SURFACE
-	style.border_color = UI_COLOR_TOWN_BORDER
+	style.bg_color = UI_COLOR_TOWN_PANEL_BG
+	style.border_color = UI_COLOR_TOWN_PANEL_OUTER
 	style.set_border_width_all(2)
-	style.set_corner_radius_all(8)
+	style.set_corner_radius_all(0)
 	style.set_content_margin_all(8.0)
 	return style
 
 
 func _town_button_style(is_primary: bool) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
-	style.bg_color = UI_COLOR_TOWN_ACCENT if is_primary else Color("F5DDA8")
+	style.bg_color = UI_COLOR_TOWN_ACCENT if is_primary else Palette.BUTTON_SECONDARY_BG
 	style.border_color = UI_COLOR_TOWN_BORDER
 	style.set_border_width_all(1)
-	style.set_corner_radius_all(5)
+	style.set_corner_radius_all(0)
 	style.set_content_margin_all(6.0)
 	return style
 
 
 func _town_button_focus_style(is_primary: bool) -> StyleBoxFlat:
 	var style := _town_button_style(is_primary)
-	style.border_color = Color("5B8C5A")
+	style.border_color = Palette.BUTTON_FOCUS_BORDER
 	style.set_border_width_all(3)
 	return style
 
 
 func _home_card_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color("FFF8E8")
-	style.border_color = Color("D8A85A")
+	style.bg_color = Palette.HOME_CARD_BG
+	style.border_color = Palette.HOME_CARD_BORDER
 	style.set_border_width_all(1)
-	style.set_corner_radius_all(6)
+	style.set_corner_radius_all(0)
 	style.set_content_margin_all(8.0)
 	return style
 
 
 func _disable_reason_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color("FFE9C2")
+	style.bg_color = Palette.DISABLE_REASON_BG
 	style.border_color = UI_COLOR_TOWN_ACCENT
 	style.set_border_width_all(2)
-	style.set_corner_radius_all(6)
+	style.set_corner_radius_all(0)
 	style.set_content_margin_all(8.0)
 	return style
 
@@ -462,6 +485,10 @@ func _set_shell_chrome_visible(is_visible: bool) -> void:
 		_growth_panel.visible = is_visible and _current_route == ROUTE_HOME
 	if _town_grid != null:
 		_town_grid.visible = is_visible and _current_route == ROUTE_HOME
+	if _settings_toggle_button != null:
+		_settings_toggle_button.visible = is_visible and _current_route == ROUTE_HOME
+	if _settings_panel != null and not (is_visible and _current_route == ROUTE_HOME):
+		_settings_panel.visible = false
 	_disable_reason_label.visible = is_visible and not _disable_reason_label.text.is_empty()
 	_primary_button.visible = is_visible
 	_secondary_button.visible = is_visible
@@ -552,7 +579,7 @@ func _add_home_info_card(card_name: String, title: String, body: String) -> void
 	title_label.name = "%sTitle" % card_name
 	title_label.text = title
 	title_label.add_theme_color_override("font_color", UI_COLOR_TOWN_ACCENT)
-	title_label.add_theme_font_size_override("font_size", 14)
+	title_label.add_theme_font_size_override("font_size", 16)
 	box.add_child(title_label)
 	var body_label := Label.new()
 	body_label.name = "%sBody" % card_name
@@ -690,6 +717,16 @@ func _on_secondary_action_pressed() -> void:
 			route_to(ROUTE_ROSTER)
 			return
 		route_to(ROUTE_MATCH_PRE)
+
+
+func _on_settings_toggle_pressed() -> void:
+	if _settings_panel == null:
+		return
+	if _settings_panel.visible:
+		_settings_panel.visible = false
+		return
+	_settings_panel.visible = true
+	_settings_panel.call("refresh_from_authority")
 
 
 func _can_enter_match() -> bool:

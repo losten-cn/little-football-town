@@ -1,13 +1,13 @@
 # Active Session State
 
-Task: P1 最小视觉原型 — 在 prototypes/ 下验证 32×32 TileMap + Camera2D + 2x 缩放 + Y-sort
+Task: Story 001 完成 — 视觉方向对齐推进中
 Date: 2026-07-10
-Pipeline: Production — 文档收敛已完成。P1 启动。
+Pipeline: Production — Story 001 (世界渲染层) COMPLETE WITH NOTES。Story 002 (HUD 暖亮化) 待启动。
 
 <!-- STATUS -->
-Epic: Town Building System
-Feature: Town Management UI
-Task: S5-02 facility grid stub — 实现完成，等待 /code-review + /story-done
+Epic: Visual Direction Alignment
+Feature: 世界渲染层 (Story 001 — COMPLETE)
+Task: /story-done 完成 → Story 002 待启动
 <!-- /STATUS -->
 
 ## 2026-07-10 文档收敛完成
@@ -1259,3 +1259,9 @@ Historical status at this checkpoint: Production Gate Preparation > Player exper
 - Tests: `TOWN_GRID_AUTHORITATIVE_PAYLOAD_TEST_PASS`, `L2_PLAYABLE_LOOP_PANELS_TEST_PASS`, `MVP_VISUAL_WALKTHROUGH_STRUCTURE_PASS`
 - Blockers: None
 - Next: `/code-review src/ui/town_grid.gd src/ui/hud/main_loop_shell.gd tests/integration/ui/town_grid_authoritative_payload_test.gd` then `/story-done production/epics/town-building-system/story-002-town-ui-grid-stub.md`
+
+## Session Extract — /story-done 2026-07-10
+- Verdict: COMPLETE WITH NOTES
+- Story: `production/epics/town-building-system/story-002-town-ui-grid-stub.md` — Town Management UI grid stub
+- Tech debt logged: None (AC 7 stub-deferred to Alpha; progress bar TODO stub noted in Completion Notes)
+- Next recommended: Sprint 5 Must Have 全部完成 → `/smoke-check sprint` → `/retrospective` → `/sprint-plan new`

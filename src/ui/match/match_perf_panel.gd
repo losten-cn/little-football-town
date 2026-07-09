@@ -26,6 +26,9 @@ var _pre_match_return_home_button: Button = null
 var _live_timeline: VBoxContainer = null
 var _live_exit_warning: Label = null
 var _halftime_adjust_button: Button = null
+var _halftime_tactic_option: OptionButton = null
+var _halftime_confirm_button: Button = null
+var _halftime_adjustment_made: bool = false
 var _result_confirm_button: Button = null
 var _league_impact_summary: Label = null
 var _disable_reason_label: Label = null
@@ -144,11 +147,29 @@ func _setup_ui() -> void:
 
 	_halftime_adjust_button = Button.new()
 	_halftime_adjust_button.name = "HalftimeAdjustButton"
-	_halftime_adjust_button.text = _localized_text("MATCH_HALFTIME_EXPLANATION", "说明：中场调整将在后续版本开放；本场先继续观看时间线。")
+	_halftime_adjust_button.text = _localized_text("MATCH_HALFTIME_AVAILABLE", "中场调整 — 选择下半场战术")
 	_halftime_adjust_button.focus_mode = Control.FOCUS_NONE
 	_halftime_adjust_button.disabled = true
 	_apply_town_button_style(_halftime_adjust_button, false)
 	_root_box.add_child(_halftime_adjust_button)
+
+	_halftime_tactic_option = OptionButton.new()
+	_halftime_tactic_option.name = "HalftimeTacticOption"
+	_halftime_tactic_option.add_item(_localized_text("HALFTIME_TACTIC_KEEP", "保持现有战术"), 0)
+	_halftime_tactic_option.add_item(_localized_text("HALFTIME_TACTIC_DEFENSIVE", "防守反击 — 稳固后防"), 1)
+	_halftime_tactic_option.add_item(_localized_text("HALFTIME_TACTIC_OFFENSIVE", "全力进攻 — 高压前场"), 2)
+	_halftime_tactic_option.select(0)
+	_halftime_tactic_option.visible = false
+	_root_box.add_child(_halftime_tactic_option)
+
+	_halftime_confirm_button = Button.new()
+	_halftime_confirm_button.name = "HalftimeConfirmButton"
+	_halftime_confirm_button.text = _localized_text("HALFTIME_CONFIRM", "确认调整")
+	_halftime_confirm_button.focus_mode = Control.FOCUS_ALL
+	_halftime_confirm_button.visible = false
+	_apply_town_button_style(_halftime_confirm_button, true)
+	_halftime_confirm_button.pressed.connect(_on_halftime_confirm_pressed)
+	_root_box.add_child(_halftime_confirm_button)
 
 	_league_impact_summary = Label.new()
 	_league_impact_summary.name = "LeagueImpactSummary"
@@ -207,6 +228,8 @@ func _refresh() -> void:
 	_live_timeline.visible = false
 	_live_exit_warning.visible = false
 	_halftime_adjust_button.visible = false
+	_halftime_tactic_option.visible = false
+	_halftime_confirm_button.visible = false
 	_result_confirm_button.visible = false
 	_league_impact_summary.visible = false
 	_disable_reason_label.visible = false
@@ -230,6 +253,7 @@ func _mount_pre_match() -> void:
 	_pre_match_return_home_button.visible = true
 	_disable_reason_label.visible = not _can_start_match()
 	_disable_reason_label.text = _match_disable_reason()
+	_halftime_adjustment_made = false
 
 
 func _mount_live() -> void:
@@ -237,7 +261,15 @@ func _mount_live() -> void:
 	_summary_label.text = _format_live_summary()
 	_live_timeline.visible = true
 	_live_exit_warning.visible = true
-	_halftime_adjust_button.visible = true
+	if not _halftime_adjustment_made:
+		_halftime_adjust_button.visible = true
+		_halftime_adjust_button.disabled = false
+		_halftime_tactic_option.visible = true
+		_halftime_confirm_button.visible = true
+	else:
+		_halftime_adjust_button.visible = true
+		_halftime_adjust_button.disabled = true
+		_halftime_adjust_button.text = _localized_text("HALFTIME_ADJUSTED", "中场调整已确认")
 	_mount_timeline()
 
 
@@ -279,6 +311,21 @@ func _on_pre_match_start_pressed() -> void:
 
 func _on_pre_match_return_home_pressed() -> void:
 	EventBus.emit("screen_requested", {"screen_id": "home"})
+
+
+func _on_halftime_confirm_pressed() -> void:
+	var selected_id: int = _halftime_tactic_option.get_selected_id() if _halftime_tactic_option != null else 0
+	var tactic_name: String = ""
+	match selected_id:
+		1: tactic_name = "defensive_counter"
+		2: tactic_name = "full_offensive"
+		_: tactic_name = "keep_current"
+	_halftime_adjustment_made = true
+	EventBus.emit("halftime_adjustment_requested", {
+		"tactic": tactic_name,
+		"tactic_label": str(_halftime_tactic_option.get_item_text(selected_id)) if _halftime_tactic_option != null else "保持现有战术",
+	})
+	_refresh()
 
 
 func _on_result_confirm_pressed() -> void:

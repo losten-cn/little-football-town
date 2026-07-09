@@ -1,7 +1,7 @@
 # Story 002: Town Management UI — 最小 facility grid stub
 
 > **Epic**: 小镇建设系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: UI
 > **Estimate**: S–M
@@ -175,3 +175,12 @@ Not allowed:
 - [ ] No new route IDs, gameplay formulas, or schema contracts were introduced.
 - [ ] Code review confirms presentation-only scope was preserved.
 - [ ] Any advisory deviations are documented.
+
+## Completion Notes
+**Completed**: 2026-07-10
+**Criteria**: 11/11 (10 passing + 1 stub-deferred)
+**Deviations**:
+- AC 7 (focus/hover/disabled without color): Stub-deferred to Alpha build/upgrade interaction story. All grid cells use `mouse_filter = IGNORE` in this read-only stub — no interactive states to verify.
+- AC 6 partial: Progress indicator uses ColorRect TODO stub rather than full ProgressBar. Marked `TODO(S5-followup)` — deferred until total construction units become available from TownBuilding authority.
+**Test Evidence**: `tests/integration/ui/town_grid_authoritative_payload_test.gd` (4 test functions, PASS); `L2_PLAYABLE_LOOP_PANELS_TEST_PASS`; `MVP_VISUAL_WALKTHROUGH_STRUCTURE_PASS`. Manual evidence file (`production/qa/evidence/town-ui-grid-stub-2026-07-10.md`) not yet created.
+**Code Review**: Complete — `/code-review` passed; 3 blocking issues resolved (double-subscription removed, dead progress-bar code cleaned, AC 7 stub-scoped).
