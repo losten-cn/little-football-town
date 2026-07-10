@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ReputationConfig" load_steps=2 format=3 uid="uid://reputationconfig00001"]
+
+[ext_resource type="Script" path="res://src/config/reputation_config.gd" id="1_reputation"]
+
+[resource]
+script = ExtResource("1_reputation")
+reputation_level_thresholds = {
+1: 0,
+2: 100,
+3: 180,
+4: 260,
+5: 360
+}

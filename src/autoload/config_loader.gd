@@ -8,12 +8,14 @@ const ECONOMY_CONFIG_PATH: String = "res://config/economy_config.tres"
 const TOWN_CONFIG_PATH: String = "res://config/town_config.tres"
 const MATCH_CONFIG_PATH: String = "res://config/match_config.tres"
 const LEAGUE_CONFIG_PATH: String = "res://config/league_config.tres"
+const REPUTATION_CONFIG_PATH: String = "res://config/reputation_config.tres"
 const TRAINING_CATALOG_CONFIG_PATH: String = "res://config/training_catalog_config.tres"
 const BalanceConfigType = preload("res://src/config/balance_config.gd")
 const EconomyConfigType = preload("res://src/config/economy_config.gd")
 const TownConfigType = preload("res://src/config/town_config.gd")
 const MatchConfigType = preload("res://src/config/match_config.gd")
 const LeagueConfigType = preload("res://src/config/league_config.gd")
+const ReputationConfigType = preload("res://src/config/reputation_config.gd")
 const TrainingCatalogConfigType = preload("res://src/config/training_catalog_config.gd")
 
 var balance_config: BalanceConfigType = null
@@ -21,6 +23,7 @@ var economy_config: EconomyConfigType = null
 var town_config: TownConfigType = null
 var match_config: MatchConfigType = null
 var league_config: LeagueConfigType = null
+var reputation_config: ReputationConfigType = null
 var training_catalog_config: TrainingCatalogConfigType = null
 var last_errors: Array[String] = []
 
@@ -46,8 +49,9 @@ func load_all() -> bool:
 	town_config = _load_town_config()
 	match_config = _load_match_config()
 	league_config = _load_league_config()
+	reputation_config = _load_reputation_config()
 	training_catalog_config = _load_training_catalog_config()
-	return balance_config != null and economy_config != null and town_config != null and match_config != null and league_config != null and training_catalog_config != null
+	return balance_config != null and economy_config != null and town_config != null and match_config != null and league_config != null and reputation_config != null and training_catalog_config != null
 
 ## Loads and validates a balance config resource from a specific path.
 func load_balance_config_from_path(path: String):
@@ -100,6 +104,9 @@ func reload_config(domain: String) -> bool:
 	if domain == "league":
 		league_config = _load_league_config()
 		return league_config != null
+	if domain == "reputation":
+		reputation_config = _load_reputation_config()
+		return reputation_config != null
 	if domain == "training":
 		training_catalog_config = _load_training_catalog_config()
 		return training_catalog_config != null
