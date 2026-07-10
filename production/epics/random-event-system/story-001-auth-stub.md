@@ -1,7 +1,7 @@
 # Story 001: RandomEventManager 最小 Authority Stub
 
 > **Epic**: 随机事件系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Logic + Integration
 > **Estimate**: M (3-4 hours)
@@ -75,3 +75,11 @@
 
 - Depends on: None
 - Unlocks: Story 002 (事件触发窗口与 offer 骨架)
+
+## Completion Notes
+**Completed**: 2026-07-10
+**Criteria**: 5/5 passing (all auto-verified)
+**Deviations**: None
+**Test Evidence**: Logic + Integration — `tests/unit/random_event/auth_stub_test.gd` (5 test functions, PASS)
+**Code Review**: Complete
+**Implementation**: `src/core/random_event_manager.gd` (Story 001 baseline — 4 durable fields + settlement key + serialize/deserialize + idempotency guard)

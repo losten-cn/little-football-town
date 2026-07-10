@@ -1,7 +1,7 @@
 # Story 002: AudioServer 集成 + BGM 切换
 
 > **Epic**: 音频系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Integration
 > **Estimate**: M (3-4 hours)
@@ -73,3 +73,11 @@
 
 - Depends on: Story 001 (AudioManager save integration)
 - Unlocks: Story 003 (SFX event-to-cue mapping)
+
+## Completion Notes
+**Completed**: 2026-07-10
+**Criteria**: 5/5 passing (all auto-verified)
+**Deviations**: None
+**Test Evidence**: Integration — `tests/integration/audio/audioserver_integration_test.gd` (5 test functions, PASS)
+**Code Review**: Complete
+**Implementation**: `src/autoload/audio_manager.gd` (AudioServer bus hierarchy + BGM switching + SFX cooldown + priority ducking + graceful degrade)

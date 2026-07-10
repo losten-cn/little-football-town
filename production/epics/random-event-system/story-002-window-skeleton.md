@@ -1,12 +1,12 @@
 # Story 002: 事件触发窗口与 Offer 骨架
 
 > **Epic**: 随机事件系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Logic
 > **Estimate**: M (3-4 hours)
 > **Manifest Version**: 2026-07-05
-> **Last Updated**: [set by /dev-story]
+> **Last Updated**: 2026-07-10
 
 ## Context
 
@@ -69,3 +69,11 @@
 
 - Depends on: Story 001 (RandomEventManager auth stub — durable truth 字段)
 - Unlocks: 后续 Beta story (实际事件分类/选项/效果)
+
+## Completion Notes
+**Completed**: 2026-07-10
+**Criteria**: 5/5 passing (all auto-verified)
+**Deviations**: None
+**Test Evidence**: Logic — `tests/unit/random_event/window_skeleton_test.gd` (5 test functions, PASS)
+**Code Review**: Complete
+**Implementation**: `src/core/random_event_manager.gd` (Story 002 increment — EventBus subscription, stable-window evaluation, cooldown gating, read-only view payloads)

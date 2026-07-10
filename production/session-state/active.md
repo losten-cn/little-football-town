@@ -1,14 +1,48 @@
 # Active Session State
 
-Task: Story 001 完成 — 视觉方向对齐推进中
+## Session Extract — /story-done 2026-07-10
+- Verdict: COMPLETE
+- Story: `production/epics/audio-system/story-002-audioserver-bgm.md` — AudioServer 集成 + BGM 切换
+- Tech debt logged: None
+- Next: S8-03 / S8-04 待 /story-done
+
+---
+
+Task: Sprint 8 close-out — S8-01/02 CLOSED, S8-03/04 pending
 Date: 2026-07-10
-Pipeline: Production — Story 001 (世界渲染层) COMPLETE WITH NOTES。Story 002 (HUD 暖亮化) 待启动。
+Pipeline: Production — 2/4 Sprint 8 Must Haves formally closed
 
 <!-- STATUS -->
-Epic: Visual Direction Alignment
-Feature: 世界渲染层 (Story 001 — COMPLETE)
-Task: /story-done 完成 → Story 002 待启动
+Epic: Audio System
+Feature: AudioServer Integration + BGM (Story 002)
+Task: Implementation complete — both tests pass
 <!-- /STATUS -->
+
+## Story 002 (S8-02) Implementation — 2026-07-10
+
+### Files Changed
+- **MODIFIED** `src/autoload/audio_manager.gd` — filled _apply_volumes() stub with AudioServer calls; added bus setup, BGM state switching, SFX cooldown, priority ducking, graceful degrade
+- **CREATED** `tests/integration/audio/audioserver_integration_test.gd` — AC-1 through AC-5 automated integration test
+
+### Implementation Summary
+- `_setup_audio_buses()`: Creates Master/BGM/SFX/Ambience bus hierarchy programmatically in _ready() (idempotent)
+- `_apply_volumes()`: Calls AudioServer.set_bus_volume_db() + set_bus_mute() for each bus, applies durable prefs + transient ducking
+- `set_game_state(state)`: Switches between daily / match_live / post_match with ducking config; unknown states clamp to daily
+- `request_sfx(sfx_id) -> bool`: Cooldown-gated SFX eligibility check (2.0s default cooldown, respects mute/volume-zero)
+- `_apply_ducking()`: Transient layer (ADR-0013 Decision #5) — BGM ducked to 0.6x in match_live, Ambience muted in match_live/post_match
+- `_linear_to_db()`: Converts [0.0, 1.0] to dB via linear2db(), clamped to -80 dB floor
+- Volume setters now call _apply_volumes() immediately (immediate AudioServer sync)
+
+### Verification
+- `AUDIO_AUTH_STUB_TEST_PASS` (Story 001 regression)
+- `AUDIOSERVER_INTEGRATION_TEST_PASS` (Story 002 AC-1 through AC-5)
+
+### Key Design Decisions
+- Buses created programmatically in _ready() — no pre-configured .tres needed
+- Unknown game states clamp to "daily" with push_warning()
+- Ducking: match_live ducks BGM to 0.6x, mutes Ambience; post_match restores BGM, keeps Ambience muted
+- SFX cooldown uses Time.get_ticks_msec() for wall-clock timing
+- Priority ducking (match_whistle > sfx > ambience) implemented as transient bus manipulation, never mutating durable prefs
 
 ## 2026-07-10 文档收敛完成
 
