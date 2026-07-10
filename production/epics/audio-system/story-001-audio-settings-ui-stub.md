@@ -167,19 +167,19 @@ Not allowed:
 - Authority contract evidence:
   - `tests/integration/ui/audio_settings_authoritative_payload_test.gd`
 
-**Status**: [ ] Not yet created
+**Status**: [x] PASS — 2026-07-10
 
 ---
 
 ## Definition of Done
 
-- [ ] Audio Settings panel exists and is accessible from Home.
-- [ ] `AudioManager` stub exists with ADR-0013 key interfaces.
-- [ ] Integration test for authoritative volume payload consumption passes.
-- [ ] Existing route/handoff guardrails still pass.
-- [ ] No new route IDs, gameplay formulas, or schema contracts were introduced.
-- [ ] Code review confirms presentation-only + foundation-stub scope was preserved.
-- [ ] Any advisory deviations are documented.
+- [x] Audio Settings panel exists and is accessible from Home.
+- [x] `AudioManager` stub exists with ADR-0013 key interfaces.
+- [x] Integration test for authoritative volume payload consumption passes.
+- [x] Existing route/handoff guardrails still pass.
+- [x] No new route IDs, gameplay formulas, or schema contracts were introduced.
+- [x] Code review confirms presentation-only + foundation-stub scope was preserved.
+- [x] Any advisory deviations are documented.
 
 ## Completion Notes
 **Completed**: 2026-07-10
