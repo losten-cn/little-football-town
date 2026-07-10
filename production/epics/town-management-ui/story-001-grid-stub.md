@@ -1,7 +1,7 @@
 # Story 001: 设施网格最小容器
 
 > **Epic**: 建设与经营 UI
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: UI
 > **Estimate**: S (2-3 hours)
@@ -74,3 +74,11 @@
 
 - Depends on: None（可独立创建容器；grid 数据从 mock TownBuilding 获取）
 - Unlocks: Story 002 (建造/升级确认流)
+
+## Completion Notes
+**Completed**: 2026-07-10
+**Criteria**: All passing (S7-03 implementation, auto-verified)
+**Deviations**: None
+**Test Evidence**: UI — `tests/integration/ui/town_mgmt_grid_stub_test.gd` (PASS)
+**Code Review**: Complete (Sprint 7)
+**Implementation**: S7-03 — TownOverview grid stub (5×5 layout, TownBuilding read model consumption)
