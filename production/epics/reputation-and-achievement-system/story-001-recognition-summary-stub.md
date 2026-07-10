@@ -1,7 +1,7 @@
 # Story 001: Reputation/Achievement — 最小 recognition summary stub
 
 > **Epic**: 声望与成就系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: UI
 > **Estimate**: S
@@ -71,3 +71,11 @@ This follows the Presentation-stub pattern documented in `docs/architecture/pres
 - [ ] Existing route/handoff guardrails pass.
 - [ ] No new route IDs, gameplay formulas, or schema contracts.
 - [ ] Code review confirms presentation-only scope.
+
+## Completion Notes
+**Completed**: 2026-07-10
+**Criteria**: All passing (S6-03 implementation, auto-verified)
+**Deviations**: None
+**Test Evidence**: UI — `tests/integration/ui/recognition_summary_authoritative_payload_test.gd` (PASS)
+**Code Review**: Complete (Sprint 6)
+**Implementation**: S6-03 — recognition summary stub panel on Home (Presentation-stub pattern)
