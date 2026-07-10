@@ -1,7 +1,7 @@
 # Story 001: AudioManager 最小 Auth + Save 集成
 
 > **Epic**: 音频系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Logic + Integration
 > **Estimate**: S (2-3 hours)
@@ -74,3 +74,11 @@
 
 - Depends on: None (内存数据 stub，不依赖音频资产)
 - Unlocks: Story 002 (音频播放 + BGM 管理)
+
+## Completion Notes
+**Completed**: 2026-07-10
+**Criteria**: All passing (S5-03 implementation, auto-verified)
+**Deviations**: None
+**Test Evidence**: Logic — `tests/unit/audio/auth_stub_test.gd` (PASS)
+**Code Review**: Complete (Sprint 5)
+**Implementation**: S5-03 — AudioManager autoload + save integration + 4 bus hierarchy stub
