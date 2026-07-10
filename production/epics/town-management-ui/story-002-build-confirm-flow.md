@@ -1,7 +1,7 @@
 # Story 002: 建造/升级确认流
 
 > **Epic**: 建设与经营 UI
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: UI + Integration
 > **Estimate**: M (3-4 hours)
@@ -74,3 +74,11 @@
 
 - Depends on: Story 001 (grid stub — TownOverview screen exists)
 - Unlocks: Story 003 (建设队列 + 并行项目)
+
+## Completion Notes
+**Completed**: 2026-07-10
+**Criteria**: 5/5 passing (all auto-verified)
+**Deviations**: None
+**Test Evidence**: UI + Integration — `tests/integration/ui/town_build_confirm_test.gd` (PASS)
+**Code Review**: Complete
+**Implementation**: `src/ui/town/town_overview_screen.gd` (budget preview + confirm flow + facility status labels)

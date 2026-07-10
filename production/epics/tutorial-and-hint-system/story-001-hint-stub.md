@@ -1,7 +1,7 @@
 # Story 001: TutorialHintManager 最小 Stub
 
 > **Epic**: 教程与提示系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Polish
 > **Type**: Logic + Integration
 > **Estimate**: S (2-3 hours)
@@ -73,3 +73,11 @@
 
 - Depends on: OnboardingSystem (existing, ADR-defined)
 - Unlocks: Story 002 (自动弹出提示 + 帮助面板)
+
+## Completion Notes
+**Completed**: 2026-07-10
+**Criteria**: 5/5 passing (all auto-verified)
+**Deviations**: None
+**Test Evidence**: Logic + Integration — `tests/unit/tutorial/hint_stub_test.gd` (PASS)
+**Code Review**: Complete
+**Implementation**: `src/core/tutorial_hint_manager.gd` (scene-instantiated hint state + OnboardingSystem DI + cooldown/disabled persistence + view payload)

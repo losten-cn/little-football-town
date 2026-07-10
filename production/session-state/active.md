@@ -1,16 +1,14 @@
 # Active Session State
 
-## Session Extract — /story-done 2026-07-10
-- Verdict: COMPLETE
-- Story: `production/epics/audio-system/story-002-audioserver-bgm.md` — AudioServer 集成 + BGM 切换
-- Tech debt logged: None
-- Next: S8-03 / S8-04 待 /story-done
-
----
-
-Task: Sprint 8 close-out — S8-01/02 CLOSED, S8-03/04 pending
+Task: Sprint 8 — 4/4 Must Haves CLOSED → sprint close-out
 Date: 2026-07-10
-Pipeline: Production — 2/4 Sprint 8 Must Haves formally closed
+Pipeline: Production — Sprint 8 Backend Deepening COMPLETE
+
+<!-- STATUS -->
+Epic: Sprint 8
+Feature: Backend Deepening
+Task: Sprint close-out
+<!-- /STATUS -->
 
 <!-- STATUS -->
 Epic: Audio System
