@@ -4,7 +4,12 @@
 > **GDD**: `design/gdd/audio-system.md`
 > **Architecture Module**: `AudioSystem` (Feature Contract / Presentation Support)
 > **Status**: Ready
-> **Stories**: Not yet created — run `/create-stories audio-system`
+> **Stories**: 2 stories
+
+| # | Story | Type | Status | ADR |
+|---|-------|------|--------|-----|
+| 001 | [Auth Stub](story-001-auth-stub.md) | Logic + Integration | Complete | ADR-0013 |
+| 002 | [AudioServer BGM](story-002-audioserver-bgm.md) | Integration | Ready | ADR-0013 |
 
 ## Overview
 
