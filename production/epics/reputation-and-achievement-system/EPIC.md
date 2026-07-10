@@ -4,7 +4,7 @@
 > **GDD**: `design/gdd/reputation-and-achievement-system.md`
 > **Architecture Module**: `ReputationAchievementSystem` (Feature Contract Layer)
 > **Status**: Ready
-> **Stories**: Not yet created — run `/create-stories reputation-and-achievement-system`
+> **Stories**: 4 stories (001 stub, 002-004 ready)
 
 ## Overview
 
@@ -26,6 +26,15 @@
 | TR-reputation-004 | 奖励结算需定义明确的归属、去重键与消费顺序 | ADR-0011 ✅ |
 | TR-reputation-005 | 声望等级、进度、已解锁成就与待展示奖励作为可存档耐久状态恢复 | ADR-0011 ✅ |
 | TR-reputation-006 | 展示层必须消费权威声望/成就 payload，不得自行推导 | ADR-0011 ✅ |
+
+## Stories
+
+| # | Story | Type | Status | ADR |
+|---|-------|------|--------|-----|
+| 001 | Recognition Summary Stub | UI | Ready | ADR-0011 |
+| 002 | 声望计算 + 等级推进 | Logic | Ready | ADR-0011 |
+| 003 | 成就判定 + 结算去重 | Logic | Ready | ADR-0011 |
+| 004 | 持久化 + UI View Payload | Integration | Ready | ADR-0011 |
 
 ## Definition of Done
 

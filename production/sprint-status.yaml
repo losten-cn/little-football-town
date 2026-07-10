@@ -19,19 +19,19 @@ updated: "2026-07-10"
 stories:
   - id: "S9-01"
     name: "声望/成就 — Story 002: 声望计算 + 等级推进"
-    file: ""  # 待 /create-stories reputation-and-achievement-system 生成
+    file: "production/epics/reputation-and-achievement-system/story-002-reputation-calculation-level-progression.md"
     priority: must-have
-    status: backlog
+    status: ready-for-dev
     owner: "Gameplay Programmer"
     estimate_days: 1.0
-    blocker: "需先运行 /create-stories"
+    blocker: ""
     completed: ""
 
   - id: "S9-02"
     name: "关闭 3 个过期 Ready story"
     file: "production/sprints/sprint-9-alpha-recognition.md#s9-02"
     priority: must-have
-    status: backlog
+    status: ready-for-dev
     owner: "Producer"
     estimate_days: 0.3
     blocker: ""
@@ -44,14 +44,14 @@ stories:
     status: backlog
     owner: "Gameplay Programmer"
     estimate_days: 0.5
-    blocker: "需先运行 /create-stories"
+    blocker: "需先运行 /create-stories skill-and-trait-system"
     completed: ""
 
   - id: "S9-04"
     name: "S8-05 visual-direction-alignment 延期 AC 手动验证"
     file: "production/sprints/sprint-9-alpha-recognition.md#s9-04"
     priority: nice-to-have
-    status: backlog
+    status: ready-for-dev
     owner: "QA"
     estimate_days: 0.3
     blocker: ""
