@@ -1,7 +1,7 @@
 # Story 002: 声望计算 + 等级推进
 
 > **Epic**: 声望与成就系统
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Logic
 > **Estimate**: M (3-4 hours)
@@ -64,3 +64,11 @@
 
 - Depends on: Story 001 (ReputationAchievementManager auth stub)
 - Unlocks: Story 003 (成就判定 + settlement key 去重)
+
+## Completion Notes
+**Completed**: 2026-07-10
+**Criteria**: 5/5 passing (all auto-verified)
+**Deviations**: None
+**Test Evidence**: Logic — `tests/unit/reputation/reputation_formula_test.gd` (PASS)
+**Code Review**: Pending
+**Implementation**: `src/core/reputation_achievement_manager.gd` + `src/config/reputation_config.gd` + `config/reputation_config.tres` + ConfigLoader integration
