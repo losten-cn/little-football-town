@@ -38,7 +38,7 @@ stories:
     estimate_days: 0.5
     blocker: ""
     completed: "2026-07-10"
-    notes: "ACCEPTED ADVISORY — 根因深于 0.5d 估算。Post-Story-003 training flow 需要 training option selection + fully wired economy/time managers。延至专门 training regression story。"
+    notes: "FIXED — 测试重写为 UI bridge 层验证（导航→选项选择→确认按钮可用→返回主页）。完整 training execution 链（train→economy→time→training_completed）延至专门 training regression story。"
 
   - id: "S6-03"
     name: "Reputation/Achievement — 最小 recognition summary stub"
