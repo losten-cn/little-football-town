@@ -4,7 +4,12 @@
 > **GDD**: `design/gdd/random-event-system.md`
 > **Architecture Module**: `RandomEventSystem` (Feature Contract Layer)
 > **Status**: Ready
-> **Stories**: Not yet created — run `/create-stories random-event-system`
+> **Stories**: 2 stories
+
+| # | Story | Type | Status | ADR |
+|---|-------|------|--------|-----|
+| 001 | [Authority Stub](story-001-auth-stub.md) | Logic + Integration | Ready | ADR-0012 |
+| 002 | [Window Skeleton](story-002-window-skeleton.md) | Logic | Ready | ADR-0012 |
 
 ## Overview
 
