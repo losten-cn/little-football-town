@@ -61,6 +61,7 @@ var _town_grid: Control = null
 var _settings_panel: Control = null
 var _settings_toggle_button: Button = null
 var _recognition_panel: Control = null
+var _town_overview_button: Button = null
 var _transition_tween: Tween = null
 
 
@@ -224,6 +225,16 @@ func _setup_container() -> void:
 	_town_grid = TownGridScript.new() as Control
 	_town_grid.name = "TownGrid"
 	_content_box.add_child(_town_grid)
+
+	# Town overview button (entry point to full-screen Town Management UI)
+	_town_overview_button = Button.new()
+	_town_overview_button.name = "TownOverviewButton"
+	_town_overview_button.text = _localized_text("HOME_TOWN_BUTTON", "小镇")
+	_town_overview_button.focus_mode = Control.FOCUS_ALL
+	_town_overview_button.size_flags_horizontal = Control.SIZE_SHRINK_END
+	_apply_town_button_style(_town_overview_button, false)
+	_town_overview_button.pressed.connect(_on_town_overview_pressed)
+	_content_box.add_child(_town_overview_button)
 
 	_settings_toggle_button = Button.new()
 	_settings_toggle_button.name = "SettingsToggleButton"
@@ -725,6 +736,13 @@ func _on_secondary_action_pressed() -> void:
 			route_to(ROUTE_ROSTER)
 			return
 		route_to(ROUTE_MATCH_PRE)
+
+
+func _on_town_overview_pressed() -> void:
+	## Stub — opens full-screen Town Management UI.
+	## Currently a no-op: the 5×5 grid is already visible on Home.
+	## Future stories will implement town full-screen navigation here.
+	pass
 
 
 func _on_settings_toggle_pressed() -> void:

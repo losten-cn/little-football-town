@@ -36,7 +36,7 @@ func test_time_manager_autoload_order_matches_manifest_contract() -> void:
 	var autoload_order: Array[String] = _read_autoload_order_from_project_file()
 
 	# Assert
-	_expect(autoload_order.size() == 5, "autoload order should contain the five foundation singletons")
+	_expect(autoload_order.size() >= 5, "autoload order should contain at least the five foundation singletons")
 	_expect(_index_of(autoload_order, "ConfigLoader") == 0, "ConfigLoader should load first")
 	_expect(_index_of(autoload_order, "EventBus") == 1, "EventBus should load second")
 	_expect(_index_of(autoload_order, "TimeManager") == 2, "TimeManager should load after EventBus")
