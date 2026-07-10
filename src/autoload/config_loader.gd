@@ -132,6 +132,9 @@ func _load_league_config() -> Resource:
 func _load_training_catalog_config() -> Resource:
 	return _load_training_catalog_config_from_path(TRAINING_CATALOG_CONFIG_PATH)
 
+func _load_reputation_config() -> Resource:
+	return _load_reputation_config_from_path(REPUTATION_CONFIG_PATH)
+
 func _load_balance_config_from_path(path: String):
 	if not ResourceLoader.exists(path):
 		last_errors.append("config file missing: %s" % path)
@@ -173,6 +176,13 @@ func _load_training_catalog_config_from_path(path: String) -> Resource:
 		return null
 	var resource: Resource = ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_IGNORE)
 	return _validate_training_catalog_config_resource(resource, path)
+
+func _load_reputation_config_from_path(path: String) -> Resource:
+	if not ResourceLoader.exists(path):
+		last_errors.append("config file missing: %s" % path)
+		return null
+	var resource: Resource = ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_IGNORE)
+	return _validate_reputation_config_resource(resource, path)
 
 func _validate_balance_config_resource(resource: Resource, path: String):
 	if resource == null:
@@ -251,6 +261,20 @@ func _validate_training_catalog_config_resource(resource: Resource, path: String
 	var loaded_config: Resource = resource
 	if loaded_config.get_script() != TrainingCatalogConfigType:
 		last_errors.append("resource is not TrainingCatalogConfig: %s" % path)
+		return null
+	var result: Dictionary[String, Variant] = loaded_config.call("validate")
+	if not (result["valid"] as bool):
+		last_errors.append_array(result["errors"] as Array[String])
+		return null
+	return loaded_config
+
+func _validate_reputation_config_resource(resource: Resource, path: String):
+	if resource == null:
+		last_errors.append("failed to load: %s" % path)
+		return null
+	var loaded_config: Resource = resource
+	if loaded_config.get_script() != ReputationConfigType:
+		last_errors.append("resource is not ReputationConfig: %s" % path)
 		return null
 	var result: Dictionary[String, Variant] = loaded_config.call("validate")
 	if not (result["valid"] as bool):
