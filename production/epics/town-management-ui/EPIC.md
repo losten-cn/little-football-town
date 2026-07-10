@@ -4,7 +4,11 @@
 > **GDD**: `design/gdd/town-management-ui.md`
 > **Architecture Module**: `TownManagementUI` (Presentation [Alpha])
 > **Status**: Ready
-> **Stories**: Not yet created — run `/create-stories town-management-ui`
+> **Stories**: 1 story
+
+| # | Story | Type | Status | ADR |
+|---|-------|------|--------|-----|
+| 001 | [Grid Stub](story-001-grid-stub.md) | UI | Ready | ADR-0008 |
 
 ## Overview
 
