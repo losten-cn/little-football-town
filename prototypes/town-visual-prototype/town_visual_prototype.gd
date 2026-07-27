@@ -85,6 +85,7 @@ func _create_tilemap() -> TileMapLayer:
 	tilemap.name = "TownTileMap"
 	tilemap.tile_set = _build_tileset()
 	tilemap.y_sort_enabled = true
+	tilemap.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST  # 像素艺术禁用线性过滤 (STYLE_GUIDE §1)
 	# 单层 TileMapLayer — Y-sort 对 tile 内部按行排序
 	# 建筑和球场 tile 的 Y 值天然大于草地，自动排在前面
 	add_child(tilemap)
@@ -240,10 +241,12 @@ func _make_sprite(size: Vector2, color: Color, pos: Vector2) -> Sprite2D:
 	for fx in range(4, int(size.x) - 4):
 		img.set_pixel(fx, 4, face)
 		img.set_pixel(fx, 5, face)
-	sprite.texture = ImageTexture.create_from_image(img)
+	var tex := ImageTexture.create_from_image(img)
+	sprite.texture = tex
 	sprite.position = pos
 	sprite.centered = false
 	sprite.y_sort_enabled = true
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST  # 像素艺术禁用线性过滤
 	return sprite
 
 

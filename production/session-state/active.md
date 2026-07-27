@@ -1,8 +1,15 @@
 # Active Session State
 
-Task: Sprint 8 — 4/4 Must Haves CLOSED → sprint close-out
+Task: Sprint 9 close-out + Sprint 10 prep
 Date: 2026-07-10
-Pipeline: Production — Sprint 8 Backend Deepening COMPLETE
+Pipeline: Production — Sprint 9 Alpha Recognition COMPLETE
+
+<!-- QA-PLAN: 2026-07-10 | System: sprint-9 | Plan written: production/qa/qa-plan-sprint-9-2026-07-10.md -->
+<!-- STATUS -->
+Epic: Sprint 9
+Feature: Alpha Recognition & Housekeeping
+Task: QA plan + sprint-status sync
+<!-- /STATUS -->
 
 <!-- STATUS -->
 Epic: Sprint 8

@@ -230,11 +230,11 @@ func _get_max_level() -> int:
 ## Parameters:
 ##   level: int — the level just attained
 func _on_level_up(level: int) -> void:
-	_reputation_leveled_up.emit(level)
+	reputation_leveled_up.emit(level)
 
 ## Called after reputation_total changes and all level-ups are resolved.
 func _on_reputation_changed(previous_total: int, new_total: int) -> void:
-	_reputation_changed.emit(previous_total, new_total)
+	reputation_changed.emit(previous_total, new_total)
 
 # ─────────────────────────────────────────────
 # Signals

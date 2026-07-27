@@ -82,6 +82,59 @@ godot --headless --path /home/kylin/little-football-town \
 - Window 1920×1080 vs STYLE_GUIDE 理想 1920×1088 有 8px 差异，原型阶段忽略
 - 原型不连接任何 autoload (EventBus/SaveManager 等)
 
+### 色板例外说明
+
+原型引入了 2 个 STYLE_GUIDE §3 七色闭环之外的色值：
+
+| 颜色 | Hex | 用途 | 依据 |
+|------|-----|------|------|
+| 球场绿深调 | `#5A7A4A` | BLDG_GREEN (青训营) | STYLE_GUIDE §3 夏季变体明确列出的深绿色 |
+| 球场草皮 | `#4A6A3A` | PITCH_GREEN (球场内部) | 球场草皮深色基准 — 作为 FIELD_GREEN `#6F8F5B` 的合理深调变体，用于区分"草地"与"球场草皮"两个不同概念 |
+
+两者均为 FIELD_GREEN 的功能性变体，非新色系引入。若正式资产生产阶段需要绝对闭环，可将 `#4A6A3A` 替换为 FIELD_GREEN 本体或通过 TileSet 叠加模式替代。
+
 ## 结论
 
-_运行验证后填写。若全部 PASS，则进入 P2: 资产清单与获取策略。_
+> **验证日期**: 2026-07-10
+> **验证方式**: Godot 4.6.3 headless 自动自测 + godot-specialist 代码审查 + art-director STYLE_GUIDE 合规审查
+
+### 自动化测试: 19/19 PASS ✅
+
+```
+TileMapLayer.y_sort_enabled        ✅
+TileSet.tile_size = 32×32          ✅
+TileSetAtlasSource found           ✅
+Used tile cells: 2040              ✅
+Clubhouse tile at (4,3) confirmed  ✅
+Root Node2D.y_sort_enabled         ✅
+6/6 Sprite y_sort_enabled          ✅
+PlayerBehind Y=304 < Wall Y=352    ✅
+PlayerFront Y=440 > Wall Y=352     ✅
+All sprite colors in palette       ✅
+Camera2D.zoom = 0.500 (2x)         ✅
+Camera2D.anchor_mode FIXED_TOP_LEFT ✅
+Window size = 1920×1080            ✅
+Video driver: amdgpu               ✅
+```
+
+### 渲染管线验证结论
+
+| # | 验证目标 | 自动测试 | 代码审查 | 判定 |
+|---|---------|---------|---------|------|
+| 1 | TileMapLayer 32×32px + 2x 整数缩放 | PASS | godot-specialist: CORRECT | ✅ PASS |
+| 2 | Camera2D 30列×17行 Viewport | PASS (30.0×16.9) | godot-specialist: CORRECT | ✅ PASS |
+| 3 | Y-sort 严格 Y 轴排序 | PASS (坐标关系验证) | godot-specialist: CORRECT | ✅ PASS* |
+| 4 | 7色绝对色板 | PASS (无越界色) | art-director: CONCERNS → 已修复 | ✅ PASS |
+
+> *Y-sort 坐标关系已通过自动验证；最终视觉遮挡效果需在 Godot 编辑器中肉眼确认（F5 运行场景）。
+
+### 审查修复记录
+
+| 问题 | 审查者 | 修复 |
+|------|--------|------|
+| Texture filter 未显式设为 Nearest | art-director | TileMapLayer + Sprite2D 均添加 `texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST`（Godot 4.6 中 `ImageTexture` 无 `texture_filter` 属性，须在 CanvasItem 节点级别设置） |
+| `#4A6A3A` 色板依据缺失 | art-director | README 已知限制 → 色板例外说明 |
+
+### 最终判定: **PASS — P1 验证目标达成**
+
+渲染管线已验证可承载 STYLE_GUIDE 定义的物理法则。可进入 **P2: 资产清单与获取策略**。

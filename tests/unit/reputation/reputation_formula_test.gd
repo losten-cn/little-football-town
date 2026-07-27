@@ -21,6 +21,14 @@ func _initialize() -> void:
 	test_ac3_multi_level_crossing()
 	test_ac4_single_writer_durable_truth_fields()
 	test_ac5_config_driven_thresholds()
+	test_edge_zero_gain_early_return()
+	test_edge_negative_gain_guard()
+	test_edge_apply_config_null_keeps_defaults()
+	test_edge_apply_config_invalid_keeps_defaults()
+	test_edge_reputation_changed_signal()
+	test_edge_exact_threshold_boundary()
+	test_edge_exceed_max_level()
+	test_edge_negative_weights_guard()
 
 	if _failures.is_empty():
 		print("REPUTATION_FORMULA_TEST_PASS")
@@ -211,7 +219,7 @@ func test_ac4_single_writer_durable_truth_fields() -> void:
 
 func test_ac5_config_driven_thresholds() -> void:
 	# Arrange — custom config with non-default thresholds
-	var custom_config: Resource = ReputationConfigScript.new()
+	var custom_config: ReputationConfig = ReputationConfigScript.new() as ReputationConfig
 	custom_config.reputation_level_thresholds = {
 		1: 0,
 		2: 50,
@@ -240,22 +248,226 @@ func test_ac5_config_driven_thresholds() -> void:
 	_expect(is_equal_approx(manager.get_reputation_progress_ratio(), 1.0), "AC-5: at max level progress should be 1.0, got %.6f" % manager.get_reputation_progress_ratio())
 
 	# Arrange — invalid config (non-consecutive levels)
-	var bad_config: Resource = ReputationConfigScript.new()
+	var bad_config: ReputationConfig = ReputationConfigScript.new() as ReputationConfig
 	bad_config.reputation_level_thresholds = {1: 0, 3: 100}
 	var bad_validation: Dictionary[String, Variant] = bad_config.validate()
 	_expect(not (bad_validation["valid"] as bool), "AC-5: non-consecutive levels config must be invalid")
 
 	# Arrange — invalid config (level 1 not 0)
-	var bad_config_2: Resource = ReputationConfigScript.new()
+	var bad_config_2: ReputationConfig = ReputationConfigScript.new() as ReputationConfig
 	bad_config_2.reputation_level_thresholds = {1: 10, 2: 100}
 	var bad_validation_2: Dictionary[String, Variant] = bad_config_2.validate()
 	_expect(not (bad_validation_2["valid"] as bool), "AC-5: level 1 threshold not 0 must be invalid")
 
 	# Arrange — invalid config (non-increasing)
-	var bad_config_3: Resource = ReputationConfigScript.new()
+	var bad_config_3: ReputationConfig = ReputationConfigScript.new() as ReputationConfig
 	bad_config_3.reputation_level_thresholds = {1: 0, 2: 100, 3: 50}
 	var bad_validation_3: Dictionary[String, Variant] = bad_config_3.validate()
 	_expect(not (bad_validation_3["valid"] as bool), "AC-5: non-increasing thresholds must be invalid")
+
+	manager.free()
+
+
+# ─────────────────────────────────────────────
+# Edge case — Zero gain early return
+# ─────────────────────────────────────────────
+
+func test_edge_zero_gain_early_return() -> void:
+	var manager: Node = ReputationAchievementManagerScript.new() as Node
+	var config: ReputationConfig = _make_test_config({1: 0, 2: 100, 3: 180, 4: 260, 5: 360})
+	manager.apply_config(config)
+
+	var signal_data: Array[bool] = [false]
+	manager.reputation_changed.connect(func(_prev: int, _new: int): signal_data[0] = true)
+
+	# Act
+	manager.process_reputation_gain(0)
+
+	# Assert — no state change, no signals
+	_expect(manager.reputation_total == 0, "Edge Zero Gain: total should remain 0, got %d" % manager.reputation_total)
+	_expect(manager.reputation_level == 1, "Edge Zero Gain: level should remain 1, got %d" % manager.reputation_level)
+	_expect(not signal_data[0], "Edge Zero Gain: reputation_changed should NOT fire on zero gain")
+
+	manager.free()
+
+
+# ─────────────────────────────────────────────
+# Edge case — Negative gain guard
+# ─────────────────────────────────────────────
+
+func test_edge_negative_gain_guard() -> void:
+	var manager: Node = ReputationAchievementManagerScript.new() as Node
+	var config: ReputationConfig = _make_test_config({1: 0, 2: 100, 3: 180})
+	manager.apply_config(config)
+
+	var signal_data: Array[bool] = [false]
+	manager.reputation_changed.connect(func(_prev: int, _new: int): signal_data[0] = true)
+
+	# Act
+	manager.process_reputation_gain(-1)
+
+	# Assert — no state change, no signals
+	_expect(manager.reputation_total == 0, "Edge Negative Gain: total should remain 0, got %d" % manager.reputation_total)
+	_expect(manager.reputation_level == 1, "Edge Negative Gain: level should remain 1, got %d" % manager.reputation_level)
+	_expect(not signal_data[0], "Edge Negative Gain: reputation_changed should NOT fire on negative gain")
+
+	manager.free()
+
+
+# ─────────────────────────────────────────────
+# Edge case — apply_config(null) keeps defaults
+# ─────────────────────────────────────────────
+
+func test_edge_apply_config_null_keeps_defaults() -> void:
+	var manager: Node = ReputationAchievementManagerScript.new() as Node
+
+	# Act — inject null
+	manager.apply_config(null)
+
+	# Assert — defaults preserved
+	_expect(manager.reputation_level == 1, "Edge Null Config: level should still be 1, got %d" % manager.reputation_level)
+	# Verify manager still functional with defaults
+	var gain: int = manager.calculate_reputation_gain(10, 0, 1.0, 1.0)
+	_expect(gain == 10, "Edge Null Config: calculate_reputation_gain should still work, got %d" % gain)
+
+	manager.free()
+
+
+# ─────────────────────────────────────────────
+# Edge case — apply_config(invalid) keeps defaults
+# ─────────────────────────────────────────────
+
+func test_edge_apply_config_invalid_keeps_defaults() -> void:
+	var manager: Node = ReputationAchievementManagerScript.new() as Node
+
+	# Arrange — an invalid config (non-consecutive levels)
+	var bad_config: ReputationConfig = ReputationConfigScript.new() as ReputationConfig
+	bad_config.reputation_level_thresholds = {1: 0, 3: 100}
+
+	# Act — inject invalid config
+	manager.apply_config(bad_config)
+
+	# Assert — defaults preserved, manager still functional
+	_expect(manager.reputation_level == 1, "Edge Invalid Config: level should still be 1, got %d" % manager.reputation_level)
+	var gain: int = manager.calculate_reputation_gain(10, 0, 1.0, 1.0)
+	_expect(gain == 10, "Edge Invalid Config: calculate_reputation_gain should still work, got %d" % gain)
+
+	manager.free()
+
+
+# ─────────────────────────────────────────────
+# Edge case — reputation_changed signal verification
+# ─────────────────────────────────────────────
+
+func test_edge_reputation_changed_signal() -> void:
+	var manager: Node = ReputationAchievementManagerScript.new() as Node
+	var config: ReputationConfig = _make_test_config({1: 0, 2: 100, 3: 180, 4: 260, 5: 360})
+	manager.apply_config(config)
+
+	# Godot 4.6.3: lambdas cannot reassign captured local variables.
+	# Use Array/Dictionary for mutable captured state.
+	var signal_data: Dictionary = {"prev": -1, "new": -1, "count": 0}
+	manager.reputation_changed.connect(func(prev: int, new: int):
+		signal_data["prev"] = prev
+		signal_data["new"] = new
+		signal_data["count"] = signal_data["count"] + 1
+	)
+
+	# Act
+	manager.process_reputation_gain(50)
+
+	# Assert
+	_expect(signal_data["count"] == 1, "Edge Reputation Changed: signal should fire once, got %d" % signal_data["count"])
+	_expect(signal_data["prev"] == 0, "Edge Reputation Changed: previous_total should be 0, got %d" % signal_data["prev"])
+	_expect(signal_data["new"] == 50, "Edge Reputation Changed: new_total should be 50, got %d" % signal_data["new"])
+
+	# Act again — verify cumulative signal
+	manager.process_reputation_gain(30)
+	_expect(signal_data["count"] == 2, "Edge Reputation Changed: signal should fire twice total, got %d" % signal_data["count"])
+	_expect(signal_data["prev"] == 50, "Edge Reputation Changed: second previous_total should be 50, got %d" % signal_data["prev"])
+	_expect(signal_data["new"] == 80, "Edge Reputation Changed: second new_total should be 80, got %d" % signal_data["new"])
+
+	manager.free()
+
+
+# ─────────────────────────────────────────────
+# Edge case — Exact threshold boundary crossing
+# ─────────────────────────────────────────────
+
+func test_edge_exact_threshold_boundary() -> void:
+	var manager: Node = ReputationAchievementManagerScript.new() as Node
+	var config: Resource = _make_test_config({1: 0, 2: 100, 3: 180})
+	manager.apply_config(config)
+
+	# Total=100 at Lv.1 (exactly at Lv.2 threshold). Add 100 → total=200.
+	manager.reputation_total = 100
+	manager.reputation_level = 1
+	manager._recompute_progress_ratio()
+
+	var leveled_up_to: Array[int] = []
+	manager.reputation_leveled_up.connect(func(level: int): leveled_up_to.append(level))
+
+	# Act
+	manager.process_reputation_gain(100)
+
+	# Assert
+	_expect(manager.reputation_total == 200, "Edge Threshold: total should be 200, got %d" % manager.reputation_total)
+	_expect(manager.reputation_level == 3, "Edge Threshold: should cross Lv.2→Lv.3, got Lv.%d" % manager.reputation_level)
+	_expect(leveled_up_to.size() == 2, "Edge Threshold: should emit 2 level-up signals, got %d" % leveled_up_to.size())
+	# Progress: Lv.3 (180→360? no, next is undefined after Lv.3 since we only defined up to 3)
+	# Actually config has Lv.3=180, no Lv.4 → at max level, progress = 1.0
+	_expect(is_equal_approx(manager.get_reputation_progress_ratio(), 1.0), "Edge Threshold: at max level progress should be 1.0, got %.6f" % manager.get_reputation_progress_ratio())
+
+	manager.free()
+
+
+# ─────────────────────────────────────────────
+# Edge case — Gain exceeds max level
+# ─────────────────────────────────────────────
+
+func test_edge_exceed_max_level() -> void:
+	var manager: Node = ReputationAchievementManagerScript.new() as Node
+	var config: Resource = _make_test_config({1: 0, 2: 100, 3: 180, 4: 260, 5: 360})
+	manager.apply_config(config)
+
+	# Start at max level
+	manager.reputation_total = 500
+	manager.reputation_level = 5
+	manager._recompute_progress_ratio()
+
+	var leveled_up_to: Array[int] = []
+	manager.reputation_leveled_up.connect(func(level: int): leveled_up_to.append(level))
+
+	# Act
+	manager.process_reputation_gain(100)
+
+	# Assert
+	_expect(manager.reputation_total == 600, "Edge Exceed Max: total should be 600, got %d" % manager.reputation_total)
+	_expect(manager.reputation_level == 5, "Edge Exceed Max: level should stay at max 5, got %d" % manager.reputation_level)
+	_expect(leveled_up_to.size() == 0, "Edge Exceed Max: no level-up signals should fire, got %d" % leveled_up_to.size())
+	_expect(is_equal_approx(manager.get_reputation_progress_ratio(), 1.0), "Edge Exceed Max: progress should remain 1.0, got %.6f" % manager.get_reputation_progress_ratio())
+
+	manager.free()
+
+
+# ─────────────────────────────────────────────
+# Edge case — Negative source_weight / stage_multiplier
+# ─────────────────────────────────────────────
+
+func test_edge_negative_weights_guard() -> void:
+	var manager: Node = ReputationAchievementManagerScript.new() as Node
+
+	# Negative source_weight
+	var result_1: int = manager.calculate_reputation_gain(10, 0, -0.5, 1.0)
+	_expect(result_1 == 0, "Edge Negative Weights: negative source_weight should return 0, got %d" % result_1)
+
+	# Negative stage_multiplier
+	var result_2: int = manager.calculate_reputation_gain(10, 0, 1.0, -0.5)
+	_expect(result_2 == 0, "Edge Negative Weights: negative stage_multiplier should return 0, got %d" % result_2)
+
+	# Both negative
+	var result_3: int = manager.calculate_reputation_gain(10, 0, -0.5, -0.5)
+	_expect(result_3 == 0, "Edge Negative Weights: both negative should return 0, got %d" % result_3)
 
 	manager.free()
 
@@ -268,8 +480,8 @@ func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		_failures.append(message)
 
-func _make_test_config(thresholds: Dictionary[int, int]) -> Resource:
-	var config: Resource = ReputationConfigScript.new()
+func _make_test_config(thresholds: Dictionary[int, int]) -> ReputationConfig:
+	var config: ReputationConfig = ReputationConfigScript.new() as ReputationConfig
 	config.reputation_level_thresholds = thresholds
 	var result: Dictionary[String, Variant] = config.validate()
 	if not (result["valid"] as bool):
